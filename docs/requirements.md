@@ -31,7 +31,25 @@ Australian households (owners or renters) who want to reduce their utility costs
 ### Out of Scope
 
 Non-goals, not deferred features.
-
+- Cloud storage or cloud synchronisation . 
+- Network-dependent functionality.
+- Integration with utility providers 
 - Network access, cloud sync, or user accounts.
-- Mobile Versions.
+- Mobile or Web Versions.
 - Scientifically validated emissions modelling.
+
+## 4. Initial Function Requiremnts
+- User authentication - The system will allow users to create an account and log in 
+- Energy Tracking - The system will allow users to view and document household energy.
+- Waste Tracking - The system will allow users to view and document household waste 
+- Water Tracking - The system will allow users to view and document household water
+- Transport Tracking - The system will allow users to view and document household transport
+- Household Profile - The system will allow users to create and update information about their household 
+- Sustainability Score and Dashboard - The system will calculate the sustainability score of the household and display it through visual dashboard
+
+## 5. Initial Non-Functional Requirements
+- Usability - the application will be easy to understand and navigate for users who lack a technical background
+- Performance - Common actions and sustainability calculation will complete without delay 
+- Maintainability - The application should use object-oriented design and separation of concerns to support testing and future development.
+- Data Validation - The application should validate user inout and prevent invalid inputs. 
+- Accessibility - The application should be readable, clear and be able to communicate important information . 
