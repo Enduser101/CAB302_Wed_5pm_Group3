@@ -1,10 +1,10 @@
 # EcoTwin — Project Requirements
 
 **Unit:** CAB302 Software Development
-**Team:** [team name]
-**Members:** [Frankie Galea, 11496703 | Name, Student Number | Name, Student Number | Name, Student Number | Name, Student Number | Name, Student Number]
-**Version:** 0.1 (draft — Week 5)
-**Last updated:** 18 August 2026
+**Team:** Earth
+**Members:** [Frankie Galea, 11496703 | James Renwick, 12564800 | Name, Student Number | Name, Student Number | Name, Student Number | Name, Student Number]
+**Version:** 0.2 (draft — Week 5)
+**Last updated:** 19 August 2026
 
 ---
 
