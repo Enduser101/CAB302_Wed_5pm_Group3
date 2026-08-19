@@ -2,7 +2,7 @@
 
 **Unit:** CAB302 Software Development
 **Team:** Earth
-**Members:** [Frankie Galea, 11496703 | James Renwick, 12564800 | Edward Trollope ( Ted ) 12367991, Student Number | Name, Student Number | Name, Student Number | Name, Student Number]
+**Members:** [Frankie Galea, 11496703 | James Renwick, 12564800 | Edward Trollope ( Ted ), 12367991| Name, Student Number | Name, Student Number | Name, Student Number]
 **Version:** 0.2 (draft — Week 5)
 **Last updated:** 19 August 2026
 
