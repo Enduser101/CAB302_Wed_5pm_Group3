@@ -1,4 +1,4 @@
-**EPIC 3 — Household Membership**
+# **EPIC 3 — Household Membership**
 
 **Goal**: Let registered users form and move between households freely, while the household retains its own history.
 
@@ -29,6 +29,7 @@ As a registered user, I wish to leave a household so that I can stop participati
 As a registered user, I want to view the current household members so that I can see who is currently involved in the household.
 
 **Acceptance Criteri**a: Members who are active are shown. The household administrator is recognisable. Members who have left are no longer displayed .
+---
 
 # **EPIC 4 — Household Activity History**
 
@@ -58,3 +59,69 @@ I want changes to household sustainability data to be documented as a household 
 
 **Data model:** The change log is a separate entity from current household data.
 
+---
+
+# **EPIC 7 — Recommendations**
+
+**Goal:** To inform a household of what needs to be changed so that the score is more than just information.
+
+**Definition of done**: Each recommendation is tagged by domain and is based on the household's own data rather than general advice.
+
+**Dependencies**: E6 is necessary.
+
+## **User story 24 \- Receive sustainability recommendations:**
+
+As a member of the household, I would like EcoTwin to make suggestions based on our household data so that we can determine what adjustments could enhance our sustainability.
+
+**Acceptance Criteria:** Different households have different recommendations based on their data. Every domain has at least one recommendation. Targets the weakest domain first
+
+## **User story 25 \- Identify the domain of a recommendation:**
+
+As a household member, I would like recommendations to be labelled by Energy, Water, Waste, or Transport so that I may determine which area they pertain to.
+
+**Acceptance Criteria:** The domain of each recommendation is shown. Recommendations can be labelled or filtered by domain.
+
+## **User story 26 \- Understand why a recommendation was made:**
+
+As a household member, I would like a brief explanation of EcoTwin's recommendations so that they feel relevant to our home.
+
+**Acceptance Criteria:** The explanation makes reference to the household's own values. Written in plain English.
+
+---
+# **EPIC 8 — Scenario Simulation**
+
+**Goal:** Before implementing a change in real life, let a household test it. This is what sets EcoTwin apart from the single-number calculators mentioned in the problem description.
+
+**Definition of done**: Without changing actual household data, a member can model a hypothetical change, compare its score to the current one, and save it for later.
+
+**Dependencies**: E6 is necessary.
+
+## **User story 27 \- Create a sustainability scenario:**
+
+As a household member, I would like to temporarily adjust household values in a scenario in order to investigate potential changes without changing the present household data.
+
+**Acceptance Criteria:** Current household data is the starting point for the scenario. Modifying a scenario value does not create a history entry or change the actual record.
+
+## **User story 28 \- Compare scenario score to current score:**
+
+As a household member, I want to see the potential effects of changes by comparing the scenario score to the current score.
+
+**Acceptance Criteria:** The two scores are displayed. The difference between the two scores is displayed. Makes use of the same computation as the live score. The direction of change is clear.
+
+## **User story 29 \- Save a scenario:**
+
+I wish to preserve a scenario as a household member so that other household members can review possible enhancements at a later time.
+
+**Acceptance Criteria:** The scenario persists after restarting with a user-supplied name and is visible to every member of the household.
+
+## **User story 30 \- View saved scenarios:**
+
+I want to access previously saved scenarios as a household member so that I can go over concepts we have discussed.
+
+**Acceptance Criteria:** Scores and names are displayed for saved scenarios. Selecting one reopens its detail.
+
+## **User story 31 \- Delete a saved scenario:**
+
+I wish to remove out-of-date scenarios from our saved scenario list as a household member.
+
+**Acceptance Criteria:** Verification is required. The scenario has been permanently removed. Household data is unaffected.
