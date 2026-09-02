@@ -1,3 +1,67 @@
+# **EPIC 1 — Guest & Authentication**
+
+**Goal**: Let a person trial EcoTwin without commitment, then create a private account so their household data persists.
+
+**Definition of done**: A guest can calculate a score without registering, a user can register and log in, passwords are never stored in plain text.
+
+**Dependencies:** None. Foundation epic — E3 depends on it.
+
+## **User story 1 \- Register an account:**
+
+As a guest, I want to register with a username, email and password so that I can save household information.
+
+**Acceptance Criteria:** Username must be unique. Password must meet minimum requirements. Invalid registration shows a clear error. Successful account creation persists after restart.
+
+## **User story 2 \- Log in:**
+
+As a guest, I want to log in using my username and password so that I can access my saved EcoTwin data.
+
+**Acceptance Criteria:** Correct credentials authenticate the user. Incorrect credentials show a generic error. The error does not reveal which credential was incorrect.
+
+## **User story 3 \- Try EcoTwin without an account:**
+
+As a guest, I want to enter household information and calculate a sustainability score so that I can try EcoTwin before registering.
+
+**Acceptance Criteria:** Guest can enter enough data to calculate a score. Score is displayed. Guest is informed that results are temporary and will not persist after leaving the session.
+
+## **User story 4 \- Restrict household membership to registered users:**
+
+As a guest, I want to be informed that registration is required to join a household so that I understand how household features are accessed.
+
+**Acceptance Criteria:** Guest cannot join a household. Household membership functions direct the guest toward registration or login.
+
+**Implementation note:** Passwords must be hashed with a salt (BCrypt). Plain text passwords are never written to disk or logs. This is an acceptance criterion on User Story 1 and a likely marking point for the Authentication requirement.
+
+---
+
+# **EPIC 2 — Account Management**
+
+**Goal**: Let a registered user inspect and maintain their own account.
+
+**Definition of done**: Account details are viewable, the password can be changed with the current password as proof, logout clears the session completely.
+
+**Dependencies:** Requires E1.
+
+## **User story 5 \- View account details:**
+
+As a registered user, I want to view my account details so that I can verify my information.
+
+**Acceptance Criteria:** Username and email are displayed. Password is never displayed in plain text.
+
+## **User story 6 \- Change password:**
+
+As a registered user, I want to change my password so that I can maintain account security.
+
+**Acceptance Criteria:** Current password is required. New password must satisfy password rules. Old password no longer authenticates after the change.
+
+## **User story 7 \- Log out:**
+
+As a registered user, I want to log out so that another person using the computer cannot access my account.
+
+**Acceptance Criteria:** Session is cleared. Protected views require login. User returns to the start/login screen.
+
+---
+
 # **EPIC 3 — Household Membership**
 
 **Goal**: Let registered users form and move between households freely, while the household retains its own history.
