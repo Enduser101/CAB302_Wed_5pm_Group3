@@ -256,3 +256,71 @@ I want to access previously saved scenarios as a household member so that I can 
 I wish to remove out-of-date scenarios from our saved scenario list as a household member.
 
 **Acceptance Criteria:** Verification is required. The scenario has been permanently removed. Household data is unaffected.
+
+# **EPIC 9 — Household Administration**
+
+**Goal:** give household admin tools to keep the household accurate
+
+**This will be completed when:** Admin can remove members, correct member input, rename, transfer rights and delete the household. Every action is recorded in the activity history.
+
+**Requires:** Epic 3 & Epic 4
+
+## **User story 32:**
+
+As an household administrator I want to remove a member from a household such they can no longer access it
+
+**Acceptance Criteria:** HhA can remove members. Mbr data stays but members removed and cannot see HH recorded to change log
+
+**Time estimate:** 4 hour
+
+## **User story 33:**
+
+As a household admin I want to rename a household so that it's id can be meaningful.
+
+**Acceptance Criteria:** This will be done when new name can be recorded to history
+
+**Time estimate:** 1 hour
+
+## **User story 34:**
+
+As a household admin I want to correct data that has been entered by any user on the house hold. So incorrect information does not persist
+
+**Acceptance Criteria:** -
+
+**Time estimate:** 1 hour
+
+## **User story 35:**
+
+As a household admin I want to transfer admin rights to another active member so that household management can continue without the same household admin
+
+**Acceptance Criteria:** Rights transfer to a nominated active member. Previous administrator becomes an ordinary member. Exactly one administrator at all times. Recorded in history.
+
+**Time estimate:** 2 hour
+
+## **User story 36:**
+
+As a household admin I want to delete the household so that a household can be permanently removed.
+
+**Acceptance Criteria:** Only admin can initiate deletion, active members are removed and history is all deleted
+
+**Time estimate:** 1 hour
+
+---
+
+# **Nice to haves**
+
+## **N1:**
+
+As a user I want to be able to join multiple households so I can track more than one residence.
+
+**Acceptance Criteria:** User can belong to more than one household, household data remains separate. Users can switch which household they're viewing.
+
+**Time estimate:** 2 hour
+
+## **N2:**
+
+As a user I can switch which house hold I am looking at.
+
+**Acceptance Criteria:** All views reflect the selected house hold
+
+**Time estimate:** 1 hour
