@@ -1,0 +1,58 @@
+src/
+├── main/
+│   ├── java/
+│   │   └── ecotwin/
+│   │       ├── Main.java
+│   │       │
+│   │       ├── controller/
+│   │       │   ├── LoginController.java
+│   │       │   ├── RegisterController.java
+│   │       │   ├── DashboardController.java
+│   │       │   ├── ResourceController.java
+│   │       │   ├── ScenarioController.java
+│   │       │   ├── HouseholdController.java
+│   │       │   └── AccountController.java
+│   │       │
+│   │       ├── model/
+│   │       │   ├── User.java
+│   │       │   ├── Household.java
+│   │       │   ├── ResourceEntry.java
+│   │       │   ├── Scenario.java
+│   │       │   └── Recommendation.java
+│   │       │
+│   │       ├── service/
+│   │       │   ├── AuthenticationService.java
+│   │       │   ├── HouseholdService.java
+│   │       │   ├── ResourceService.java
+│   │       │   ├── SustainabilityService.java
+│   │       │   ├── RecommendationService.java
+│   │       │   └── ScenarioService.java
+│   │       │
+│   │       ├── constants/
+│   │       │   └── SustainabilityConstants.java
+│   │       │
+│   │       └── database/
+│   │           ├── DatabaseManager.java
+│   │           ├── UserRepository.java
+│   │           ├── HouseholdRepository.java
+│   │           ├── ResourceRepository.java
+│   │           └── ScenarioRepository.java
+│   │
+│   └── resources/
+│       └── ecotwin/
+│           ├── login.fxml
+│           ├── register.fxml
+│           ├── dashboard.fxml
+│           ├── resources.fxml
+│           ├── scenario.fxml
+│           ├── household.fxml
+│           ├── account.fxml
+│           └── styles.css
+│
+└── test/
+    └── java/
+        └── ecotwin/
+            ├── AuthenticationServiceTest.java
+            ├── SustainabilityServiceTest.java
+            ├── ScenarioServiceTest.java
+            └── ResourceServiceTest.java
