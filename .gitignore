@@ -1,0 +1,12 @@
+# Maven build files
+target/
+
+# IntelliJ local files
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Local Git temporary file
+FETCH_HEAD
