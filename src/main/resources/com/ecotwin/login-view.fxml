@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ecotwin.controller.LoginController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <TextField fx:id="usernameField"
+               promptText="Username"
+               layoutX="200"
+               layoutY="140"/>
+    <PasswordField fx:id="passwordField"
+                   promptText="Password"
+                   layoutX="200"
+                   layoutY="180"/>
+    <Button fx:id="loginButton"
+            text = "Login"
+            layoutX="250"
+            layoutY="230"
+            onAction="#handleLogin"/>
+    <Hyperlink fx:id="registerLink"
+               text="Don't have an account? Register"
+               layoutX="200"
+               layoutY="270"/>
+    <Button fx:id="guestButton"
+            text="Continue as Guest"
+            layoutX="215"
+            layoutY="310"/>
+    <Label fx:id="messageLabel"
+           layoutX="200"
+           layoutY="350" />
+
+
+</AnchorPane>
