@@ -1,0 +1,174 @@
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #0A130E;
+    -fx-text-fill: #F2F5F3;
+}
+
+.page-bg {
+    -fx-background-color: #0A130E;
+}
+
+.sidebar {
+    -fx-background-color: #0B150F;
+    -fx-border-color: transparent #1D2B22 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 24 0 0 0;
+}
+
+.sidebar-logo {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 20 24;
+}
+
+.brand-logo {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+}
+
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 14px;
+    -fx-padding: 12 24 12 24;
+    -fx-alignment: CENTER_LEFT;
+    -fx-max-width: infinity;
+    -fx-background-radius: 0;
+    -fx-cursor: hand;
+}
+
+.nav-item:hover {
+    -fx-text-fill: #F2F5F3;
+}
+
+.nav-item-active {
+    -fx-background-color: #1D7A46;
+    -fx-text-fill: #F2F5F3;
+    -fx-font-weight: bold;
+}
+
+.page-title {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.muted-text {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+}
+
+.field-label {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.card {
+    -fx-background-color: #101C15;
+    -fx-border-color: #26362C;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 16;
+}
+
+.text-field, .password-field, .combo-box, .spinner {
+    -fx-background-color: #0D1912;
+    -fx-text-fill: #F2F5F3;
+    -fx-prompt-text-fill: #5B6B61;
+    -fx-border-color: #2A3B32;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #F2F5F3;
+    -fx-background-color: #0D1912;
+}
+
+.btn-primary {
+    -fx-background-color: #22C55E;
+    -fx-text-fill: #06210F;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #34D399;
+}
+
+.btn-secondary {
+    -fx-background-color: #0D1912;
+    -fx-text-fill: #F2F5F3;
+    -fx-border-color: #2A3B32;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-border-color: #34D399;
+}
+
+.btn-danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F87171;
+    -fx-border-color: #F87171;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #2A1414;
+}
+
+.link-text {
+    -fx-text-fill: #34D399;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.badge {
+    -fx-background-color: #1D2B22;
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 11px;
+    -fx-padding: 3 8;
+    -fx-background-radius: 10;
+}
+
+.error-text {
+    -fx-text-fill: #F87171;
+    -fx-font-size: 12px;
+}
+
+.success-text {
+    -fx-text-fill: #34D399;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.content-scroll, .content-scroll > .viewport {
+    -fx-background: #0A130E;
+    -fx-background-color: #0A130E;
+}
+
+.content-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.content-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #26362C;
+    -fx-background-radius: 6;
+}
+
+.content-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #34503f;
+}

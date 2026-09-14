@@ -1,6 +1,9 @@
 # Maven build files
 target/
 
+# Runtime SQLite database (created by DatabaseConnection, never checked in)
+*.db
+
 # IntelliJ local files
 .idea/
 *.iml

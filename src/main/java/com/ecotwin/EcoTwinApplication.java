@@ -1,24 +1,19 @@
 package com.ecotwin;
 
+import com.ecotwin.controller.Navigator;
+import com.ecotwin.util.DatabaseConnection;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.fxml.FXMLLoader;
-
-import java.io.IOException;
 
 public class EcoTwinApplication extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                EcoTwinApplication.class.getResource("/com/ecotwin/login-view.fxml")
-        );
-        Scene scene = new Scene(loader.load());
+    public void start(Stage primaryStage) {
+        AppContext ctx = new AppContext(DatabaseConnection.getInstance().getConnection());
+        Navigator navigator = new Navigator(primaryStage, ctx);
 
         primaryStage.setTitle("EcoTwin");
-        primaryStage.setScene(scene);
+        navigator.showLogin();
         primaryStage.show();
-
     }
 }
