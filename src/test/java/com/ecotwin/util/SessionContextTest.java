@@ -1,8 +1,8 @@
-package com.ecotwin.model;
+package com.ecotwin.util;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SessionTest {
+public class SessionContextTest {
     // US -03 - try EcoTwin without an account (epic 1 priority should)
 //Should be able to create a scenario but not be able to save. Shouldn't be able to join household.
 //tests
@@ -13,29 +13,29 @@ public class SessionTest {
 
     @Test
     void guestIsNotRegistered(){
-        Session session = Session.guest();
-        boolean registered = session.isRegistered();
-        assertFalse(registered);
+        Session session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertFalse(session.isLoggedIn());
     }
     @Test
     void guestCreateScenario(){
-        Session session =Session.guest();
-        boolean createScenario = session.canCreateScenario();
-        assertTrue(createScenario);
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertTrue(session.canCreateScenario());
     }
 
     @Test
     void guestFailsScenarioSave(){
-        Session session = Session.guest();
-        boolean guestSavesScenario = session.save();
-        assertFalse(guestSavesScenario);
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertFalse(session.canSaveScenario());
     }
 
     @Test
     void userSavesScenario(){
-        Session session = Session.user();
-        boolean userCanSavesScenario = session.save();
-        assertTrue(userCanSavesScenario);
+        SessionContext session = SessionContext.getInstance();
+        session.login(new User(1L, "tester", "tester@example.com", "hash", "Tester","2026-09-15"));
+        assertTrue(session.canSaveScenario());
     }
 
 }
