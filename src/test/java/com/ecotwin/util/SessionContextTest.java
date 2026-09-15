@@ -35,14 +35,33 @@ public class SessionContextTest {
     @Test
     void userSavesScenario(){
         SessionContext session = SessionContext.getInstance();
-        session.login(new User(1L, "tester", "tester@example.com", "hash", "Tester","2026-09-15"));
+        session.login(new User(1L, "tester", "tester@example.com", "passwordHash", "Tester","2026-09-15"));
         assertTrue(session.canSaveScenario());
     }
-
-}
-
 // us -04 restrict household membership to registered users (epic 1, piroity should )
 // Add a check to the household membership to check the user type when adding a user. reject anyone that isn't registered.
 // shouldn't be able to join as an unregistered user
 // registered user should be able to join
 // registered user should be able leave and rejoin
+    @Test
+    void guestCannotJoinHousehold(){
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertFalse(session.canJoinHousehold());
+    }
+    @Test
+    void userCanJoinHousehold(){
+        SessionContext session = SessionContext.getInstance();
+        session.login(new User(1L, "tester", "tester@example.com", "passwordHash", "Tester", "2026-09-15"));
+        assertTrue(session.canJoinHousehold());
+    }
+
+    @Test
+    void guestIsBlockedFromEnteringHousehold(){
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertThrows(IllegalStateException.class, () -> session.enterHousehold(null, null));
+    }
+
+}
+
