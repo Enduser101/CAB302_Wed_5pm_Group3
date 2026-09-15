@@ -76,4 +76,17 @@ public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
             rs.getString("left_at")
         );
     }
+
+    // US-10: leave a household
+    @Override
+    public void leaveHousehold(long membershipId) {
+        String sql = "UPDATE household_memberships SET left_at = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, Instant.now().toString());
+            statement.setLong(2, membershipId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not leave household", e);
+        }
+    }
 }

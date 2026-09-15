@@ -78,4 +78,10 @@ public class HouseholdService {
     private String displayName(User user) {
         return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();
     }
+
+    // US-10: leave a household
+    public void leaveHousehold(User user, Household household) {
+        HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
+        membershipDao.leaveHousehold(membership.getId());
+    }
 }

@@ -5,12 +5,13 @@ import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-/** US-08 (create a household) and US-09 (join a household) - plus a minimal read of the
+/** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
  *  resulting household once the user has one. Member management (US-11+) is out of scope here. */
 public class HouseholdController {
 
@@ -34,6 +35,9 @@ public class HouseholdController {
     @FXML private Label summaryNameLabel;
     @FXML private Label summaryRoleLabel;
     @FXML private Label summaryJoinCodeLabel;
+
+    @FXML private Label leaveErrorLabel;
+    @FXML private Button leaveButton;
 
     public HouseholdController(Navigator nav, AppContext ctx) {
         this.nav = nav;
@@ -107,5 +111,21 @@ public class HouseholdController {
     private void hideError(Label label) {
         label.setVisible(false);
         label.setManaged(false);
+    }
+
+    // US-10: leave a household
+    @FXML
+    private void handleLeaveHousehold() {
+        try {
+            User user = ctx.session.getCurrentUser();
+            Household household = ctx.session.getCurrentHousehold();
+
+            ctx.householdService.leaveHousehold(user, household);
+            ctx.session.leaveHousehold();
+            hideError(leaveErrorLabel);
+            refresh();
+        } catch (IllegalArgumentException e) {
+            showError(leaveErrorLabel, e.getMessage());
+        }
     }
 }

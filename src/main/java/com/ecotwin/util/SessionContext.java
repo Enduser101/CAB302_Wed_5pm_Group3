@@ -58,4 +58,10 @@ public final class SessionContext {
     public HouseholdMembership getCurrentMembership() {
         return currentMembership;
     }
+    
+    // US-10: leave a household
+    public void leaveHousehold() {
+        currentHousehold = null;
+        currentMembership = null;
+    }
 }

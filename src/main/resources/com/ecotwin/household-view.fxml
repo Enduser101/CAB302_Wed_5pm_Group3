@@ -64,6 +64,10 @@
                 <Label fx:id="summaryNameLabel" styleClass="page-title" />
                 <Label fx:id="summaryRoleLabel" styleClass="muted-text" />
                 <Label fx:id="summaryJoinCodeLabel" styleClass="badge" />
+                <!-- US-10: leave a household -->
+                <Button fx:id="leaveButton" text="Leave Household" styleClass="btn-danger"
+                        onAction="#handleLeaveHousehold" />
+                <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
             </VBox>
         </VBox>
     </ScrollPane>
