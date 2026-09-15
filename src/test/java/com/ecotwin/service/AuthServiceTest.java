@@ -79,4 +79,47 @@ class AuthServiceTest {
             () -> service.login("ghost", "password123"));
         assertTrue(ex.getMessage().equalsIgnoreCase("Invalid username or password"));
     }
+
+    @Test
+    void changePasswordRejectsIncorrectCurrentPassword() {
+        String hash = BCrypt.hashpw("oldpassword", BCrypt.gensalt());
+        when(userDao.findByUsername("someone")).thenReturn(
+                Optional.of(new User(1, "someone", "s@example.com", hash, "someone", "now")));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.changePassword("someone", "wrongcurrent", "newpassword123"));
+    }
+
+    @Test
+    void changePasswordRejectsShortNewPassword() {
+        String hash = BCrypt.hashpw("oldpassword", BCrypt.gensalt());
+        when(userDao.findByUsername("someone")).thenReturn(
+                Optional.of(new User(1, "someone", "s@example.com", hash, "someone", "now")));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.changePassword("someone", "oldpassword", "short"));
+    }
+
+    @Test
+    void changePasswordStoresAHashRatherThanThePlainText() {
+        String hash = BCrypt.hashpw("oldpassword", BCrypt.gensalt());
+        when(userDao.findByUsername("someone")).thenReturn(
+                Optional.of(new User(1, "someone", "s@example.com", hash, "someone", "now")));
+
+        service.changePassword("someone", "oldpassword", "newpassword123");
+
+        verify(userDao).updatePassword(eq(1L),
+                argThat(h -> !h.equals("newpassword123") && BCrypt.checkpw("newpassword123", h)));
+    }
+
+    @Test
+    void changePasswordMeansTheOldPasswordNoLongerWorks() {
+        String hash = BCrypt.hashpw("oldpassword", BCrypt.gensalt());
+        when(userDao.findByUsername("someone")).thenReturn(
+                Optional.of(new User(1, "someone", "s@example.com", hash, "someone", "now")));
+
+        service.changePassword("someone", "oldpassword", "newpassword123");
+
+        verify(userDao).updatePassword(eq(1L), argThat(h -> !BCrypt.checkpw("oldpassword", h)));
+    }
 }
