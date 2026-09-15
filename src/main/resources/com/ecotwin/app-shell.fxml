@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ecotwin.controller.AppShellController"
+            prefWidth="1000" prefHeight="650">
+
+    <left>
+        <VBox styleClass="sidebar" prefWidth="220" spacing="2">
+            <Label text="EcoTwin" styleClass="sidebar-logo" />
+            <Button fx:id="dashboardNav" text="Dashboard" styleClass="nav-item" maxWidth="Infinity" onAction="#showDashboard" />
+            <Button fx:id="resourcesNav" text="Resources" styleClass="nav-item" maxWidth="Infinity" onAction="#showResources" />
+            <Button fx:id="recommendationsNav" text="Recommendations" styleClass="nav-item" maxWidth="Infinity" onAction="#showRecommendations" />
+            <Button fx:id="scenariosNav" text="Scenarios" styleClass="nav-item" maxWidth="Infinity" onAction="#showScenarios" />
+            <Button fx:id="householdNav" text="Household" styleClass="nav-item" maxWidth="Infinity" onAction="#showHousehold" />
+            <Button fx:id="accountNav" text="Account" styleClass="nav-item" maxWidth="Infinity" onAction="#showAccount" />
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="page-bg" />
+    </center>
+
+</BorderPane>
