@@ -5,10 +5,7 @@ import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 /** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
@@ -36,8 +33,12 @@ public class HouseholdController {
     @FXML private Label summaryRoleLabel;
     @FXML private Label summaryJoinCodeLabel;
 
+    // US-10: leave a household
     @FXML private Label leaveErrorLabel;
     @FXML private Button leaveButton;
+
+    // US-11: view current household members
+    @FXML private VBox membersListView;
 
     public HouseholdController(Navigator nav, AppContext ctx) {
         this.nav = nav;
@@ -94,11 +95,59 @@ public class HouseholdController {
         if (hasHousehold) {
             Household household = ctx.session.getCurrentHousehold();
             boolean admin = ctx.session.isAdmin();
+
+            // US-10: only members can leave the household
+            leaveButton.setVisible(!admin);
+            leaveButton.setManaged(!admin);
+
             summaryNameLabel.setText(household.getName());
-            summaryRoleLabel.setText(admin ? "Administrator" : "Member");
             summaryJoinCodeLabel.setText("Join code: " + household.getJoinCode());
             summaryJoinCodeLabel.setVisible(admin);
             summaryJoinCodeLabel.setManaged(admin);
+
+            // US-11: display current household members
+            membersListView.getChildren().clear();
+
+            java.util.List<User> members = ctx.householdService.findActiveMembers(household);
+
+            for (int i = 0; i < members.size(); i++) {
+                User member = members.get(i);
+
+                javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(16);
+                row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                row.setStyle(
+                        "-fx-background-color: transparent;" +
+                                "-fx-border-color: #28543d;" +
+                                "-fx-border-radius: 8;" +
+                                "-fx-background-radius: 8;" +
+                                "-fx-padding: 12 20 12 20;"
+                );
+
+                javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(
+                        member.getDisplayName() != null ? member.getDisplayName() : member.getUsername()
+                );
+                nameLabel.setStyle("-fx-font-size: 20px;");
+
+                row.getChildren().add(nameLabel);
+
+                // US-11: show administrator beside the first member
+                if (i == 0) {
+                    javafx.scene.control.Label adminLabel =
+                            new javafx.scene.control.Label("Administrator");
+                    adminLabel.setStyle("-fx-font-size: 16px;");
+                    row.getChildren().add(adminLabel);
+                }
+
+                // US-11: show which member is the current user
+                if (member.getId() == ctx.session.getCurrentUser().getId()) {
+                    javafx.scene.control.Label youLabel =
+                            new javafx.scene.control.Label("(you)");
+                    youLabel.setStyle("-fx-font-size: 16px;");
+                    row.getChildren().add(youLabel);
+                }
+
+                membersListView.getChildren().add(row);
+            }
         }
     }
 

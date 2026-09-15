@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
@@ -87,6 +89,29 @@ public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException("Could not leave household", e);
+        }
+    }
+
+    // US-11: view current household members
+    @Override
+    public List<HouseholdMembership> findActiveByHousehold(long householdId) {
+        // Show the admin first
+        String sql = "SELECT * FROM household_memberships WHERE household_id = ? AND left_at IS NULL "
+                + "ORDER BY CASE WHEN role = 'ADMIN' THEN 0 ELSE 1 END, joined_at";
+        List<HouseholdMembership> memberships = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    memberships.add(map(rs));
+                }
+            }
+
+            return memberships;
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not look up household members", e);
         }
     }
 }

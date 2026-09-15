@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ScrollPane?>
 
+<?import javafx.scene.control.ListView?>
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.ecotwin.controller.HouseholdController"
@@ -64,10 +65,18 @@
                 <Label fx:id="summaryNameLabel" styleClass="page-title" />
                 <Label fx:id="summaryRoleLabel" styleClass="muted-text" />
                 <Label fx:id="summaryJoinCodeLabel" styleClass="badge" />
+
+
+
+                <!-- US-11: view current household members -->
+                <Label text="Members" style="-fx-font-size: 26px; -fx-font-weight: bold;" />
+                <VBox fx:id="membersListView" spacing="0" />
+
                 <!-- US-10: leave a household -->
+                <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
                 <Button fx:id="leaveButton" text="Leave Household" styleClass="btn-danger"
                         onAction="#handleLeaveHousehold" />
-                <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
             </VBox>
         </VBox>
     </ScrollPane>

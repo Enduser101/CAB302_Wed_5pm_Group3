@@ -3,11 +3,14 @@ package com.ecotwin.service;
 import com.ecotwin.dao.ActivityLogDao;
 import com.ecotwin.dao.HouseholdDao;
 import com.ecotwin.dao.HouseholdMembershipDao;
+import com.ecotwin.dao.UserDao;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class HouseholdService {
@@ -19,12 +22,14 @@ public class HouseholdService {
     private final HouseholdDao householdDao;
     private final HouseholdMembershipDao membershipDao;
     private final ActivityLogDao activityLogDao;
+    private final UserDao userDao;
 
     public HouseholdService(HouseholdDao householdDao, HouseholdMembershipDao membershipDao,
-                             ActivityLogDao activityLogDao) {
+                            ActivityLogDao activityLogDao, UserDao userDao) {
         this.householdDao = householdDao;
         this.membershipDao = membershipDao;
         this.activityLogDao = activityLogDao;
+        this.userDao = userDao;
     }
 
     /** US-08: creator becomes admin, household persists after restart. */
@@ -83,5 +88,16 @@ public class HouseholdService {
     public void leaveHousehold(User user, Household household) {
         HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
         membershipDao.leaveHousehold(membership.getId());
+    }
+
+    // US-11: view current household members
+    public List<User> findActiveMembers(Household household) {
+        List<User> users = new ArrayList<>();
+
+        for (HouseholdMembership membership : membershipDao.findActiveByHousehold(household.getId())) {
+            userDao.findById(membership.getUserId()).ifPresent(users::add);
+        }
+
+        return users;
     }
 }

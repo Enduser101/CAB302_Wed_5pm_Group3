@@ -24,6 +24,6 @@ public class AppContext {
         SqliteActivityLogDao activityLogDao = new SqliteActivityLogDao(connection);
 
         this.authService = new AuthService(userDao);
-        this.householdService = new HouseholdService(householdDao, membershipDao, activityLogDao);
+        this.householdService = new HouseholdService(householdDao, membershipDao, activityLogDao, userDao);
     }
 }
