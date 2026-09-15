@@ -1,6 +1,7 @@
 package com.ecotwin.util;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import com.ecotwin.model.User;
 
 public class SessionContextTest {
     // US -03 - try EcoTwin without an account (epic 1 priority should)
@@ -13,7 +14,7 @@ public class SessionContextTest {
 
     @Test
     void guestIsNotRegistered(){
-        Session session = SessionContext.getInstance();
+        SessionContext session = SessionContext.getInstance();
         session.startGuestSession();
         assertFalse(session.isLoggedIn());
     }
