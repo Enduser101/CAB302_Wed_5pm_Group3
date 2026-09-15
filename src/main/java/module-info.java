@@ -7,6 +7,8 @@ module com.ecotwin {
 
     opens com.ecotwin to javafx.fxml;
     opens com.ecotwin.controller to javafx.fxml;
+    opens com.ecotwin.util;
+    opens com.ecotwin.service;
 
     exports com.ecotwin;
     exports com.ecotwin.controller;
