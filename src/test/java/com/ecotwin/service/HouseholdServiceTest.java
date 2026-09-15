@@ -6,6 +6,7 @@ import com.ecotwin.dao.HouseholdMembershipDao;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
+import com.ecotwin.dao.UserDao;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -24,7 +25,8 @@ class HouseholdServiceTest {
     private final HouseholdDao householdDao = mock(HouseholdDao.class);
     private final HouseholdMembershipDao membershipDao = mock(HouseholdMembershipDao.class);
     private final ActivityLogDao activityLogDao = mock(ActivityLogDao.class);
-    private final HouseholdService service = new HouseholdService(householdDao, membershipDao, activityLogDao);
+    private final UserDao userDao = mock(UserDao.class);
+    private final HouseholdService service = new HouseholdService(householdDao, membershipDao, activityLogDao, userDao);
 
     private final User creator = new User(1, "creator", "c@example.com", "hash", "Creator", "now");
 
