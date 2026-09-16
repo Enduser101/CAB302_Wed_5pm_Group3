@@ -9,10 +9,10 @@ import com.ecotwin.model.User;
 import com.ecotwin.dao.UserDao;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -97,5 +97,152 @@ class HouseholdServiceTest {
 
     private static long eqLong(long value) {
         return org.mockito.ArgumentMatchers.eq(value);
+    }
+
+    // US -10 Leave a household (epic 3, priority must)
+    // Must be able to remove household membership, including access to the household. Household acticity history remains unchanged, despite members leaving.
+    // tests
+    // member leaving is no longer a current household member
+    // member leaving loses all access to the household
+    // member activity history remains after leaving
+
+    @Test
+    void memberLeavesHousehold_membershipRemoved() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 2, "House", "QLD", "now");
+        User member = new User(2, "ted", "t@example.com", "hash", "Ted", "now");
+
+        HouseholdMembership membership = new HouseholdMembership(
+                10, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(membership));
+
+        service.leaveHousehold(member, household);
+
+        verify(membershipDao).leaveHousehold(membership.getId());
+    }
+
+    @Test
+    void memberLeavesHousehold_losesFutureAccess() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 2, "House", "QLD", "now");
+        User member = new User(2, "ted", "t@example.com", "hash", "Ted", "now");
+
+        HouseholdMembership membership = new HouseholdMembership(
+                10, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(membership));
+
+        service.leaveHousehold(member, household);
+
+        verify(membershipDao).leaveHousehold(membership.getId());
+    }
+
+    @Test
+    void memberLeavesHousehold_historicalDataRetained() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 2, "House", "QLD", "now");
+        User member = new User(2, "ted", "t@example.com", "hash", "Ted", "now");
+
+        HouseholdMembership membership = new HouseholdMembership(
+                10, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(membership));
+
+        service.leaveHousehold(member, household);
+
+        verify(membershipDao).leaveHousehold(membership.getId());
+    }
+
+
+    // US -11 View current household members (epic 3, priority should)
+    // Current active members should be displayed, the administrator is identifiable, while departed members are not.
+    // tests
+    // member lists returns all currently active members
+    // administrator is identifiable in the list of members
+    // members who have left are excluded from the current member list
+
+    @Test
+    void viewMembers_returnsAllActiveMembers() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 3, "House", "QLD", "now");
+        User member1 = new User(2, "ted", "t@example.com", "hash", "Ted", "now");
+        User member2 = new User(3, "michael", "m@example.com", "hash", "Michael", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, admin.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+        HouseholdMembership member1Membership = new HouseholdMembership(
+                11, member1.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+        HouseholdMembership member2Membership = new HouseholdMembership(
+                12, member2.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByHousehold(household.getId()))
+                .thenReturn(List.of(adminMembership, member1Membership, member2Membership));
+
+        when(userDao.findById(admin.getId())).thenReturn(Optional.of(admin));
+        when(userDao.findById(member1.getId())).thenReturn(Optional.of(member1));
+        when(userDao.findById(member2.getId())).thenReturn(Optional.of(member2));
+
+        List<User> members = service.findActiveMembers(household);
+
+        assertEquals(3, members.size());
+    }
+
+    @Test
+    void viewMembers_identifiesAdministrator() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 1, "House", "QLD", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, admin.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        when(membershipDao.findActiveByHousehold(household.getId()))
+                .thenReturn(List.of(adminMembership));
+
+        when(userDao.findById(admin.getId())).thenReturn(Optional.of(admin));
+
+        List<User> members = service.findActiveMembers(household);
+
+        assertEquals(admin, members.get(0));
+    }
+
+    @Test
+    void viewMembers_excludesDepartedMembers() {
+        User admin = new User(1, "james", "j@example.com", "hash", "James", "now");
+        Household household = new Household(
+                1, "11 Mermaid Street", "ABC123", 2, "House", "QLD", "now");
+        User member = new User(2, "frankie", "f@example.com", "hash", "Frankie", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, admin.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        when(membershipDao.findActiveByHousehold(household.getId()))
+                .thenReturn(List.of(adminMembership));
+
+        when(userDao.findById(admin.getId())).thenReturn(Optional.of(admin));
+
+        List<User> members = service.findActiveMembers(household);
+        boolean stillListed = members.contains(member);
+
+        assertFalse(stillListed);
     }
 }
