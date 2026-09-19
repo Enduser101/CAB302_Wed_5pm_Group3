@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.ecotwin.controller.ResourcesController"
+           styleClass="page-bg">
+
+    <ScrollPane fitToWidth="true" styleClass="content-scroll">
+        <VBox spacing="24">
+            <padding><Insets top="32" right="32" bottom="32" left="32" /></padding>
+
+            <Label text="Resources" styleClass="page-title" />
+            <Label text="Record your household's energy, water, waste and transport information."
+                   styleClass="muted-text" wrapText="true" />
+
+            <VBox fx:id="noHouseholdSection" spacing="12">
+                <Label text="Join or create a household first to start tracking resources." styleClass="muted-text" wrapText="true" />
+            </VBox>
+
+            <TabPane fx:id="resourcesTabPane" tabClosingPolicy="UNAVAILABLE">
+
+                <!-- US-15: record energy information -->
+                <Tab text="Energy">
+                    <VBox spacing="16">
+                        <padding><Insets top="20" right="4" bottom="4" left="4" /></padding>
+                        <VBox styleClass="card" spacing="12" maxWidth="420">
+                            <Label text="Record energy usage" styleClass="page-title" />
+                            <Label text="Logged for the current month." styleClass="muted-text" />
+
+                            <Label text="Electricity (kWh)" styleClass="field-label" />
+                            <TextField fx:id="electricityKwhField" />
+
+                            <Label text="Solar generation (kWh, optional)" styleClass="field-label" />
+                            <TextField fx:id="solarGenerationKwhField" />
+
+                            <Label text="Notes (optional)" styleClass="field-label" />
+                            <TextField fx:id="energyNotesField" />
+
+                            <Label fx:id="energyErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                            <Button text="Save Energy Reading" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleSaveEnergy" />
+                        </VBox>
+
+                        <Label text="History" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+                        <VBox fx:id="energyEntriesList" spacing="6" />
+                    </VBox>
+                </Tab>
+
+                <!-- US-16: record water information -->
+                <Tab text="Water">
+                    <VBox spacing="16">
+                        <padding><Insets top="20" right="4" bottom="4" left="4" /></padding>
+                        <VBox styleClass="card" spacing="12" maxWidth="420">
+                            <Label text="Record water usage" styleClass="page-title" />
+                            <Label text="Logged for the current month." styleClass="muted-text" />
+
+                            <Label text="Litres" styleClass="field-label" />
+                            <TextField fx:id="litresField" />
+
+                            <Label text="Notes (optional)" styleClass="field-label" />
+                            <TextField fx:id="waterNotesField" />
+
+                            <Label fx:id="waterErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                            <Button text="Save Water Reading" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleSaveWater" />
+                        </VBox>
+
+                        <Label text="History" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+                        <VBox fx:id="waterEntriesList" spacing="6" />
+                    </VBox>
+                </Tab>
+
+                <!-- US-17: record waste information -->
+                <Tab text="Waste">
+                    <VBox spacing="16">
+                        <padding><Insets top="20" right="4" bottom="4" left="4" /></padding>
+                        <VBox styleClass="card" spacing="12" maxWidth="420">
+                            <Label text="Record waste and recycling" styleClass="page-title" />
+                            <Label text="Logged for the current month." styleClass="muted-text" />
+
+                            <Label text="General waste (kg)" styleClass="field-label" />
+                            <TextField fx:id="generalKgField" />
+
+                            <Label text="Recycled (kg)" styleClass="field-label" />
+                            <TextField fx:id="recycledKgField" />
+
+                            <Label text="Compost (kg)" styleClass="field-label" />
+                            <TextField fx:id="compostKgField" />
+
+                            <Label fx:id="wasteErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                            <Button text="Save Waste Reading" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleSaveWaste" />
+                        </VBox>
+
+                        <Label text="History" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+                        <VBox fx:id="wasteEntriesList" spacing="6" />
+                    </VBox>
+                </Tab>
+
+                <!-- US-18: record transport information -->
+                <Tab text="Transport">
+                    <VBox spacing="16">
+                        <padding><Insets top="20" right="4" bottom="4" left="4" /></padding>
+
+                        <HBox spacing="24">
+                            <VBox styleClass="card" spacing="12" maxWidth="360" HBox.hgrow="ALWAYS">
+                                <Label text="Add a vehicle" styleClass="page-title" />
+
+                                <Label text="Label" styleClass="field-label" />
+                                <TextField fx:id="vehicleLabelField" promptText="Vehicle 1" />
+
+                                <Label text="Fuel type" styleClass="field-label" />
+                                <ComboBox fx:id="vehicleFuelTypeCombo" maxWidth="Infinity" />
+
+                                <Label text="Kilometres per week" styleClass="field-label" />
+                                <TextField fx:id="vehicleKmPerWeekField" />
+
+                                <Label fx:id="vehicleErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                                <Button text="Add Vehicle" styleClass="btn-secondary" maxWidth="Infinity" onAction="#handleAddVehicle" />
+
+                                <Label text="Vehicles" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+                                <VBox fx:id="vehiclesList" spacing="6" />
+                            </VBox>
+
+                            <VBox styleClass="card" spacing="12" maxWidth="360" HBox.hgrow="ALWAYS">
+                                <Label text="Household transport" styleClass="page-title" />
+                                <Label text="Logged for the current month." styleClass="muted-text" />
+
+                                <Label text="Public transport trips per week" styleClass="field-label" />
+                                <TextField fx:id="publicTransportTripsField" />
+
+                                <Label text="Flights per year" styleClass="field-label" />
+                                <TextField fx:id="flightsPerYearField" />
+
+                                <Label fx:id="transportErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                                <Button text="Save Transport Information" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleSaveTransport" />
+                            </VBox>
+                        </HBox>
+
+                        <Label text="History" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+                        <VBox fx:id="transportEntriesList" spacing="6" />
+                    </VBox>
+                </Tab>
+
+            </TabPane>
+        </VBox>
+    </ScrollPane>
+
+</StackPane>
