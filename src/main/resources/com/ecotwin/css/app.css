@@ -66,6 +66,18 @@
     -fx-font-weight: bold;
 }
 
+.section-title {
+    -fx-text-fill: #34D399;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.value-text {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
 .card {
     -fx-background-color: #101C15;
     -fx-border-color: #26362C;

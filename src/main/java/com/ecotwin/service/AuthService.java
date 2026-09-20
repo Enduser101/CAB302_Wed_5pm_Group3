@@ -28,10 +28,29 @@ public class AuthService {
 
     public User login(String username, String password) {
         User user = userDao.findByUsername(username)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
         if (!BCrypt.checkpw(password, user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
         return user;
+    }
+
+
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = userDao.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+
+        if (!BCrypt.checkpw(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        validatePassword(newPassword);
+
+        userDao.updatePassword(user.getId(), BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
     }
 }
