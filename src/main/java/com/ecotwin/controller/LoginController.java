@@ -54,6 +54,12 @@ public class LoginController {
         nav.showRegister();
     }
 
+    @FXML
+    private void handleGuest() {
+        ctx.session.startGuestSession();
+        nav.showShell();
+    }
+
     private void attachHouseholdIfAny(User user) {
         Optional<Household> household = ctx.householdService.findActiveHouseholdForUser(user);
         household.ifPresent(h -> {
