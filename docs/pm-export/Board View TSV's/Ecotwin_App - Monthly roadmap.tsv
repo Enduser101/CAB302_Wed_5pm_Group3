@@ -1,0 +1,78 @@
+Title	URL	Assignees	Status	CAB302_Team	Iteration	Start date	Target date	Quarter
+Determine Architecture Map	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/71	Fbature	Done	CAB302 Team		Sep 2, 2026	Sep 6, 2026	
+Define Project Timeline	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/1	8ound, Enduser101, Fbature, Jam577, lifeisthing	Done	CAB302 Team	Iteration 1	Aug 19, 2026	Sep 2, 2026	
+Determine Style sheets	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/69		Done	CAB302 Team		Aug 26, 2026	Sep 2, 2026	
+Determine Colour Pallet	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/70		Done	CAB302 Team		Aug 26, 2026	Sep 2, 2026	
+Develop User Stories	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/72		Done	CAB302 Team		Aug 19, 2026	Aug 26, 2026	
+Release 1: Auth and household features	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/pull/81	Enduser101	Done	CAB302 Team		Sep 9, 2026	Sep 16, 2026	
+UI - Recommendations	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/49		Done	UX / UI		Aug 30, 2026	Sep 12, 2026	
+UI - Dashboard	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/47		Done	UX / UI		Aug 30, 2026	Sep 8, 2026	
+UI - Scenario Simulator	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/50	Fbature	Done	UX / UI		Aug 30, 2026	Sep 11, 2026	
+UI - Household Management	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/51		Done	UX / UI		Aug 31, 2026	Sep 12, 2026	
+UI - Resource Tracking	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/48		Done	UX / UI		Aug 30, 2026	Sep 12, 2026	
+UI - Account	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/52		Done	UX / UI		Aug 31, 2026	Sep 12, 2026	
+UI - Authentication	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/45	Fbature	Done	UX / UI		Aug 30, 2026	Sep 12, 2026	
+UI - Household Setup	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/46	Jam577	Done	UX / UI		Aug 30, 2026	Sep 12, 2026	
+Resource Tracking Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/60		Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Dashboard Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/56		Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Resource tracking Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/59		Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Account Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/68		Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Account Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/67	Jam577	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Household Management Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/66		Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Household Management Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/65	Jam577	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Scenario Simulator Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/64	Fbature	Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Authentication Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/57	Fbature	Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Dashboard Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/55	Jam577	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Recommendation Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/62	Jam577	Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Household Setup Mid-High Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/58	Jam577	Done	UX / UI		Sep 9, 2026	Sep 12, 2026	
+Authentication Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/53	Fbature	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Household Setup Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/54	Jam577	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Recommendations Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/61	Jam577	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+Scenario Simulator Low Fid	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/63	Fbature	Done	UX / UI		Aug 30, 2026	Sep 9, 2026	
+US-06 — Change password	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/14	8ound	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-05 — View account details	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/13	8ound	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-04 — Restrict household membership to registered users	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/12	lifeisthing	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-03 — Try EcoTwin without an account	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/11	lifeisthing	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-22 — Understand score meaning	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/30	Fbature	In progress - Sprint	Features / Logic				
+US-21 — View domain scores	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/29	lifeisthing	In progress - Sprint	Features / Logic				
+US-20 — View overall sustainability score	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/28	8ound	In progress - Sprint	Features / Logic				
+US-23 — See changes in score after updating household data	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/31	Enduser101	In progress - Sprint	Features / Logic				
+US-15 — Record energy information	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/23	Enduser101	Done	Features / Logic				
+US-18 — Record transport information	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/26	Enduser101	Done	Features / Logic				
+US-16 — Record water information	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/24	Enduser101	Done	Features / Logic				
+US-17 — Record waste information	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/25	Enduser101	Done	Features / Logic				
+US-14 — Record household data changes	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/22	Enduser101	Review	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-13 — Record household membership changes	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/21	8ound	In progress - Sprint	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-11 — View current household members	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/19	Jam577	Done	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-10 — Leave a household	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/18	Jam577	Done	Features / Logic				
+US-08 — Create a household	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/16	Enduser101	Done	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-09 — Join a household	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/17	Enduser101	Done	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-07 — Log out	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/15	Enduser101	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-19 — Edit household sustainability information	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/27	Fbature	In progress - Sprint	Features / Logic				
+US-12 — View household activity history	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/20	lifeisthing	In progress - Sprint	Features / Logic		Sep 15, 2026	Sep 17, 2026	
+US-02 — Log in	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/10	Fbature	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-01 — Register an account	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/9	Fbature	Done	Features / Logic		Sep 13, 2026	Sep 15, 2026	
+US-24 — Receive sustainability recommendations	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/32		Todo	Features / Logic				
+US-25 — Identify the domain of a recommendation	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/33		Todo	Features / Logic				
+US-26 — Understand why a recommendation was made	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/34		Todo	Features / Logic				
+US-27 — Create a sustainability scenario	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/35		Todo	Features / Logic				
+US-28 — Compare scenario score to current score	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/36		Todo	Features / Logic				
+US-29 — Save a scenario	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/37		Todo	Features / Logic				
+US-30 — View saved scenarios	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/38		Todo	Features / Logic				
+US-31 — Delete a saved scenario	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/39		Todo	Features / Logic				
+US-32 — Remove a household member	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/40		Todo	Features / Logic				
+US-33 — Rename a household	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/41		Todo	Features / Logic				
+US-34 — Correct household data	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/42		Todo	Features / Logic				
+US-35 — Transfer household administrator rights	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/43		Todo	Features / Logic				
+US-36 — Delete household	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/44		Todo	Features / Logic				
+Guest mode bugs	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/85	lifeisthing	On-Hold					
+Household resource tracking (US-15–18) + CI test gate	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/pull/82	Enduser101	Done					
+Database Mapping ORM	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/73	Enduser101	Done					
+ER Final	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/79	Enduser101	Done					
+Group Video Submission	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/80	8ound, Enduser101, Fbature, Jam577, lifeisthing	In progress - Sprint					
+UML Final	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/78	lifeisthing	Done					
+ER Draft	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/77	Enduser101	Done					
+Create UML Draft	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/76	lifeisthing	Done					
+Maths function mapping	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/75	Fbature	Done					
+Object mapping and interactions	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/issues/74		Done					
+Account details and change password (US-05, US-06, US-07)	https://github.com/Enduser101/CAB302_Wed_5pm_Group3/pull/86	8ound	Done					
