@@ -184,3 +184,29 @@
 .content-scroll .scroll-bar:vertical .thumb:hover {
     -fx-background-color: #34503f;
 }
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #0A130E;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #101C15;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #1D7A46;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #8FA398;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: #0A130E;
+}

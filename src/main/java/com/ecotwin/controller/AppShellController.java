@@ -40,7 +40,8 @@ public class AppShellController {
 
     @FXML
     private void showResources() {
-        showPlaceholder(resourcesNav, "Resources");
+        setActive(resourcesNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/resources-view.fxml"));
     }
 
     @FXML

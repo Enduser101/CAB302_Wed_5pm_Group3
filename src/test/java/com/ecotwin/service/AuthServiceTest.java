@@ -80,6 +80,7 @@ class AuthServiceTest {
         assertTrue(ex.getMessage().equalsIgnoreCase("Invalid username or password"));
     }
 
+
     @Test
     void changePasswordRejectsIncorrectCurrentPassword() {
         String hash = BCrypt.hashpw("oldpassword", BCrypt.gensalt());
@@ -123,3 +124,5 @@ class AuthServiceTest {
         verify(userDao).updatePassword(eq(1L), argThat(h -> !BCrypt.checkpw("oldpassword", h)));
     }
 }
+
+
