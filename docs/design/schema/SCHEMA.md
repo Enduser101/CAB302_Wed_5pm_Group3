@@ -24,7 +24,7 @@ Three earlier, mutually inconsistent schema drafts existed in this project befor
 ## Decisions worth knowing before you touch this file
 
 1. **Household ownership is multi-user, not single-owner.** An earlier draft (`build_plan.md`) modelled `households.user_id`. That's wrong for Epic E3 (US-08/09/10/11 all assume a household has *members*, not one owner) — hence the `household_memberships` association entity instead.
-2. **`state`, not `postcode`.** Earlier drafts used `postcode`. The **approved high-fidelity "Set up your household" screen** (`docs/Ecotwin High Fidelity/CAB302 Ecotwin High Fidelity.pdf`) collects a state dropdown (ACT/NSW/NT/QLD/SA/TAS/VIC/WA), not a postcode field. Schema follows the approved UI, not the older draft doc.
+2. **`state`, not `postcode`.** Earlier drafts used `postcode`. The **approved high-fidelity "Set up your household" screen** (`docs/design/wirewframes/hig-fid/CAB302 Ecotwin High Fidelity.pdf`) collects a state dropdown (ACT/NSW/NT/QLD/SA/TAS/VIC/WA), not a postcode field. Schema follows the approved UI, not the older draft doc.
 3. **Transport is a vehicle list, not one row per mode.** The mockup's Resources → Transport tab manages a list of vehicles (add/remove, fuel type, km/week) rather than logging `car_km`/`public_transport_km`/... as scalar columns. `vehicles` models that directly.
 4. **`activity_log` is intentionally unstructured.** No `old_value`/`new_value` columns — every acceptance criterion in Epic 4 only asks for a readable trail ("Frankie updated transport: Vehicle 2 distance 90 → 120 km/week"), which a formatted `message` string satisfies without a rigid schema every future entry type has to fit into.
 
