@@ -1,0 +1,15 @@
+# Maven build files
+target/
+
+# Runtime SQLite database (created by DatabaseConnection, never checked in)
+*.db
+
+# IntelliJ local files
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Local Git temporary file
+FETCH_HEAD

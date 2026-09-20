@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ScrollPane?>
+
+<?import javafx.scene.control.ListView?>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.ecotwin.controller.HouseholdController"
+           styleClass="page-bg">
+
+    <ScrollPane fitToWidth="true" styleClass="content-scroll">
+        <VBox spacing="24">
+            <padding><Insets top="32" right="32" bottom="32" left="32" /></padding>
+
+            <VBox fx:id="setupSection" spacing="20">
+                <Label text="Set up your household" styleClass="page-title" />
+                <Label text="Start a new household, or join one your housemates have already created."
+                       styleClass="muted-text" wrapText="true" />
+
+                <HBox spacing="24">
+                    <VBox styleClass="card" spacing="12" maxWidth="360" HBox.hgrow="ALWAYS">
+                        <Label text="Create a household" styleClass="page-title" />
+                        <Label text="You'll become the administrator and get a code to share."
+                               styleClass="muted-text" wrapText="true" />
+
+                        <Label text="Household name" styleClass="field-label" />
+                        <TextField fx:id="householdNameField" />
+
+                        <Label text="Number of occupants" styleClass="field-label" />
+                        <TextField fx:id="occupantsField" />
+
+                        <Label text="State" styleClass="field-label" />
+                        <ComboBox fx:id="stateCombo" maxWidth="Infinity" />
+
+                        <Label fx:id="createErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                        <Button text="Create Household" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleCreateHousehold" />
+                    </VBox>
+
+                    <VBox styleClass="card" spacing="12" maxWidth="360" HBox.hgrow="ALWAYS">
+                        <Label text="Join a household" styleClass="page-title" />
+                        <Label text="Ask a housemate for the six-character code on their household page."
+                               styleClass="muted-text" wrapText="true" />
+
+                        <Label text="Join code" styleClass="field-label" />
+                        <TextField fx:id="joinCodeField" />
+
+                        <Label fx:id="joinErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+
+                        <Button text="Join Household" styleClass="btn-secondary" maxWidth="Infinity" onAction="#handleJoinHousehold" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <VBox fx:id="summarySection" spacing="12" visible="false" managed="false">
+                <Label text="Household" styleClass="page-title" />
+                <Label fx:id="summaryNameLabel" styleClass="page-title" />
+                <Label fx:id="summaryRoleLabel" styleClass="muted-text" />
+                <Label fx:id="summaryJoinCodeLabel" styleClass="badge" />
+
+
+
+                <!-- US-11: view current household members -->
+                <Label text="Members" style="-fx-font-size: 26px; -fx-font-weight: bold;" />
+                <VBox fx:id="membersListView" spacing="0" />
+
+                <!-- US-10: leave a household -->
+                <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+                <Button fx:id="leaveButton" text="Leave Household" styleClass="btn-danger"
+                        onAction="#handleLeaveHousehold" />
+
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+</StackPane>

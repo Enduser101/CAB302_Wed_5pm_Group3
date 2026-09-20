@@ -1,0 +1,49 @@
+Attending :
+Missing : Tanom (dropped in), James, Mirzo 
+
+Plan : 
+25% is due Friday for presentation 
+Currently we are behind in grading standards. 
+We need to show more iteration with Git pushes, use TDD and have code blocks handed out. 
+Assignment marking page : https://canvas.qut.edu.au/courses/23243/assignments/224868
+
+Review and uplift of user stories - so they're inline with lecture 5 and up to standard 
+ 
+Git : https://github.com/Enduser101/CAB302_Wed_5pm_Group3
+
+Figma : https://www.figma.com/design/MsC3FvXtrcvASVRW8pmsrq/CAB302-UI-Design
+
+Frankie : nearly completed Figma, had questions about what to do when a new scenario is created ( default screen for a new house hold) & guest screen. Confirmed guest home screen is the same as a users one, but save will lead to a create account screen. Confirmed default screen is default values loaded. 
+
+
+discussed splitting coding into segments to split between the group. Micheal confirmed that DB stuff has been done.
+
+Discussed finishing epic 1 and start of User 2 which should be suficent for prototype. 
+
+Pushed through, low,med,high fid from review into done. 
+
+Discussed story points for user stories. 
+
+Micheal confirmed he will do US 1,2,7 Register, login, log out. - 2/3 hours 
+Ted confirmed will do 3 & 4 - restrict membership to front end - setting skeleton - 2/3 hours 
+Frankie - finishing high fid - and then 5 & 6 - view acount details , change password 
+Tinom - 8 & 9 - create and join a household 
+James - 10 & 11 - leave and view a house hold 
+
+These tasks are suh that the written functions should all work and follow TDD.  These are due weds night. 
+
+Tinom joined in 15 minutes in Advised that she made a login and registration page, however these have pushed to a differnt Git branch. Confirmed in Sydeny and unable to stay in meeting.  
+
+swap tinom and Micheal's tasks :
+
+Tinom confirmed he will do US 1,2 Register, login - 2/3 hours
+Ted confirmed will do 3 & 4 - restrict membership to front end - setting skeleton - 2/3 hours
+Frankie - finishing high fid - and then 5 & 6 - view acount details , change password
+Micheal - 8 & 9 & 7- log out, create and join a household
+James - 10 & 11 - leave and view a house hold
+
+Links : 
+
+https://github.com/users/Enduser101/projects/2/views/4
+https://www.figma.com/design/MsC3FvXtrcvASVRW8pmsrq/CAB302-UI-Design
+https://canvas.qut.edu.au/courses/23243/assignments/224868

@@ -33,14 +33,14 @@ We are in **Week 5**. That means **Checkpoint 1 (Milestone: Inception & Setup) i
 
 ## 2. Team roster & roles
 
-| Name | Student # | Primary role / area | Backup for |
-|---|---|---|---|
-| Tinom Bature | _fill in_ | _fill in_ | |
-| Frankie Galea | 11496703 | _fill in_ | |
-| _fill in_ | _fill in_ | | |
-| _fill in_ | _fill in_ | | |
-| _fill in_ | _fill in_ | | |
-| _fill in_ | _fill in_ | | |
+| Name          | Student # | Primary role / area | Backup for |
+|---------------|-----------|---|---|
+| Tinom Bature  | _fill in_ | _fill in_ | |
+| Frankie Galea | 11496703  | _fill in_ | |
+| James Renwick | 12564800  | | |
+| _fill in_     | _fill in_ | | |
+| _fill in_     | _fill in_ | | |
+| _fill in_     | _fill in_ | | |
 
 **Suggested role split** (adapt to team size — everyone still commits code, this is just *primary* ownership):
 - **Scrum lead / PM tool owner** — runs standups, keeps the board honest, exports the PM tool for submission.
@@ -204,23 +204,28 @@ _Recommended video order (timing is a guide):_ ~1 min refresher (purpose, storie
 Fill this in each sprint. One owner per row. **[TEAM]** = checkpoint-critical, schedule first.
 
 | Feature / task | Owner | Sprint | Status | Linked user story |
-|---|---|---|---|---|
+|---|---|---|---|-|
 | **[TEAM]** Repo + branch protection + PR rules | | 0 | | |
 | **[TEAM]** PM tool set up | | 0 | | |
 | User stories (all) | | 1 | | |
 | Release plan + Sprint 1 plan | | 1 | | |
 | UI wireframes (low/med fi) | | 1 | | |
-| Auth — sign up / sign in (GUI + model) | | | | |
+| Auth — sign up / sign in (GUI + model) | | | | US-01, US-02 |
+| Account management — view details, change password, log out | | | | US-05, US-06, US-07 |
 | Persistence layer — JDBC + DAO | | | | |
+| Household creation, joining, leaving | | | | US-08, US-09, US-10, US-11 |
+| Activity history / audit log | | | | US-12, US-13, US-14 |
 | Household profile CRUD | | | | |
-| Energy tracker | | | | |
-| Waste tracker | | | | |
-| Water tracker | | | | |
-| Transport tracker | | | | |
-| Score engine (overall + per-domain) | | | | |
+| Energy tracker | | | | US-15 |
+| Waste tracker | | | | US-17 |
+| Water tracker | | | | US-16 |
+| Transport tracker | | | | US-18 |
+| Edit existing resource data | | | | US-19 |
+| Score engine (overall + per-domain) | | | | US-20, US-21, US-22, US-23 |
 | Dashboard / visualisation | | | | |
-| Recommendations logic | | | | |
-| Scenario simulation + score delta | | | | |
+| Recommendations logic | | | | US-24, US-25, US-26 |
+| Scenario simulation + score delta | | | | US-27, US-28, US-29, US-30, US-31 |
+| Household administration — remove member, correct data, rename, transfer rights, delete household | | | | US-32, US-33, US-34, US-35, US-36 |
 | **[TEAM]** Build script | | | | |
 | **[TEAM]** GitHub Actions CI | | | | |
 | Javadoc comments + generated pages | | | | |

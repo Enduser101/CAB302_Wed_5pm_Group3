@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.ecotwin.controller.LoginController"
+           styleClass="page-bg"
+           prefWidth="1000" prefHeight="650">
+
+    <VBox alignment="CENTER" spacing="32">
+        <VBox alignment="CENTER" spacing="8">
+            <Label text="EcoTwin" styleClass="brand-logo" />
+            <Label text="Understand your household's environmental impact" styleClass="muted-text" />
+        </VBox>
+
+        <VBox styleClass="card" maxWidth="360" spacing="14" alignment="TOP_LEFT">
+            <padding><Insets top="40" right="40" bottom="40" left="40" /></padding>
+
+            <Label text="Login" styleClass="page-title" />
+
+            <VBox spacing="4">
+                <Label text="Username" styleClass="field-label" />
+                <TextField fx:id="usernameField" maxWidth="Infinity" />
+            </VBox>
+
+            <VBox spacing="4">
+                <Label text="Password" styleClass="field-label" />
+                <PasswordField fx:id="passwordField" maxWidth="Infinity" />
+            </VBox>
+
+            <Label fx:id="messageLabel" styleClass="error-text" wrapText="true" />
+
+            <Button fx:id="loginButton" text="Login" styleClass="btn-primary" maxWidth="Infinity"
+                    defaultButton="true" onAction="#handleLogin" />
+
+            <HBox alignment="CENTER">
+                <Label text="or" styleClass="muted-text" />
+            </HBox>
+
+            <Button fx:id="guestButton" text="Continue as Guest" styleClass="btn-secondary" maxWidth="Infinity" onAction="#handleGuest" />
+
+            <HBox alignment="CENTER" spacing="6">
+                <Label text="Don't have an account?" styleClass="muted-text" />
+                <Hyperlink fx:id="registerLink" text="Register here" styleClass="link-text" onAction="#handleRegisterLink" />
+            </HBox>
+        </VBox>
+    </VBox>
+</StackPane>

@@ -1,0 +1,326 @@
+# **EPIC 1 — Guest & Authentication**
+
+**Goal**: Let a person trial EcoTwin without commitment, then create a private account so their household data persists.
+
+**Definition of done**: A guest can calculate a score without registering, a user can register and log in, passwords are never stored in plain text.
+
+**Dependencies:** None. Foundation epic — E3 depends on it.
+
+## **User story 1 \- Register an account:**
+
+As a guest, I want to register with a username, email and password so that I can save household information.
+
+**Acceptance Criteria:** Username must be unique. Password must meet minimum requirements. Invalid registration shows a clear error. Successful account creation persists after restart.
+
+## **User story 2 \- Log in:**
+
+As a guest, I want to log in using my username and password so that I can access my saved EcoTwin data.
+
+**Acceptance Criteria:** Correct credentials authenticate the user. Incorrect credentials show a generic error. The error does not reveal which credential was incorrect.
+
+## **User story 3 \- Try EcoTwin without an account:**
+
+As a guest, I want to enter household information and calculate a sustainability score so that I can try EcoTwin before registering.
+
+**Acceptance Criteria:** Guest can enter enough data to calculate a score. Score is displayed. Guest is informed that results are temporary and will not persist after leaving the session.
+
+## **User story 4 \- Restrict household membership to registered users:**
+
+As a guest, I want to be informed that registration is required to join a household so that I understand how household features are accessed.
+
+**Acceptance Criteria:** Guest cannot join a household. Household membership functions direct the guest toward registration or login.
+
+**Implementation note:** Passwords must be hashed with a salt (BCrypt). Plain text passwords are never written to disk or logs. This is an acceptance criterion on User Story 1 and a likely marking point for the Authentication requirement.
+
+---
+
+# **EPIC 2 — Account Management**
+
+**Goal**: Let a registered user inspect and maintain their own account.
+
+**Definition of done**: Account details are viewable, the password can be changed with the current password as proof, logout clears the session completely.
+
+**Dependencies:** Requires E1.
+
+## **User story 5 \- View account details:**
+
+As a registered user, I want to view my account details so that I can verify my information.
+
+**Acceptance Criteria:** Username and email are displayed. Password is never displayed in plain text.
+
+## **User story 6 \- Change password:**
+
+As a registered user, I want to change my password so that I can maintain account security.
+
+**Acceptance Criteria:** Current password is required. New password must satisfy password rules. Old password no longer authenticates after the change.
+
+## **User story 7 \- Log out:**
+
+As a registered user, I want to log out so that another person using the computer cannot access my account.
+
+**Acceptance Criteria:** Session is cleared. Protected views require login. User returns to the start/login screen.
+
+---
+
+# **EPIC 3 — Household Membership**
+
+**Goal**: Let registered users form and move between households freely, while the household retains its own history.
+
+**Definition of done**: A user can create a household and take on the role of administrator, other users can join and go, membership is retained during restarts, departures do not erase household history.
+
+**Design decision:** how joining operates. A join code, such as EC4932, is given to a household upon creation and is shared with the other members of the household, as it doesn't require a messaging system, network, or notification infrastructure, all of which are outside the purview of a local desktop application, it was selected over invites, name searches, and admin approval.
+
+## **User story 8 \- Create a household:**
+
+I want to set up a household as a registered user so that everyone in the household may track sustainability data together.
+
+**Acceptance Criteri**a: Household has a valid name. The creator takes on the role of household administrator. Household continues even after the application is restarted.
+
+## **User story 9 \- Join a household**:
+
+I would like to join an existing home as a registered user in order to take part in its sustainability tracking.
+
+**Acceptance Criteri**a: The household join code can be used by the user to join. Membership is recorded. Access to household data is granted to the user. Invalid code displays an error message.
+
+## **User story 10 \- Leave a household:**
+
+As a registered user, I wish to leave a household so that I can stop participating in a household to which I no longer belong.
+
+**Acceptance Criteri**a:The user's household membership is removed. Future access is lost for the user. Leaving does not erase past household data.
+
+## **User story 11 \- View current household members**:
+
+As a registered user, I want to view the current household members so that I can see who is currently involved in the household.
+
+**Acceptance Criteri**a: Members who are active are shown. The household administrator is recognisable. Members who have left are no longer displayed .
+---
+
+# **EPIC 4 — Household Activity History**
+
+**Goal:** To help a household understand how its profile changed and who made what changes, keep a data trail of all household modifications.
+
+**Why it matters:** The household's data is constant, but memberships are dynamic people come and go. Administrator corrections are safe rather than harmful because of the history, which also keeps the record consistent over membership changes.
+
+**Definition of done:** data records are created by data modifications, joins, and departures; each record includes the actor, timestamp, action, and, if relevant, the old and new values. History is preserved even after the user who created it leaves.
+
+## **User Story 12 \- View household activity history:**
+
+In order to comprehend how the household profile has evolved over time, as a household member, I would like to see a history of household changes.
+
+**Accredited history:** Changes in the household are noted. Each entry contains the type of change, a time and date, and, if relevant, the name of the responsible user. After users leave, history is retained. The newest entries appear first.
+
+## **User Story 13 \- Record household membership changes:**
+
+In order for membership changes to be visible over time, as a household member, want joins and departures to be documented in the household history.
+
+**Accredited history:** A history entry is created upon joining. A history entry is created after you leave. After the user departs, historical membership entries are still present.
+
+## **User Story 14 \- Record household data changes:**
+
+I want changes to household sustainability data to be documented as a household member so that the household profile's evolution may be tracked.
+
+**Accredited history:** History records are created by pertinent changes. When necessary, original and updated values can be distinguished. The responsible user is identified by the record.
+
+**Data model:** The change log is a separate entity from current household data.
+
+---
+# **EPIC 5 — Household Resource Tracking**
+**Goal:**  The goal is to give household members a way to log consumption across all four domains, so the sustainability score is actually backed by real data not placeholders
+**Definition of done:**All four domains accept deal updates. Invalid input is rejected with a message that helps the user understand what went wrong. datta belongs to the household. Every change recalculates the score and writes a history record
+**Dependencies:**  Requires E3 and E4. Blocks E6 without data there is no score
+**Sequencing Note:** Build User story 15 first. it establishes the input form, validations,persistence and history logging pattern that the other three domains use, so user stories 16 through 18 should go considerably faster
+
+## **User story 15 \- Record energy information:**
+As a household member, I want to update the household's energy information so that EcoTwin can assess our energy sustainability.
+**Acceptance Criteria:** Valid values can be entered. Invalid values are rejected with a helpful message. Data belongs to the household. Data persists. Score recalculates. Change is recorded in household history.
+
+## **User Story 16 \- Record water information:**
+
+As a household member, I want to update the household's water information so that EcoTwin can assess our water sustainability.
+
+**Acceptance Criteria:** Valid information can be saved. Data belongs to the household. Data persists. Score recalculates. Change is logged.
+
+## **User Story 17 \- Record waste information:**
+As a household member, I want to update the household's waste and recycling information so that EcoTwin can assess our waste sustainability.
+
+**Acceptance Criteria:** Valid values can be saved. Data persists. Score recalculates. Change is logged.
+
+## **User Story 18 \- Record transport information:**
+As a household member, I want to update household transport information so that EcoTwin can assess the sustainability impact of our transport behaviour.
+
+**Acceptance Criteria:** Valid information can be saved. Data persists. Score recalculates. Change is logged.
+
+## **User Story 19 \- Edit household sustainability information:**
+
+As a household member, I want to modify existing resource information so that EcoTwin reflects changes in our household behaviour.
+
+**Acceptance Criteria:** Current values are displayed. Valid edits can be saved. Previous state remains represented in activity history. Scores recalculate.
+
+---
+# **EPIC 6 — Sustainability Scores**
+**Goal:** Turn recorded data into a score and a breakdown, so that a household can see where it stands and which area matters most.
+**Definition of done:** An overall score and four domain scores display on a dashboard. The score's meaning is explained. Changes in score after an update are visible. Calculation completes without noticeable delay.
+**Dependencies:** Requires E5. Blocks E7 and E8 both operate on the score.
+
+## **User story 20 \- View overall sustainability score:**
+As a household member, I want to view our overall sustainability score so that I can quickly understand the household's environmental performance.
+**Acceptance Criteria:** Single overall figure displayed. Reflects all household data. Recalculates when data changes.
+
+## **User Story 21 \- View domain scores:**
+
+As a household member, I want to view separate Energy, Water, Waste and Transport scores so that I can identify areas requiring improvement.
+
+**Acceptance Criteria:** Four domain scores shown alongside the total. Presented visually, not as raw numbers alone. Meaning is not conveyed by colour alone.
+
+## **User Story 22 \- Understanding score meaning :**
+As a household member, I want an explanation of what our score represents so that I can interpret the result meaningfully.
+
+**Acceptance Criteria:** Scale and its bounds are stated. Explanation is written for a non-technical reader.
+
+## **User Story 23 \- See changes in score after updating household data:**
+As a household member, I want to see how updates affect our sustainability score so that I understand the impact of changes in household behaviour.
+
+**Acceptance Criteria:** Previous and new score both shown after an update. Affected domain score also shown. Direction of change is unambiguous.
+
+User story 23 pairs naturally with the activity history. An entry can show both the data chnage and its score consequences:
+
+|               | Before | After  |
+|---------------|--------|--------|
+| Energy use    | 850kWh | 700kWh |
+| Energy score  | 62     | 71     |
+| Overall score | 68     | 71     |
+
+
+---
+# **EPIC 7 — Recommendations**
+
+**Goal:** To inform a household of what needs to be changed so that the score is more than just information.
+
+**Definition of done**: Each recommendation is tagged by domain and is based on the household's own data rather than general advice.
+
+**Dependencies**: E6 is necessary.
+
+## **User story 24 \- Receive sustainability recommendations:**
+
+As a member of the household, I would like EcoTwin to make suggestions based on our household data so that we can determine what adjustments could enhance our sustainability.
+
+**Acceptance Criteria:** Different households have different recommendations based on their data. Every domain has at least one recommendation. Targets the weakest domain first
+
+## **User story 25 \- Identify the domain of a recommendation:**
+
+As a household member, I would like recommendations to be labelled by Energy, Water, Waste, or Transport so that I may determine which area they pertain to.
+
+**Acceptance Criteria:** The domain of each recommendation is shown. Recommendations can be labelled or filtered by domain.
+
+## **User story 26 \- Understand why a recommendation was made:**
+
+As a household member, I would like a brief explanation of EcoTwin's recommendations so that they feel relevant to our home.
+
+**Acceptance Criteria:** The explanation makes reference to the household's own values. Written in plain English.
+
+---
+# **EPIC 8 — Scenario Simulation**
+
+**Goal:** Before implementing a change in real life, let a household test it. This is what sets EcoTwin apart from the single-number calculators mentioned in the problem description.
+
+**Definition of done**: Without changing actual household data, a member can model a hypothetical change, compare its score to the current one, and save it for later.
+
+**Dependencies**: E6 is necessary.
+
+## **User story 27 \- Create a sustainability scenario:**
+
+As a household member, I would like to temporarily adjust household values in a scenario in order to investigate potential changes without changing the present household data.
+
+**Acceptance Criteria:** Current household data is the starting point for the scenario. Modifying a scenario value does not create a history entry or change the actual record.
+
+## **User story 28 \- Compare scenario score to current score:**
+
+As a household member, I want to see the potential effects of changes by comparing the scenario score to the current score.
+
+**Acceptance Criteria:** The two scores are displayed. The difference between the two scores is displayed. Makes use of the same computation as the live score. The direction of change is clear.
+
+## **User story 29 \- Save a scenario:**
+
+I wish to preserve a scenario as a household member so that other household members can review possible enhancements at a later time.
+
+**Acceptance Criteria:** The scenario persists after restarting with a user-supplied name and is visible to every member of the household.
+
+## **User story 30 \- View saved scenarios:**
+
+I want to access previously saved scenarios as a household member so that I can go over concepts we have discussed.
+
+**Acceptance Criteria:** Scores and names are displayed for saved scenarios. Selecting one reopens its detail.
+
+## **User story 31 \- Delete a saved scenario:**
+
+I wish to remove out-of-date scenarios from our saved scenario list as a household member.
+
+**Acceptance Criteria:** Verification is required. The scenario has been permanently removed. Household data is unaffected.
+
+# **EPIC 9 — Household Administration**
+
+**Goal:** give household admin tools to keep the household accurate
+
+**This will be completed when:** Admin can remove members, correct member input, rename, transfer rights and delete the household. Every action is recorded in the activity history.
+
+**Requires:** Epic 3 & Epic 4
+
+## **User story 32:**
+
+As an household administrator I want to remove a member from a household such they can no longer access it
+
+**Acceptance Criteria:** HhA can remove members. Mbr data stays but members removed and cannot see HH recorded to change log
+
+**Time estimate:** 4 hour
+
+## **User story 33:**
+
+As a household admin I want to rename a household so that it's id can be meaningful.
+
+**Acceptance Criteria:** This will be done when new name can be recorded to history
+
+**Time estimate:** 1 hour
+
+## **User story 34:**
+
+As a household admin I want to correct data that has been entered by any user on the house hold. So incorrect information does not persist
+
+**Acceptance Criteria:** -
+
+**Time estimate:** 1 hour
+
+## **User story 35:**
+
+As a household admin I want to transfer admin rights to another active member so that household management can continue without the same household admin
+
+**Acceptance Criteria:** Rights transfer to a nominated active member. Previous administrator becomes an ordinary member. Exactly one administrator at all times. Recorded in history.
+
+**Time estimate:** 2 hour
+
+## **User story 36:**
+
+As a household admin I want to delete the household so that a household can be permanently removed.
+
+**Acceptance Criteria:** Only admin can initiate deletion, active members are removed and history is all deleted
+
+**Time estimate:** 1 hour
+
+---
+
+# **Nice to haves**
+
+## **N1:**
+
+As a user I want to be able to join multiple households so I can track more than one residence.
+
+**Acceptance Criteria:** User can belong to more than one household, household data remains separate. Users can switch which household they're viewing.
+
+**Time estimate:** 2 hour
+
+## **N2:**
+
+As a user I can switch which house hold I am looking at.
+
+**Acceptance Criteria:** All views reflect the selected house hold
+
+**Time estimate:** 1 hour
