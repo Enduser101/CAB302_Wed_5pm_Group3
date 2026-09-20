@@ -46,7 +46,7 @@
                 <Label text="or" styleClass="muted-text" />
             </HBox>
 
-            <Button fx:id="guestButton" text="Continue as Guest" styleClass="btn-secondary" maxWidth="Infinity" />
+            <Button fx:id="guestButton" text="Continue as Guest" styleClass="btn-secondary" maxWidth="Infinity" onAction="#handleGuest" />
 
             <HBox alignment="CENTER" spacing="6">
                 <Label text="Don't have an account?" styleClass="muted-text" />
