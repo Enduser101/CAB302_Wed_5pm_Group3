@@ -8,4 +8,5 @@ public interface UserDao {
     User create(String username, String email, String passwordHash, String displayName);
     Optional<User> findByUsername(String username);
     Optional<User> findById(long id);
+    void updatePassword(long id, String passwordHash);
 }

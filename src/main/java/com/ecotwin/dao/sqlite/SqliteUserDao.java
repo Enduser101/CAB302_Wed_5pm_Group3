@@ -65,6 +65,18 @@ public class SqliteUserDao implements UserDao {
         }
     }
 
+    @Override
+    public void updatePassword(long id, String passwordHash) {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, passwordHash);
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update password for user " + id, e);
+        }
+    }
+
     private User map(ResultSet rs) throws SQLException {
         return new User(
             rs.getLong("id"),
