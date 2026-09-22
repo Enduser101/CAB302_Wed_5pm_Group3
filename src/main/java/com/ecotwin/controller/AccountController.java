@@ -1,5 +1,5 @@
 package com.ecotwin.controller;
-
+import javafx.scene.layout.VBox;
 import com.ecotwin.AppContext;
 import com.ecotwin.model.User;
 import javafx.fxml.FXML;
@@ -29,6 +29,9 @@ public class AccountController {
     @FXML private PasswordField confirmPasswordField;
     @FXML private Label passwordMessageLabel;
 
+    @FXML private VBox guestSection;
+    @FXML private VBox memberSection;
+
     public AccountController(Navigator nav, AppContext ctx) {
         this.nav = nav;
         this.ctx = ctx;
@@ -36,6 +39,13 @@ public class AccountController {
 
     @FXML
     private void initialize() {
+        boolean guest = ctx.session.isGuest();
+        guestSection.setVisible(guest);   guestSection.setManaged(guest);
+        memberSection.setVisible(!guest); memberSection.setManaged(!guest);
+        if (guest) {
+            usernameLabel.setText("Browsing as a guest");
+            return;                                        //check what page to display on whether the user is a guest or not
+        }
         User user = ctx.session.getCurrentUser();
         usernameLabel.setText("Signed in as " + user.getUsername());
         usernameValue.setText(user.getUsername());
@@ -84,5 +94,17 @@ public class AccountController {
     private void handleSignOut() {
         ctx.session.logout();
         nav.showLogin();
+    }
+
+    @FXML
+    private void guestHandleSignIn() {
+        ctx.session.logout();
+        nav.showLogin();
+    }
+
+    @FXML
+    private void guestHandleCreateAccount() {
+        ctx.session.logout();
+        nav.showRegister();
     }
 }
