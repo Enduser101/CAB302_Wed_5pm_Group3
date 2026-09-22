@@ -64,6 +64,17 @@ public class SessionContextTest {
         assertTrue(session.isLoggedIn());
     }
 
+    @Test
+    void guest_canSeeEveryPageExceptHousehold() {
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertTrue(session.canAccessPage(Page.DASHBOARD));
+        assertTrue(session.canAccessPage(Page.RESOURCES));
+        assertTrue(session.canAccessPage(Page.RECOMMENDATIONS));
+        assertTrue(session.canAccessPage(Page.SCENARIOS));
+        assertFalse(session.canAccessPage(Page.HOUSEHOLD));
+    }
+
 // us -04 restrict household membership to registered users (epic 1, piroity should )
 // Add a check to the household membership to check the user type when adding a user. reject anyone that isn't registered.
 // shouldn't be able to join as an unregistered user
