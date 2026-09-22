@@ -64,6 +64,11 @@ public final class SessionContext {
         return true;
     }
 
+    // US-03  #85 check whether a save press has entries and has an active household.
+    public boolean canRecordEntries() {
+        return isLoggedIn() && hasActiveHousehold();
+    }
+
     public boolean isLoggedIn() {
         return currentUser != null;
     }
