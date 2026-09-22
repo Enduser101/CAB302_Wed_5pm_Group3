@@ -54,6 +54,16 @@ public class SessionContextTest {
         assertFalse(session.isGuest());
         assertFalse(session.isLoggedIn());
     }
+
+    @Test
+    void guestSignsIn_isNoLongerGuest(){
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        session.login(new User(1L, "tester", "tester@example.com", "passwordHash", "Tester","2026-09-15"));
+        assertFalse(session.isGuest());
+        assertTrue(session.isLoggedIn());
+    }
+
 // us -04 restrict household membership to registered users (epic 1, piroity should )
 // Add a check to the household membership to check the user type when adding a user. reject anyone that isn't registered.
 // shouldn't be able to join as an unregistered user
