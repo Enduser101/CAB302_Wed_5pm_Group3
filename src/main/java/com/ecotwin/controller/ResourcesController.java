@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 
 import java.util.List;
 
@@ -52,6 +54,8 @@ public class ResourcesController {
     @FXML private TextField flightsPerYearField;
     @FXML private Label transportErrorLabel;
     @FXML private VBox transportEntriesList;
+
+    private Long editingEnergyEntryId;
 
     public ResourcesController(Navigator nav, AppContext ctx) {
         this.nav = nav;
@@ -94,7 +98,18 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.energyService.recordEntry(user, household, electricityKwh, solarGenerationKwh, energyNotesField.getText());
+            if (editingEnergyEntryId == null) {
+                ctx.energyService.recordEntry(
+                        user, household, electricityKwh,
+                        solarGenerationKwh, energyNotesField.getText()
+                );
+            } else {
+                ctx.energyService.updateEntry(
+                        user, household, editingEnergyEntryId,
+                        electricityKwh, solarGenerationKwh, energyNotesField.getText()
+                );
+                editingEnergyEntryId = null;
+            }
             hideError(energyErrorLabel);
             electricityKwhField.clear();
             solarGenerationKwhField.clear();
@@ -115,12 +130,44 @@ public class ResourcesController {
             return;
         }
         for (EnergyEntry entry : entries) {
-            String solar = entry.getSolarGenerationKwh() != null ? ", " + entry.getSolarGenerationKwh() + " kWh solar" : "";
-            energyEntriesList.getChildren().add(
-                mutedLabel(entry.getPeriod() + " — " + entry.getElectricityKwh() + " kWh" + solar));
+            String solar = entry.getSolarGenerationKwh() != null
+                    ? ", " + entry.getSolarGenerationKwh() + " kWh solar"
+                    : "";
+
+            Label entryLabel = mutedLabel(
+                    entry.getPeriod() + " — " + entry.getElectricityKwh() + " kWh" + solar
+            );
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event-> {
+                editingEnergyEntryId = entry.getId();
+
+                electricityKwhField.setText(String.valueOf(entry.getElectricityKwh()));
+
+                if (entry.getSolarGenerationKwh() != null) {
+                    solarGenerationKwhField.setText(
+                            String.valueOf(entry.getSolarGenerationKwh())
+                    );
+                } else {
+                    solarGenerationKwhField.clear();
+                }
+
+                energyNotesField.setText(
+                        entry.getNotes() != null ? entry.getNotes() : ""
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+            row.getChildren().addAll(entryLabel, editButton);
+
+            entryLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(entryLabel, javafx.scene.layout.Priority.ALWAYS);
+
+            energyEntriesList.getChildren().add(row);
         }
     }
-
     // US-16: record water information
 
     @FXML

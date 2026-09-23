@@ -210,3 +210,30 @@
 .tab-pane .tab-content-area {
     -fx-background-color: #0A130E;
 }
+.history-row {
+    -fx-alignment: center-left ;
+    -fx-padding: 14px 16px;
+    -fx-background-color: #101C15;
+    -fx-background-radius: 8px;
+    -fx-border-color: #26362C;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.edit-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #34D399;
+    -fx-border-color: #1D7A46;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 9px 16px;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.edit-button:hover {
+    -fx-background-color: #163523;
+    -fx-border-color: #34d399;
+}
