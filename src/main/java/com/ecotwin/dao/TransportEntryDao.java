@@ -9,4 +9,9 @@ public interface TransportEntryDao {
     TransportEntry upsertForPeriod(long householdId, String period, double publicTransportTripsPerWeek,
                                     double flightsPerYear, Long updatedByUserId);
     List<TransportEntry> findByHousehold(long householdId);
+    TransportEntry update(long entryId,
+                          double publicTransportTripsPerWeek,
+                          double flightsPerYear,
+                          long updatedByUserId);
+
 }
