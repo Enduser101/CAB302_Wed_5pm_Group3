@@ -45,6 +45,73 @@ public class TransportService {
         return entry;
     }
 
+    /** US-19: update an existing transport entry. */
+    public TransportEntry updateEntry(User actor,
+                                      Household household,
+                                      long entryId,
+                                      double publicTransportTripsPerWeek,
+                                      double flightsPerYear) {
+
+        if (publicTransportTripsPerWeek < 0) {
+            throw new IllegalArgumentException(
+                    "Public transport trips cannot be negative"
+            );
+        }
+
+        if (flightsPerYear < 0) {
+            throw new IllegalArgumentException(
+                    "Flights per year cannot be negative"
+            );
+        }
+
+        TransportEntry oldEntry = null;
+
+        for (TransportEntry entry :
+                transportEntryDao.findByHousehold(household.getId())) {
+
+            if (entry.getId() == entryId) {
+                oldEntry = entry;
+                break;
+            }
+        }
+
+        TransportEntry updatedEntry = transportEntryDao.update(
+                entryId,
+                publicTransportTripsPerWeek,
+                flightsPerYear,
+                actor.getId()
+        );
+
+        if (oldEntry != null) {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor)
+                            + " changed transport from "
+                            + oldEntry.getPublicTransportTripsPerWeek()
+                            + " PT trips/week and "
+                            + oldEntry.getFlightsPerYear()
+                            + " flights/year to "
+                            + publicTransportTripsPerWeek
+                            + " PT trips/week and "
+                            + flightsPerYear
+                            + " flights/year"
+            );
+        } else {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor)
+                            + " updated transport information for "
+                            + updatedEntry.getPeriod()
+            );
+        }
+
+        scoreService.recalculate(household.getId());
+
+        return updatedEntry;
+    }
+
     /** US-18: a household's vehicle list backs its transport score. */
     public Vehicle addVehicle(User actor, Household household, String label, String fuelType, double kmPerWeek) {
         if (label == null || label.isBlank()) {
@@ -61,6 +128,72 @@ public class TransportService {
         activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + " added vehicle " + label);
         scoreService.recalculate(household.getId());
         return vehicle;
+    }
+
+    /** US-19: update an existing household vehicle. */
+    public Vehicle updateVehicle(User actor,
+                                 Household household,
+                                 long vehicleId,
+                                 String label,
+                                 String fuelType,
+                                 double kmPerWeek) {
+
+        if (label == null || label.isBlank()) {
+            throw new IllegalArgumentException("Vehicle label is required");
+        }
+
+        if (fuelType == null || fuelType.isBlank()) {
+            throw new IllegalArgumentException("Fuel type is required");
+        }
+
+        if (kmPerWeek < 0) {
+            throw new IllegalArgumentException(
+                    "Kilometres per week cannot be negative"
+            );
+        }
+
+        Vehicle oldVehicle = null;
+
+        for (Vehicle vehicle : vehicleDao.findByHousehold(household.getId())) {
+            if (vehicle.getId() == vehicleId) {
+                oldVehicle = vehicle;
+                break;
+            }
+        }
+
+        Vehicle updatedVehicle = vehicleDao.update(
+                vehicleId,
+                label,
+                fuelType,
+                kmPerWeek
+        );
+
+        if (oldVehicle != null) {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor)
+                            + " changed vehicle "
+                            + oldVehicle.getLabel()
+                            + " (" + oldVehicle.getFuelType()
+                            + ", " + oldVehicle.getKmPerWeek()
+                            + " km/week) to "
+                            + label
+                            + " (" + fuelType
+                            + ", " + kmPerWeek
+                            + " km/week)"
+            );
+        } else {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " updated vehicle " + label
+            );
+        }
+
+        scoreService.recalculate(household.getId());
+
+        return updatedVehicle;
     }
 
     public List<Vehicle> findVehiclesForHousehold(Household household) {

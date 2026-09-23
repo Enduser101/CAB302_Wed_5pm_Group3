@@ -33,7 +33,50 @@ public class WaterService {
         scoreService.recalculate(household.getId());
         return entry;
     }
+    /** US-19: update an existing water entry. */
+    public WaterEntry updateEntry(User actor, Household household, long entryId,
+                                  double litres, String notes) {
+        if (litres < 0) {
+            throw new IllegalArgumentException("Water usage cannot be negative");
+        }
 
+        WaterEntry oldEntry = null;
+
+        for (WaterEntry entry : waterEntryDao.findByHousehold(household.getId())) {
+            if (entry.getId() == entryId) {
+                oldEntry = entry;
+                break;
+            }
+        }
+
+        WaterEntry updatedEntry = waterEntryDao.update(
+                entryId,
+                litres,
+                notes,
+                actor.getId()
+        );
+
+        if (oldEntry != null) {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " changed water usage from "
+                            + oldEntry.getLitres() + " L to "
+                            + litres + " L"
+            );
+        } else {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " updated water usage for "
+                            + updatedEntry.getPeriod()
+            );
+        }
+
+        scoreService.recalculate(household.getId());
+
+        return updatedEntry;
+    }
     public List<WaterEntry> findEntriesForHousehold(Household household) {
         return waterEntryDao.findByHousehold(household.getId());
     }
