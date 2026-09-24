@@ -58,6 +58,17 @@ public final class SessionContext {
     // US 04 only registered users join a household.
     public boolean canJoinHousehold() { return isLoggedIn(); }
 
+    // US-03 / bug #85 guests may use every page except household
+    public boolean canAccessPage(Page page) {
+        if (page == Page.HOUSEHOLD) return isLoggedIn();
+        return true;
+    }
+
+    // US-03  #85 check whether a save press has entries and has an active household.
+    public boolean canRecordEntries() {
+        return isLoggedIn() && hasActiveHousehold();
+    }
+
     public boolean isLoggedIn() {
         return currentUser != null;
     }
