@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ScrollPane?>
 
-<?import javafx.scene.control.ListView?>
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.ecotwin.controller.HouseholdController"
@@ -62,20 +61,38 @@
 
             <VBox fx:id="summarySection" spacing="12" visible="false" managed="false">
                 <Label text="Household" styleClass="page-title" />
-                <Label fx:id="summaryNameLabel" styleClass="page-title" />
-                <Label fx:id="summaryRoleLabel" styleClass="muted-text" />
-                <Label fx:id="summaryJoinCodeLabel" styleClass="badge" />
 
-
+                <HBox maxWidth="Infinity" alignment="CENTER_LEFT">
+                    <Label fx:id="summaryNameLabel" styleClass="page-title" />
+                    <HBox HBox.hgrow="ALWAYS" />
+                    <Label fx:id="summaryJoinCodeLabel"
+                           styleClass="btn-primary"
+                           style="-fx-padding: 10 16 10 16;" />
+                </HBox>
 
                 <!-- US-11: view current household members -->
-                <Label text="Members" style="-fx-font-size: 26px; -fx-font-weight: bold;" />
-                <VBox fx:id="membersListView" spacing="0" />
+                <VBox styleClass="card" spacing="6">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16" />
+                    </padding>
+
+                    <Label text="Members"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
+
+                    <VBox fx:id="membersListView" spacing="6" />
+                </VBox>
+
+
+                <!-- US-32: remove a household member -->
+                <Label fx:id="removeMemberErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
 
                 <!-- US-10: leave a household -->
                 <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
                 <Button fx:id="leaveButton" text="Leave Household" styleClass="btn-danger"
                         onAction="#handleLeaveHousehold" />
+
+                <!-- US-32: household administrator actions -->
+                <HBox fx:id="householdAdminButtons" spacing="10" />
 
             </VBox>
         </VBox>

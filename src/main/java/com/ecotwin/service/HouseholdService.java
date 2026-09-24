@@ -100,4 +100,29 @@ public class HouseholdService {
 
         return users;
     }
+
+    // US-32: administrator removes a member from the household
+    public void removeMember(User admin, Household household, User member) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can remove members");
+        }
+
+        HouseholdMembership memberMembership =
+                findActiveMembership(member, household).orElseThrow();
+
+        if (memberMembership.getRole() == HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("The household administrator cannot be removed");
+        }
+
+        membershipDao.leaveHousehold(memberMembership.getId());
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                member.getDisplayName() + " was removed from the household"
+        );
+    }
 }

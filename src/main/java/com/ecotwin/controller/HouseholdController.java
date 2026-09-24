@@ -6,6 +6,7 @@ import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
@@ -39,6 +40,14 @@ public class HouseholdController {
 
     // US-11: view current household members
     @FXML private VBox membersListView;
+
+    // US-32: error message when removing a member
+    @FXML
+    private Label removeMemberErrorLabel;
+
+    // US-32: household administrator actions
+    @FXML
+    private HBox householdAdminButtons;
 
     public HouseholdController(Navigator nav, AppContext ctx) {
         this.nav = nav;
@@ -114,6 +123,12 @@ public class HouseholdController {
                 User member = members.get(i);
 
                 javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(16);
+
+                // US-32: keep all member rows the same height
+                row.setMinHeight(45);
+                row.setPrefHeight(45);
+                row.setMaxHeight(45);
+
                 row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                 row.setStyle(
                         "-fx-background-color: transparent;" +
@@ -146,7 +161,44 @@ public class HouseholdController {
                     row.getChildren().add(youLabel);
                 }
 
+                // US-32: show remove button for the administrator
+                if (admin && i != 0) {
+                    javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+                    javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                    row.getChildren().add(spacer);
+
+                    javafx.scene.control.Button removeButton =
+                            new javafx.scene.control.Button("Remove");
+                    removeButton.getStyleClass().add("btn-danger");
+                    removeButton.setOnAction(event -> handleRemoveMember(member));
+                    row.getChildren().add(removeButton);
+                }
+
                 membersListView.getChildren().add(row);
+            }
+
+            // US-32: household administrator actions
+            householdAdminButtons.getChildren().clear();
+
+            if (admin) {
+                Button activityButton = new Button("Activity History");
+                activityButton.getStyleClass().add("edit-button");
+
+                Button renameButton = new Button("Rename Household");
+                renameButton.getStyleClass().add("edit-button");
+
+                Button transferButton = new Button("Transfer Admin");
+                transferButton.getStyleClass().add("edit-button");
+
+                Button joinCodeButton = new Button("Generate New Join Code");
+                joinCodeButton.getStyleClass().add("edit-button");
+
+                householdAdminButtons.getChildren().addAll(
+                        activityButton,
+                        renameButton,
+                        transferButton,
+                        joinCodeButton
+                );
             }
         }
     }
@@ -175,6 +227,21 @@ public class HouseholdController {
             refresh();
         } catch (IllegalArgumentException e) {
             showError(leaveErrorLabel, e.getMessage());
+        }
+    }
+
+    // US-32: remove a household member
+    private void handleRemoveMember(User member) {
+        try {
+            User admin = ctx.session.getCurrentUser();
+            Household household = ctx.session.getCurrentHousehold();
+
+            ctx.householdService.removeMember(admin, household, member);
+
+            hideError(removeMemberErrorLabel);
+            refresh();
+        } catch (IllegalArgumentException e) {
+            showError(removeMemberErrorLabel, e.getMessage());
         }
     }
 }
