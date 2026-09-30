@@ -1,0 +1,209 @@
+## 16/08
+
+* Created the initial GitHub repository for the project and established the shared codebase for the team.
+* Set up GitHub Projects to provide a central location for planning, task tracking, and future sprint management.
+* Created the initial Figma project to support UI/UX design work, wireframing, and collaboration on the application's visual direction.
+* Helped establish the initial project structure and collaboration tools that would be used throughout development.
+* Began organising the project around a shared workflow so that design, development, and project-management activities could be tracked consistently.
+
+## 23/08
+
+* Developed the project's initial set of user stories based on the agreed application requirements and expected user workflows.
+* Structured user stories into logical functional areas to help identify relationships between features.
+* Added the user stories into GitHub so they could be referenced directly during planning and implementation.
+* Worked on assigning priorities to user stories to distinguish essential functionality from lower-priority or optional features.
+* Organised related user stories into epics to improve traceability between high-level project goals and individual development tasks.
+* Helped prepare the project backlog for future sprint planning by establishing an initial feature hierarchy and priority structure.
+
+## 30/08
+
+* Expanded the project backlog by creating approximately 38 implementation and design tasks in GitHub Projects.
+* Organised tasks into functional groups so work could be more easily divided between team members and tracked throughout development.
+* Helped translate higher-level user stories and epics into smaller actionable development tasks.
+* Created a team poll to select preferred application colour palette options.
+* Created a second poll to gather team feedback on stylesheet and overall UI direction.
+* Suggested a common structure for early interface sketches so that different team members could contribute designs in a consistent format.
+* Continued refining the GitHub Projects board to improve visibility of upcoming work and project progress.
+
+## 02/09
+
+* Began formal sprint planning, reviewing which features, design elements, and structural tasks should be prioritised for the upcoming development period.
+* Reviewed dependencies between planned features to help determine an appropriate implementation order.
+* Helped transition the UI design process from early sketches and wireframes towards high-fidelity designs.
+* Continued aligning the design work with the agreed user stories and functional requirements.
+* Assisted with establishing clearer expectations around what should be completed during the sprint and how work would be represented within GitHub Projects.
+
+## 06/09
+
+* Shared the current Entity Relationship and UML design work through the project discussion area for team review.
+* Added an initial database schema draft to the discussion area to support review of the application's persistence model.
+* Kept the schema in draft status pending confirmation of the project's final object-oriented design and relationships between application entities.
+* Reviewed how the proposed database structure mapped to the existing user stories and expected application functionality.
+* Used the ER diagram, UML design, and schema draft together to begin aligning the application's object model with its database model.
+
+## 09/09
+
+* Restructured the Git repository to provide clearer separation between source code, documentation, and design artefacts.
+* Added a dedicated design directory containing subdirectories for evidence and documentation associated with project tasks:
+
+  * ER diagrams
+  * Database schema
+  * Stylesheets
+  * UML diagrams
+  * Wireframes
+* Added additional GitHub Project views to make it easier to track work from different perspectives.
+* Updated the `main` branch to include the revised documentation and project structure.
+* Renamed/reworked the previous documentation branch into `dev` to establish a clearer development workflow.
+* Communicated the branch changes to the team and established `dev` as the primary integration branch for ongoing development.
+* Helped establish a more conventional Git workflow where feature work could be developed independently before being reviewed and merged into `dev`.
+
+## 13/09
+
+### Sprint and Project Management
+
+* Added milestones to the sprint to improve visibility of expected delivery points and project progress.
+
+### Database and Architecture
+
+* Reconciled the database design into a complete 10-table schema stored in `schema.sql`.
+* Implemented automatic schema creation through a Singleton `DatabaseConnection`.
+* Added `SCHEMA.md` to document the database structure and provide supporting context for the ER/database design.
+* Continued aligning the persistence layer with the application's object-oriented design.
+
+### Authentication — US-01 / US-02
+
+* Implemented `AuthService` functionality for user registration and login.
+* Added BCrypt password hashing so passwords are not stored in plaintext.
+* Implemented a generic `"invalid username or password"` authentication error to avoid exposing which credential was incorrect.
+
+### Household Management — US-08 / US-09
+
+* Implemented `HouseholdService` functionality for creating and joining households.
+* Household creation automatically assigns the creator as an administrator.
+* Added generation of unique household join codes.
+* Added household joining through join codes, including validation and rejection of invalid codes.
+* Added activity-log entries for household creation and household joins.
+
+### Logout — US-07
+
+* Implemented a working Sign Out function through the Account tab.
+* Logout clears the active user session and returns the application to the Login screen.
+
+### DAO Layer
+
+* Created DAO abstractions and SQLite implementations for:
+
+  * Users
+  * Households
+  * Household memberships
+  * Activity logs
+* Used the DAO layer to separate persistence logic from application/service logic.
+
+### User Interface
+
+* Restyled the Login and Register screens to match the team's approved visual direction, including the dark-card design and removal of the application sidebar from authentication views.
+* Created the initial application shell and sidebar navigation based on the approved high-fidelity design.
+* Added navigation entries for Dashboard, Resources, Recommendations, Scenarios, Household, and Account.
+* Left unfinished modules as inert placeholders so their owners could integrate them later without disrupting the application structure.
+* Implemented the functional Household tab.
+* Added Create Household and Join Household forms.
+* Added a household summary view that replaces the create/join controls once the user belongs to a household.
+
+### Testing
+
+* Created 15 JUnit 5 and Mockito tests across:
+
+  * `AuthServiceTest`
+  * `HouseholdServiceTest`
+  * `DatabaseConnectionTest`
+* Confirmed all 15 tests were passing.
+
+### Build and Dependencies
+
+* Added required Maven dependencies including:
+
+  * `sqlite-jdbc`
+  * `jbcrypt`
+  * `mockito-core`
+  * `slf4j-api`
+* Updated `module-info.java` to correctly support the required dependencies under JPMS.
+* Updated `.gitignore` so runtime SQLite database files are not committed to source control.
+
+### Git and Review
+
+* Committed and pushed the implementation to `origin/feature/login-setup`.
+* Commit: `74a50ab`.
+* Reviewed PR #81 and merged the completed work into `dev`.
+* Planned a GitHub Actions workflow using `.github/workflows/build.yml` to automatically execute the project's test suite on future pushes and pull requests.
+
+## 19/09
+
+### US-15–US-18 — Household Resource Tracking / Epic 5
+
+* Implemented the complete application stack for the four household resource-tracking user stories.
+* Added domain models for:
+
+  * `EnergyEntry`
+  * `WaterEntry`
+  * `WasteEntry`
+  * `Vehicle`
+  * `TransportEntry`
+* Added DAO interfaces and corresponding SQLite implementations for the new resource-tracking functionality.
+* Implemented four new service classes:
+
+  * `EnergyService`
+  * `WaterService`
+  * `WasteService`
+  * `TransportService`
+* Kept the new implementation consistent with the existing `HouseholdService` architecture and separation of concerns.
+
+### Score Integration
+
+* Added a `ScoreService` abstraction and `PlaceholderScoreService` implementation.
+* This provides an integration point for each user story's score-recalculation acceptance criteria without introducing a dependency on the unfinished Epic 6 scoring implementation.
+* This allows Epic 5 functionality to remain testable and complete while supporting later replacement with the full scoring system.
+
+### Resource Tracking UI
+
+* Replaced the previous **Resources — Coming Soon** placeholder with a working resource-management interface.
+* Implemented `ResourcesController` and `resources-view.fxml`.
+* Added tabbed interfaces covering energy, water, waste, and transport tracking.
+* Styled the new screens to remain consistent with the existing dark application theme and approved UI direction.
+
+### Testing and Verification
+
+* Added 20 new JUnit 5 and Mockito tests covering the resource-tracking functionality.
+* Increased the total automated test suite to 35 tests.
+* Confirmed all 35 tests passed.
+* Performed live application testing in addition to mocked/unit testing.
+* Recorded real:
+
+  * Energy entries
+  * Water entries
+  * Waste entries
+  * Vehicles
+  * Transport information
+* Confirmed each record persisted correctly in SQLite.
+* Confirmed the appropriate actions were also recorded in `activity_log`.
+
+### Continuous Integration / GitHub Actions
+
+* Reviewed and extended the existing `.github/workflows/build.yml` GitHub Actions workflow.
+* Maintained automated execution of `mvn test` using JDK 21.
+* Configured the workflow to run on pushes and pull requests targeting:
+
+  * `main`
+  * `dev`
+  * `feature/**`
+* Added `dorny/test-reporter` so JUnit test results are published directly as pull-request annotations.
+* Added branch protection rules to both `main` and `dev`.
+* Configured the repositories so the build check must pass before changes can be merged.
+* Applied the branch protection requirements to all contributors, including administrators.
+
+### Git Workflow
+
+* Created `feature/us-15-18-resource-tracking` from the current `dev` branch.
+* Separated resource-tracking implementation and CI changes into distinct commits to maintain clearer version-control history.
+* Pushed the feature branch and opened PR #82 targeting `dev`.
+* Identified that the pull request had initially been created against `main`.
+* Corrected the base branch to `dev`, resulting in the pull request showing only the intended feature-related changes.
