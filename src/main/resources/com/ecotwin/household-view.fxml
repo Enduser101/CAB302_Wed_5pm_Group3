@@ -82,12 +82,28 @@
                     <VBox fx:id="membersListView" spacing="6" />
                 </VBox>
 
+                <!-- US-33: rename household error -->
+                <Label fx:id="renameHouseholdErrorLabel"
+                       styleClass="error-text"
+                       wrapText="true"
+                       visible="false"
+                       managed="false" />
+
 
                 <!-- US-32: remove a household member -->
-                <Label fx:id="removeMemberErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+                <Label fx:id="removeMemberErrorLabel"
+                       styleClass="error-text"
+                       wrapText="true"
+                       visible="false"
+                       managed="false" />
 
                 <!-- US-10: leave a household -->
-                <Label fx:id="leaveErrorLabel" styleClass="error-text" wrapText="true" visible="false" managed="false" />
+                <Label fx:id="leaveErrorLabel"
+                       styleClass="error-text"
+                       wrapText="true"
+                       visible="false"
+                       managed="false" />
+
                 <Button fx:id="leaveButton" text="Leave Household" styleClass="btn-danger"
                         onAction="#handleLeaveHousehold" />
 

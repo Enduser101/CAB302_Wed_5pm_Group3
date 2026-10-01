@@ -125,4 +125,29 @@ public class HouseholdService {
                 member.getDisplayName() + " was removed from the household"
         );
     }
+
+    // US-33: administrator renames the household
+    public void renameHousehold(User admin, Household household, String newName) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can rename the household");
+        }
+
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Household name is required");
+        }
+
+        String oldName = household.getName();
+        String trimmedName = newName.trim();
+
+        householdDao.renameHousehold(household.getId(), trimmedName);
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                "Household renamed from " + oldName + " to " + trimmedName
+        );
+    }
 }

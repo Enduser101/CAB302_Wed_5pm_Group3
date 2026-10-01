@@ -9,4 +9,7 @@ public interface HouseholdDao {
     Household create(String name, int occupants, String dwellingType, String state, String joinCode);
     Optional<Household> findById(long id);
     Optional<Household> findByJoinCode(String joinCode); // US-09: join by code, invalid code -> empty
+
+    // US-33: rename a household
+    void renameHousehold(long householdId, String newName);
 }

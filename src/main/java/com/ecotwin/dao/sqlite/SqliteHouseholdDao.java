@@ -67,6 +67,19 @@ public class SqliteHouseholdDao implements HouseholdDao {
         }
     }
 
+    // US-33: rename a household
+    @Override
+    public void renameHousehold(long householdId, String newName) {
+        String sql = "UPDATE households SET name = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, newName);
+            statement.setLong(2, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not rename household", e);
+        }
+    }
+
     private Household map(ResultSet rs) throws SQLException {
         return new Household(
             rs.getLong("id"),

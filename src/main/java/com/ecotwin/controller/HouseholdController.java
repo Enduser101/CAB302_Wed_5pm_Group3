@@ -49,6 +49,10 @@ public class HouseholdController {
     @FXML
     private HBox householdAdminButtons;
 
+    // US-33: error message when renaming a household
+    @FXML
+    private Label renameHouseholdErrorLabel;
+
     public HouseholdController(Navigator nav, AppContext ctx) {
         this.nav = nav;
         this.ctx = ctx;
@@ -184,8 +188,10 @@ public class HouseholdController {
                 Button activityButton = new Button("Activity History");
                 activityButton.getStyleClass().add("edit-button");
 
+                // US-33: rename a household
                 Button renameButton = new Button("Rename Household");
                 renameButton.getStyleClass().add("edit-button");
+                renameButton.setOnAction(event -> handleRenameHousehold());
 
                 Button transferButton = new Button("Transfer Admin");
                 transferButton.getStyleClass().add("edit-button");
@@ -243,5 +249,39 @@ public class HouseholdController {
         } catch (IllegalArgumentException e) {
             showError(removeMemberErrorLabel, e.getMessage());
         }
+    }
+
+    // US-33: rename a household
+    private void handleRenameHousehold() {
+        TextInputDialog dialog = new TextInputDialog(
+                ctx.session.getCurrentHousehold().getName()
+        );
+
+        dialog.setTitle("Rename Household");
+        dialog.setHeaderText("Rename your household");
+        dialog.setContentText("New household name:");
+
+        dialog.showAndWait().ifPresent(newName -> {
+            try {
+                User admin = ctx.session.getCurrentUser();
+                Household household = ctx.session.getCurrentHousehold();
+
+                ctx.householdService.renameHousehold(admin, household, newName);
+
+                hideError(renameHouseholdErrorLabel);
+
+                ctx.householdService.findActiveHouseholdForUser(admin)
+                        .ifPresent(updatedHousehold ->
+                                ctx.session.enterHousehold(
+                                        updatedHousehold,
+                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()
+                                )
+                        );
+
+                refresh();
+            } catch (IllegalArgumentException e) {
+                showError(renameHouseholdErrorLabel, e.getMessage());
+            }
+        });
     }
 }
