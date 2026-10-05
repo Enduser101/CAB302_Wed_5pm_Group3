@@ -151,6 +151,27 @@ public class HouseholdService {
         );
     }
 
+    // US-33: change the household join code
+    public void changeJoinCode(User admin, Household household) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can change the join code");
+        }
+
+        String newJoinCode = generateUniqueJoinCode();
+
+        householdDao.updateJoinCode(household.getId(), newJoinCode);
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                "Household join code changed from " + household.getJoinCode()
+                        + " to " + newJoinCode
+        );
+    }
+
     // US-35: transfer administrator rights to another active member
     public void transferAdmin(User admin, Household household, User newAdmin) {
         HouseholdMembership adminMembership =

@@ -198,8 +198,10 @@ public class HouseholdController {
                 transferButton.getStyleClass().add("edit-button");
                 transferButton.setOnAction(event -> handleTransferAdmin());
 
+                // US-33: change the household join code
                 Button joinCodeButton = new Button("Generate New Join Code");
                 joinCodeButton.getStyleClass().add("edit-button");
+                joinCodeButton.setOnAction(event -> handleChangeJoinCode());
 
                 householdAdminButtons.getChildren().addAll(
                         activityButton,
@@ -340,6 +342,44 @@ public class HouseholdController {
                 refresh();
             } catch (IllegalArgumentException e) {
                 showError(renameHouseholdErrorLabel, e.getMessage());
+            }
+        });
+    }
+
+    // US-33: change the household join code
+    private void handleChangeJoinCode() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+
+        confirmation.setTitle("Generate New Join Code");
+        confirmation.setHeaderText("Generate a new household join code?");
+        confirmation.setContentText(
+                "The old join code will no longer work."
+        );
+
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    User admin = ctx.session.getCurrentUser();
+                    Household household = ctx.session.getCurrentHousehold();
+
+                    ctx.householdService.changeJoinCode(admin, household);
+
+                    // Refresh the household so the new join code is displayed
+                    ctx.householdService.findActiveHouseholdForUser(admin)
+                            .ifPresent(updatedHousehold ->
+                                    ctx.session.enterHousehold(
+                                            updatedHousehold,
+                                            ctx.householdService.findActiveMembership(
+                                                    admin,
+                                                    updatedHousehold
+                                            ).orElseThrow()
+                                    )
+                            );
+
+                    refresh();
+                } catch (IllegalArgumentException e) {
+                    showError(renameHouseholdErrorLabel, e.getMessage());
+                }
             }
         });
     }

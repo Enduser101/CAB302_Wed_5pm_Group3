@@ -12,4 +12,7 @@ public interface HouseholdDao {
 
     // US-33: rename a household
     void renameHousehold(long householdId, String newName);
+    
+    // US-33: change the household join code
+    void updateJoinCode(long householdId, String newJoinCode);
 }

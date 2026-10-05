@@ -80,6 +80,20 @@ public class SqliteHouseholdDao implements HouseholdDao {
         }
     }
 
+    // US-33: change the household join code
+    @Override
+    public void updateJoinCode(long householdId, String newJoinCode) {
+        String sql = "UPDATE households SET join_code = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, newJoinCode);
+            statement.setLong(2, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update household join code", e);
+        }
+    }
+
     private Household map(ResultSet rs) throws SQLException {
         return new Household(
             rs.getLong("id"),
