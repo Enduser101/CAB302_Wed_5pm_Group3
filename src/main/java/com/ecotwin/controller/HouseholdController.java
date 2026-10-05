@@ -193,8 +193,10 @@ public class HouseholdController {
                 renameButton.getStyleClass().add("edit-button");
                 renameButton.setOnAction(event -> handleRenameHousehold());
 
+                // US-35: transfer administrator rights
                 Button transferButton = new Button("Transfer Admin");
                 transferButton.getStyleClass().add("edit-button");
+                transferButton.setOnAction(event -> handleTransferAdmin());
 
                 Button joinCodeButton = new Button("Generate New Join Code");
                 joinCodeButton.getStyleClass().add("edit-button");
@@ -270,6 +272,63 @@ public class HouseholdController {
 
                 hideError(renameHouseholdErrorLabel);
 
+                ctx.householdService.findActiveHouseholdForUser(admin)
+                        .ifPresent(updatedHousehold ->
+                                ctx.session.enterHousehold(
+                                        updatedHousehold,
+                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()
+                                )
+                        );
+
+                refresh();
+            } catch (IllegalArgumentException e) {
+                showError(renameHouseholdErrorLabel, e.getMessage());
+            }
+        });
+    }
+
+    // US-35: transfer administrator rights
+    private void handleTransferAdmin() {
+        User admin = ctx.session.getCurrentUser();
+        Household household = ctx.session.getCurrentHousehold();
+
+        java.util.List<User> members = ctx.householdService.findActiveMembers(household)
+                .stream()
+                .filter(member -> member.getId() != admin.getId())
+                .toList();
+
+        if (members.isEmpty()) {
+            showError(renameHouseholdErrorLabel, "There are no other active members to transfer administrator rights to");
+            return;
+        }
+
+        java.util.List<String> memberNames = members.stream()
+                .map(member -> member.getDisplayName() != null
+                        ? member.getDisplayName()
+                        : member.getUsername())
+                .toList();
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(memberNames.get(0), memberNames);
+
+        dialog.setTitle("Transfer Admin");
+        dialog.setHeaderText("Transfer administrator rights");
+        dialog.setContentText("Choose a member:");
+
+        dialog.showAndWait().ifPresent(selectedName -> {
+            User newAdmin = members.stream()
+                    .filter(member -> {
+                        String name = member.getDisplayName() != null
+                                ? member.getDisplayName()
+                                : member.getUsername();
+                        return name.equals(selectedName);
+                    })
+                    .findFirst()
+                    .orElseThrow();
+
+            try {
+                ctx.householdService.transferAdmin(admin, household, newAdmin);
+
+                // Refresh the household membership so the current user is now a member
                 ctx.householdService.findActiveHouseholdForUser(admin)
                         .ifPresent(updatedHousehold ->
                                 ctx.session.enterHousehold(

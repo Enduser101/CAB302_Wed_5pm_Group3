@@ -150,4 +150,34 @@ public class HouseholdService {
                 "Household renamed from " + oldName + " to " + trimmedName
         );
     }
+
+    // US-35: transfer administrator rights to another active member
+    public void transferAdmin(User admin, Household household, User newAdmin) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can transfer administrator rights");
+        }
+
+        HouseholdMembership newAdminMembership =
+                findActiveMembership(newAdmin, household).orElseThrow();
+
+        if (newAdminMembership.getRole() != HouseholdMembership.Role.MEMBER) {
+            throw new IllegalArgumentException("Administrator rights can only be transferred to an active member");
+        }
+
+        membershipDao.transferAdmin(
+                household.getId(),
+                admin.getId(),
+                newAdmin.getId()
+        );
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                admin.getDisplayName() + " transferred administrator rights to "
+                        + newAdmin.getDisplayName()
+        );
+    }
 }
