@@ -275,9 +275,9 @@ As an household administrator I want to remove a member from a household such th
 
 ## **User story 33:**
 
-As a household admin I want to rename a household so that it's id can be meaningful.
+As a household admin I want to manage my household's name and join code so that the household's identifying information can be more meaningful.
 
-**Acceptance Criteria:** This will be done when new name can be recorded to history
+**Acceptance Criteria:** Admin can change the household name and join code. The changes replace the old name/code and is recorded in the activity history.
 
 **Time estimate:** 1 hour
 
@@ -285,7 +285,7 @@ As a household admin I want to rename a household so that it's id can be meaning
 
 As a household admin I want to correct data that has been entered by any user on the house hold. So incorrect information does not persist
 
-**Acceptance Criteria:** -
+**Acceptance Criteria:** Admin can edit any member entered data. The original and updated data are recording in the activity history.
 
 **Time estimate:** 1 hour
 
