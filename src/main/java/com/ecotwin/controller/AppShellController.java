@@ -55,7 +55,10 @@ public class AppShellController {
 
     @FXML
     private void showScenarios() {
-        showPlaceholder(scenariosNav, "Scenarios");
+        setActive(scenariosNav);
+        contentArea.getChildren().setAll(
+                nav.load("/com/ecotwin/scenarios-view.fxml")
+        );
     }
 
     @FXML
