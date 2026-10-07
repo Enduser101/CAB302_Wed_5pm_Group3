@@ -18,6 +18,16 @@
     <Label text="Account" styleClass="page-title" />
     <Label fx:id="usernameLabel" styleClass="muted-text" />
 
+    <!-- US-03 / #85: guests acct details page -->
+    <VBox fx:id="guestSection" spacing="10" maxWidth="740" visible="false" managed="false">
+        <Label text="You're browsing as a guest" styleClass="section-title" />
+        <Label text="Sign in or create an account to join a household and save your readings."
+               styleClass="muted-text" wrapText="true" />
+        <Button text="Sign in" styleClass="btn-primary" onAction="#guestHandleSignIn" />
+        <Button text="Create account" styleClass="btn-primary" onAction="#guestHandleCreateAccount" />
+    </VBox>
+
+    <VBox fx:id="memberSection" spacing="20">
     <VBox spacing="10" maxWidth="740">
         <Label text="Account details" styleClass="section-title" />
 
@@ -43,6 +53,7 @@
                    GridPane.rowIndex="2" GridPane.columnIndex="1" />
         </GridPane>
     </VBox>
+
 
     <VBox spacing="10" maxWidth="740">
         <Label text="Change password" styleClass="section-title" />
@@ -70,5 +81,5 @@
     </VBox>
 
     <Button fx:id="signOutButton" text="Sign out" styleClass="btn-danger" onAction="#handleSignOut" />
-
+    </VBox>
 </VBox>
