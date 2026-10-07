@@ -54,6 +54,49 @@ public class SqliteEnergyEntryDao implements EnergyEntryDao {
             throw new IllegalStateException("Could not record energy entry for household " + householdId, e);
         }
     }
+    @Override
+    public EnergyEntry update(long entryId, double electricityKwh, Double solarGenerationKwh,
+                              String notes, long updatedByUserId) {
+        String updatedAt = Instant.now().toString();
+
+        String sql = "UPDATE energy_entries SET electricity_kwh = ?, solar_generation_kwh = ?, "
+                + "notes = ?, updated_by_user_id = ?, updated_at = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDouble(1, electricityKwh);
+
+            if (solarGenerationKwh == null) {
+                statement.setNull(2, Types.REAL);
+            } else {
+                statement.setDouble(2, solarGenerationKwh);
+            }
+
+            statement.setString(3, notes);
+            statement.setLong(4, updatedByUserId);
+            statement.setString(5, updatedAt);
+            statement.setLong(6, entryId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update energy entry " + entryId, e);
+        }
+
+        String findSql = "SELECT * FROM energy_entries WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(findSql)) {
+            statement.setLong(1, entryId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not find energy entry " + entryId, e);
+        }
+
+        throw new IllegalArgumentException("Energy entry not found");
+    }
 
     @Override
     public List<EnergyEntry> findByHousehold(long householdId) {
@@ -68,8 +111,9 @@ public class SqliteEnergyEntryDao implements EnergyEntryDao {
                 return entries;
             }
         } catch (SQLException e) {
-            throw new IllegalStateException("Could not look up energy entries for household " + householdId, e);
+            throw new IllegalArgumentException("Energy entry not found");
         }
+
     }
 
     private EnergyEntry map(ResultSet rs) throws SQLException {

@@ -33,6 +33,56 @@ public class WasteService {
         scoreService.recalculate(household.getId());
         return entry;
     }
+    /** US-19: update an existing waste entry. */
+    public WasteEntry updateEntry(User actor, Household household, long entryId,
+                                  double generalKg, double recycledKg, double compostKg) {
+
+        if (generalKg < 0 || recycledKg < 0 || compostKg < 0) {
+            throw new IllegalArgumentException("Waste amounts cannot be negative");
+        }
+
+        WasteEntry oldEntry = null;
+
+        for (WasteEntry entry : wasteEntryDao.findByHousehold(household.getId())) {
+            if (entry.getId() == entryId) {
+                oldEntry = entry;
+                break;
+            }
+        }
+
+        WasteEntry updatedEntry = wasteEntryDao.update(
+                entryId,
+                generalKg,
+                recycledKg,
+                compostKg,
+                actor.getId()
+        );
+
+        if (oldEntry != null) {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " changed waste from general "
+                            + oldEntry.getGeneralKg() + "kg, recycled "
+                            + oldEntry.getRecycledKg() + "kg, compost "
+                            + oldEntry.getCompostKg() + "kg to general "
+                            + generalKg + "kg, recycled "
+                            + recycledKg + "kg, compost "
+                            + compostKg + "kg"
+            );
+        } else {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " updated waste for "
+                            + updatedEntry.getPeriod()
+            );
+        }
+
+        scoreService.recalculate(household.getId());
+
+        return updatedEntry;
+    }
 
     public List<WasteEntry> findEntriesForHousehold(Household household) {
         return wasteEntryDao.findByHousehold(household.getId());
