@@ -35,6 +35,20 @@ public class SustainabilityScenario {
         this.flightsPerYear = flightsPerYear;
     }
 
+    /** An independent copy: changing it leaves this scenario's values as they are. */
+    public SustainabilityScenario copy() {
+        return new SustainabilityScenario(
+                energyKwh,
+                solarGenerationKwh,
+                waterLitres,
+                generalWasteKg,
+                recycledWasteKg,
+                compostKg,
+                publicTransportTripsPerWeek,
+                flightsPerYear
+        );
+    }
+
     public double getEnergyKwh() {
         return energyKwh;
     }
