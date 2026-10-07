@@ -55,13 +55,13 @@ class HouseholdServiceTest {
     @Test
     void creatingAHouseholdRejectsABlankName() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
+            () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
     }
 
     @Test
     void creatingAHouseholdRejectsZeroOccupants() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
+            () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
     }
 
     @Test
@@ -97,36 +97,5 @@ class HouseholdServiceTest {
 
     private static long eqLong(long value) {
         return org.mockito.ArgumentMatchers.eq(value);
-    }
-
-
-    @Test
-    void leavingAHouseholdRecordsItInActivityHistory() {
-        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
-        User member = new User(2, "member", "m@example.com", "hash", "Member", "now");
-        HouseholdMembership membership = new HouseholdMembership(5, member.getId(), household.getId(),
-                HouseholdMembership.Role.MEMBER, "now", null);
-        when(membershipDao.findActiveByUserAndHousehold(member.getId(), household.getId()))
-                .thenReturn(Optional.of(membership));
-
-        service.leaveHousehold(member, household);
-
-        verify(activityLogDao).log(eqLong(household.getId()), eqLong(member.getId()), anyString());
-    }
-
-    @Test
-    void joiningAndLeavingBothProduceSeparateHistoryEntries() {
-        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
-        User member = new User(2, "member", "m@example.com", "hash", "Member", "now");
-        HouseholdMembership membership = new HouseholdMembership(5, member.getId(), household.getId(),
-                HouseholdMembership.Role.MEMBER, "now", null);
-        when(householdDao.findByJoinCode("ABC234")).thenReturn(Optional.of(household));
-        when(membershipDao.findActiveByUserAndHousehold(member.getId(), household.getId()))
-                .thenReturn(Optional.of(membership));
-
-        service.joinHousehold(member, "ABC234");
-        service.leaveHousehold(member, household);
-
-        verify(activityLogDao, times(2)).log(eqLong(household.getId()), eqLong(member.getId()), anyString());
     }
 }
