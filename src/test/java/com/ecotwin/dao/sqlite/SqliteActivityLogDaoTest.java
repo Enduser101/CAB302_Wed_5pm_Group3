@@ -1,9 +1,5 @@
 package com.ecotwin.dao.sqlite;
 
-public class SqliteActivityLogDaoTest {
-}
-package com.ecotwin.dao.sqlite;
-
 import com.ecotwin.model.ActivityLogEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
