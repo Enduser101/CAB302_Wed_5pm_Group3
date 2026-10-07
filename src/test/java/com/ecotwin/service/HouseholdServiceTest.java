@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.contains;
 
 class HouseholdServiceTest {
 
@@ -50,6 +51,18 @@ class HouseholdServiceTest {
         service.createHousehold(creator, "Test House", 2, "House", "QLD");
 
         verify(activityLogDao, times(1)).log(eqLong(household.getId()), eqLong(creator.getId()), anyString());
+    }
+
+    @Test
+    void leavingAHouseholdRecordsItInActivityHistory() {
+        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
+        User joiner = new User(2, "joiner", "j@example.com", "hash", "Joiner", "now");
+        HouseholdMembership membership = new HouseholdMembership(1, joiner.getId(), household.getId(), HouseholdMembership.Role.MEMBER, "now", null);
+        when(membershipDao.findActiveByUserAndHousehold(joiner.getId(), household.getId()))
+                .thenReturn(Optional.of(membership));
+
+        service.leaveHousehold(joiner, household);
+        verify(activityLogDao, times(1)).log(eqLong(household.getId()), eqLong(joiner.getId()), contains("left"));
     }
 
     @Test
