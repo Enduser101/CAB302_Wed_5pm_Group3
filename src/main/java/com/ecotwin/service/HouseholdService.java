@@ -85,9 +85,11 @@ public class HouseholdService {
     }
 
     // US-10: leave a household
+    // US-13: departures are recorded in the household activity history
     public void leaveHousehold(User user, Household household) {
         HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
         membershipDao.leaveHousehold(membership.getId());
+        activityLogDao.log(household.getId(), user.getId(), displayName(user) + " left the household");
     }
 
     // US-11: view current household members

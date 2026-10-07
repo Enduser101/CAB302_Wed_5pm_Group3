@@ -54,13 +54,13 @@ class HouseholdServiceTest {
     @Test
     void creatingAHouseholdRejectsABlankName() {
         assertThrows(IllegalArgumentException.class,
-            () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
+                () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
     }
 
     @Test
     void creatingAHouseholdRejectsZeroOccupants() {
         assertThrows(IllegalArgumentException.class,
-            () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
+                () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
     }
 
     @Test
