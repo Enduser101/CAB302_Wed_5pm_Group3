@@ -88,6 +88,7 @@ public class HouseholdService {
     public void leaveHousehold(User user, Household household) {
         HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
         membershipDao.leaveHousehold(membership.getId());
+        activityLogDao.log(household.getId(), user.getId(), displayName(user) + " left the household");
     }
 
     // US-11: view current household members
