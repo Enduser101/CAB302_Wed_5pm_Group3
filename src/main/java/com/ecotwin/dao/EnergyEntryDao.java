@@ -9,6 +9,4 @@ public interface EnergyEntryDao {
     EnergyEntry create(long householdId, String period, double electricityKwh, Double solarGenerationKwh,
                         String notes, Long updatedByUserId);
     List<EnergyEntry> findByHousehold(long householdId);
-
-    EnergyEntry update(long entryId, double electricityKwh, Double solarGenerationKwh, String notes, long updatedByUserId);
 }
