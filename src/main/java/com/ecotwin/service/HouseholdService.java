@@ -85,6 +85,7 @@ public class HouseholdService {
     }
 
     // US-10: leave a household
+    // US-13: departures are recorded in the household activity history
     public void leaveHousehold(User user, Household household) {
         HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
         membershipDao.leaveHousehold(membership.getId());
@@ -100,5 +101,106 @@ public class HouseholdService {
         }
 
         return users;
+    }
+
+    // US-32: administrator removes a member from the household
+    public void removeMember(User admin, Household household, User member) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can remove members");
+        }
+
+        HouseholdMembership memberMembership =
+                findActiveMembership(member, household).orElseThrow();
+
+        if (memberMembership.getRole() == HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("The household administrator cannot be removed");
+        }
+
+        membershipDao.leaveHousehold(memberMembership.getId());
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                member.getDisplayName() + " was removed from the household"
+        );
+    }
+
+    // US-33: administrator renames the household
+    public void renameHousehold(User admin, Household household, String newName) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can rename the household");
+        }
+
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Household name is required");
+        }
+
+        String oldName = household.getName();
+        String trimmedName = newName.trim();
+
+        householdDao.renameHousehold(household.getId(), trimmedName);
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                "Household renamed from " + oldName + " to " + trimmedName
+        );
+    }
+
+    // US-33: change the household join code
+    public void changeJoinCode(User admin, Household household) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can change the join code");
+        }
+
+        String newJoinCode = generateUniqueJoinCode();
+
+        householdDao.updateJoinCode(household.getId(), newJoinCode);
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                "Household join code changed from " + household.getJoinCode()
+                        + " to " + newJoinCode
+        );
+    }
+
+    // US-35: transfer administrator rights to another active member
+    public void transferAdmin(User admin, Household household, User newAdmin) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow();
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException("Only the household administrator can transfer administrator rights");
+        }
+
+        HouseholdMembership newAdminMembership =
+                findActiveMembership(newAdmin, household).orElseThrow();
+
+        if (newAdminMembership.getRole() != HouseholdMembership.Role.MEMBER) {
+            throw new IllegalArgumentException("Administrator rights can only be transferred to an active member");
+        }
+
+        membershipDao.transferAdmin(
+                household.getId(),
+                admin.getId(),
+                newAdmin.getId()
+        );
+
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                admin.getDisplayName() + " transferred administrator rights to "
+                        + newAdmin.getDisplayName()
+        );
     }
 }

@@ -11,6 +11,13 @@ public class SessionContextTest {
 //guest can creat scenrario
 //Guest cannot save scenario
 // registered user can save a scernario
+// Guests can sign into account
+// Guests can create account
+// Guests can't access HH tab
+// Guests can access dashboard
+// Guests can access scenario
+// Guests can access resources
+// user who started as guest and signed in is now classified as signed in user.
 
     @Test
     void guestIsNotRegistered(){
@@ -38,6 +45,43 @@ public class SessionContextTest {
         session.login(new User(1L, "tester", "tester@example.com", "passwordHash", "Tester","2026-09-15"));
         assertTrue(session.canSaveScenario());
     }
+
+    @Test
+    void guestLogout_clearsSession(){
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        session.logout();
+        assertFalse(session.isGuest());
+        assertFalse(session.isLoggedIn());
+    }
+
+    @Test
+    void guestSignsIn_isNoLongerGuest(){
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        session.login(new User(1L, "tester", "tester@example.com", "passwordHash", "Tester","2026-09-15"));
+        assertFalse(session.isGuest());
+        assertTrue(session.isLoggedIn());
+    }
+
+    @Test
+    void guest_canSeeEveryPageExceptHousehold() {
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertTrue(session.canAccessPage(Page.DASHBOARD));
+        assertTrue(session.canAccessPage(Page.RESOURCES));
+        assertTrue(session.canAccessPage(Page.RECOMMENDATIONS));
+        assertTrue(session.canAccessPage(Page.SCENARIOS));
+        assertFalse(session.canAccessPage(Page.HOUSEHOLD));
+    }
+
+    @Test
+    void guest_cannotRecordEntries() {
+        SessionContext session = SessionContext.getInstance();
+        session.startGuestSession();
+        assertFalse(session.canRecordEntries());   // no household to save into
+    }
+
 // us -04 restrict household membership to registered users (epic 1, piroity should )
 // Add a check to the household membership to check the user type when adding a user. reject anyone that isn't registered.
 // shouldn't be able to join as an unregistered user
