@@ -5,12 +5,14 @@ import com.ecotwin.dao.HouseholdDao;
 import com.ecotwin.dao.HouseholdMembershipDao;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
+import com.ecotwin.model.ActivityLogEntry;
 import com.ecotwin.model.User;
 import com.ecotwin.dao.UserDao;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -19,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HouseholdServiceTest {
 
@@ -50,6 +53,16 @@ class HouseholdServiceTest {
         service.createHousehold(creator, "Test House", 2, "House", "QLD");
 
         verify(activityLogDao, times(1)).log(eqLong(household.getId()), eqLong(creator.getId()), anyString());
+    }
+
+    @Test
+    void historyComesFromTheActivityLog() {
+        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
+        List<ActivityLogEntry> entries = List.of(
+                new ActivityLogEntry(1, household.getId(), 2L, "Joiner joined the household", "2026-10-07T06:25:00Z"));
+        when(activityLogDao.findByHousehold(household.getId())).thenReturn(entries);
+
+        assertEquals(entries, service.getHistory(household));
     }
 
     @Test
