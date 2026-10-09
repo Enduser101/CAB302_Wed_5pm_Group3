@@ -1,5 +1,5 @@
 package com.ecotwin.service;
-
+import com.ecotwin.model.ScoreBreakdown;
 import com.ecotwin.model.SustainabilityScenario;
 
 /**
@@ -23,12 +23,20 @@ public class IndicativeScoreCalculator implements ScoreCalculator {
 
     @Override
     public double calculate(SustainabilityScenario values, int occupants) {
+        return breakdown(values, occupants).total();
+    }
+
+    /** The four domain scores (US-21) and their average, the overall score. */
+    public ScoreBreakdown breakdown(SustainabilityScenario values, int occupants) {
         int people = Math.max(1, occupants);
 
-        return (energyScore(values, people)
-                + waterScore(values, people)
-                + wasteScore(values, people)
-                + transportScore(values, people)) / 4;
+        double energy = energyScore(values, people);
+        double water = waterScore(values, people);
+        double waste = wasteScore(values, people);
+        double transport = transportScore(values, people);
+
+        return new ScoreBreakdown(energy, water, waste, transport,
+                (energy + water + waste + transport) / 4);
     }
 
     private double energyScore(SustainabilityScenario values, int people) {
