@@ -1,4 +1,4 @@
 package com.ecotwin.model;
 
-public class ScoreBreakdown {
+public record ScoreBreakdown(double energy, double water, double waste, double transport, double total) {
 }

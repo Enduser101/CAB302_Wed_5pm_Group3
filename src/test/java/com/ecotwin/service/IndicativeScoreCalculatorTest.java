@@ -2,6 +2,7 @@ package com.ecotwin.service;
 
 import com.ecotwin.model.SustainabilityScenario;
 import org.junit.jupiter.api.Test;
+import com.ecotwin.model.ScoreBreakdown;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,5 +77,29 @@ class IndicativeScoreCalculatorTest {
 
         assertTrue(best <= 100 && best >= 0, "best was " + best);
         assertTrue(worst <= 100 && worst >= 0, "worst was " + worst);
+    }
+    @Test
+    void breakdownGivesFourDomainScoresThatAverageToTheTotal() {
+        ScoreBreakdown breakdown = calculator.breakdown(baseline(), 2);
+
+        double average = (breakdown.energy() + breakdown.water()
+                + breakdown.waste() + breakdown.transport()) / 4;
+
+        assertEquals(calculator.calculate(baseline(), 2), breakdown.total(), 0.001);
+        assertEquals(breakdown.total(), average, 0.001);
+    }
+
+    @Test
+    void usingMoreWaterLowersOnlyTheWaterScore() {
+        SustainabilityScenario higher = baseline();
+        higher.setWaterLitres(15000);
+
+        ScoreBreakdown before = calculator.breakdown(baseline(), 2);
+        ScoreBreakdown after = calculator.breakdown(higher, 2);
+
+        assertTrue(after.water() < before.water());
+        assertEquals(before.energy(), after.energy(), 0.001);
+        assertEquals(before.waste(), after.waste(), 0.001);
+        assertEquals(before.transport(), after.transport(), 0.001);
     }
 }
