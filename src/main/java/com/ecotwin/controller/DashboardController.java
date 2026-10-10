@@ -3,12 +3,12 @@ package com.ecotwin.controller;
 import com.ecotwin.AppContext;
 import com.ecotwin.model.ScoreBreakdown;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,7 +16,8 @@ import java.util.Optional;
 
 /**
  * US-20/21: the household's overall score with its four domain scores beside it.
- * Each domain shows a bar, its number and a word
+ * Each domain card shows its number and a grade, and the weakest card says "Weakest",
+ * so the meaning never relies on colour alone.
  */
 public class DashboardController {
 
@@ -25,8 +26,9 @@ public class DashboardController {
     @FXML private Label noDataLabel;
     @FXML private VBox scoresSection;
     @FXML private Label totalScoreLabel;
+    @FXML private Label totalGradeLabel;
     @FXML private Label scoreExplanationLabel; // left empty for US-22 (score meaning)
-    @FXML private VBox domainRows;
+    @FXML private HBox domainCards;
 
     public DashboardController(Navigator nav, AppContext ctx) {
         this.ctx = ctx;
@@ -59,7 +61,10 @@ public class DashboardController {
     private void showScores(ScoreBreakdown scores) {
         noDataLabel.setVisible(false);
         noDataLabel.setManaged(false);
-        totalScoreLabel.setText(whole(scores.total()) + " / 100 - " + rating(scores.total()));
+
+        long total = whole(scores.total());
+        totalScoreLabel.setText(total + " / 100");
+        totalGradeLabel.setText(letter(total) + " - " + word(total));
 
         Map<String, Double> domains = new LinkedHashMap<>();
         domains.put("Energy", scores.energy());
@@ -67,42 +72,77 @@ public class DashboardController {
         domains.put("Waste", scores.waste());
         domains.put("Transport", scores.transport());
 
-        double lowest = domains.values().stream().min(Double::compare).orElseThrow();
+        long weakest = domains.values().stream().mapToLong(DashboardController::whole).min().orElseThrow();
 
-        domainRows.getChildren().clear();
+        domainCards.getChildren().clear();
         domains.forEach((name, score) ->
-                domainRows.getChildren().add(domainRow(name, score, score == lowest)));
+                domainCards.getChildren().add(domainCard(name, whole(score), whole(score) == weakest)));
     }
 
-    private HBox domainRow(String name, double score, boolean lowest) {
+    private VBox domainCard(String name, long score, boolean weakest) {
+        String grade = letter(score) + " - " + (weakest ? "Weakest" : word(score));
+
         Label nameLabel = new Label(name);
-        nameLabel.getStyleClass().add("field-label");
-        nameLabel.setMinWidth(80);
+        nameLabel.getStyleClass().add("domain-name");
+        Label scoreLabel = new Label(String.valueOf(score));
+        scoreLabel.getStyleClass().add("domain-score");
+        Label gradeLabel = new Label(grade);
+        gradeLabel.getStyleClass().add("domain-grade");
 
-        ProgressBar bar = new ProgressBar(score / 100);
-        bar.setMaxWidth(Double.MAX_VALUE);
-        bar.setAccessibleText(name + " score " + whole(score) + " out of 100");
-        HBox.setHgrow(bar, Priority.ALWAYS);
-
-        Label valueLabel = new Label(whole(score) + " / 100 - " + rating(score));
-        valueLabel.getStyleClass().add("value-text");
-        valueLabel.setMinWidth(150);
-
-        HBox row = new HBox(12, nameLabel, bar, valueLabel);
-        row.setAlignment(Pos.CENTER_LEFT);
-
-        Label badge = new Label("Lowest");
-        badge.getStyleClass().add("badge");
-        badge.setVisible(lowest);
-        row.getChildren().add(badge);
-        return row;
+        VBox card = new VBox(6, nameLabel, scoreLabel, gradeLabel);
+        card.getStyleClass().add("domain-card");
+        if (weakest) {
+            card.getStyleClass().add("domain-card-weakest");
+        }
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setAccessibleText(name + " score " + score + " out of 100, " + grade);
+        HBox.setHgrow(card, Priority.ALWAYS);
+        return card;
+    }
+    @FXML
+    private void openRecommendations() {
+        clickNav("#recommendationsNav");
     }
 
-    private static String rating(double score) {
+    @FXML
+    private void openScenarios() {
+        clickNav("#scenariosNav");
+    }
+
+    @FXML
+    private void openResources() {
+        clickNav("#resourcesNav");
+    }
+
+    /** Presses the matching sidebar button, so the app shell stays in charge of switching pages. */
+    private void clickNav(String navId) {
+        Node node = domainCards.getScene().lookup(navId);
+        if (node instanceof Button navButton) {
+            navButton.fire();
+        }
+    }
+    /** Grade bands from the high-fidelity design: A 80+, B 70-79, C 60-69, D below 60. */
+    private static String letter(long score) {
+        if (score >= 80) {
+            return "A";
+        }
+        if (score >= 70) {
+            return "B";
+        }
+        if (score >= 60) {
+            return "C";
+        }
+        return "D";
+    }
+
+    private static String word(long score) {
+        if (score >= 80) {
+            return "Strong";
+        }
         if (score >= 70) {
             return "Good";
         }
-        if (score >= 40) {
+        if (score >= 60) {
             return "Fair";
         }
         return "Needs work";
