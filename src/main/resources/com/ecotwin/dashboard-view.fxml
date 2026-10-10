@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.ecotwin.controller.DashboardController"
+           styleClass="page-bg">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll">
+
+        <VBox spacing="24">
+            <padding>
+                <Insets top="32" right="32" bottom="32" left="32"/>
+            </padding>
+
+            <Label text="Dashboard" styleClass="page-title"/>
+
+            <Label text="Indicative scores only: a rough guide based on your latest readings, not a validated emissions model."
+                   styleClass="muted-text" wrapText="true"/>
+
+            <Label fx:id="noDataLabel" styleClass="muted-text" wrapText="true"/>
+
+            <VBox fx:id="scoresSection" styleClass="card" spacing="16" maxWidth="700">
+
+                <Label text="Overall score" styleClass="section-title"/>
+                <Label fx:id="totalScoreLabel" styleClass="page-title"/>
+
+                <!-- US-22: fbature fills this with the explanation of what the score means -->
+                <Label fx:id="scoreExplanationLabel" styleClass="muted-text" wrapText="true"/>
+
+                <Label text="By area" styleClass="section-title"/>
+                <VBox fx:id="domainRows" spacing="12"/>
+
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</StackPane>
