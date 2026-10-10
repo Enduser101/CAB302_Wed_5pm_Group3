@@ -67,6 +67,49 @@ public class SqliteWasteEntryDao implements WasteEntryDao {
             throw new IllegalStateException("Could not look up waste entries for household " + householdId, e);
         }
     }
+    @Override
+    public WasteEntry update(long entryId, double generalKg, double recycledKg,
+                             double compostKg, long updatedByUserId) {
+
+        String updatedAt = Instant.now().toString();
+
+        String sql = "UPDATE waste_entries SET general_kg = ?, recycled_kg = ?, "
+                + "compost_kg = ?, updated_by_user_id = ?, updated_at = ? "
+                + "WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDouble(1, generalKg);
+            statement.setDouble(2, recycledKg);
+            statement.setDouble(3, compostKg);
+            statement.setLong(4, updatedByUserId);
+            statement.setString(5, updatedAt);
+            statement.setLong(6, entryId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not update waste entry " + entryId, e
+            );
+        }
+
+        String findSql = "SELECT * FROM waste_entries WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(findSql)) {
+            statement.setLong(1, entryId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not find waste entry " + entryId, e
+            );
+        }
+
+        throw new IllegalArgumentException("Waste entry not found");
+    }
 
     private WasteEntry map(ResultSet rs) throws SQLException {
         long updatedBy = rs.getLong("updated_by_user_id");

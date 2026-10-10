@@ -53,7 +53,42 @@ public class SqliteVehicleDao implements VehicleDao {
             throw new IllegalStateException("Could not look up vehicles for household " + householdId, e);
         }
     }
+    @Override
+    public Vehicle update(long vehicleId, String label, String fuelType, double kmPerWeek) {
 
+        String sql = "UPDATE vehicles SET label = ?, fuel_type = ?, km_per_week = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, label);
+            statement.setString(2, fuelType);
+            statement.setDouble(3, kmPerWeek);
+            statement.setLong(4, vehicleId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not update vehicle " + vehicleId, e
+            );
+        }
+
+        String findSql = "SELECT * FROM vehicles WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(findSql)) {
+            statement.setLong(1, vehicleId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not find vehicle " + vehicleId, e
+            );
+        }
+
+        throw new IllegalArgumentException("Vehicle not found");
+    }
     private Vehicle map(ResultSet rs) throws SQLException {
         return new Vehicle(
             rs.getLong("id"),

@@ -38,6 +38,55 @@ public class EnergyService {
         scoreService.recalculate(household.getId());
         return entry;
     }
+    /** US-19: update an existing energy entry. */
+    public EnergyEntry updateEntry(User actor, Household household, long entryId,
+                                   double electricityKwh, Double solarGenerationKwh, String notes) {
+        if (electricityKwh < 0) {
+            throw new IllegalArgumentException("Electricity usage cannot be negative");
+        }
+
+        if (solarGenerationKwh != null && solarGenerationKwh < 0) {
+            throw new IllegalArgumentException("Solar generation cannot be negative");
+        }
+
+        EnergyEntry oldEntry = null;
+
+        for (EnergyEntry entry : energyEntryDao.findByHousehold(household.getId())) {
+            if (entry.getId() == entryId) {
+                oldEntry = entry;
+                break;
+            }
+        }
+
+        EnergyEntry updatedEntry = energyEntryDao.update(
+                entryId,
+                electricityKwh,
+                solarGenerationKwh,
+                notes,
+                actor.getId()
+        );
+
+        if (oldEntry != null) {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " changed energy usage from "
+                            + oldEntry.getElectricityKwh() + " kWh to "
+                            + electricityKwh + " kWh"
+            );
+        } else {
+            activityLogDao.log(
+                    household.getId(),
+                    actor.getId(),
+                    displayName(actor) + " updated energy usage for "
+                            + updatedEntry.getPeriod()
+            );
+        }
+
+        scoreService.recalculate(household.getId());
+
+        return updatedEntry;
+    }
 
     public List<EnergyEntry> findEntriesForHousehold(Household household) {
         return energyEntryDao.findByHousehold(household.getId());
