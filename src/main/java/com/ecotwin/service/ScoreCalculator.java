@@ -1,5 +1,6 @@
 package com.ecotwin.service;
 
+import com.ecotwin.model.ScoreBreakdown;
 import com.ecotwin.model.SustainabilityScenario;
 
 /**
@@ -13,4 +14,7 @@ public interface ScoreCalculator {
 
     /** @return overall score from 0 (worst) to 100 (best) */
     double calculate(SustainabilityScenario values, int occupants);
+
+    /** @return the four domain scores (US-21) and the overall score */
+    ScoreBreakdown breakdown(SustainabilityScenario values, int occupants);
 }
