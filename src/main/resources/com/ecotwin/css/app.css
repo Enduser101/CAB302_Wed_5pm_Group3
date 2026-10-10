@@ -237,3 +237,32 @@
     -fx-background-color: #163523;
     -fx-border-color: #34d399;
 }
+
+.domain-card {
+    -fx-background-color: #101C15;
+    -fx-border-color: #26362C;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14;
+}
+.domain-card-weakest {
+    -fx-border-color: #EAB308;
+}
+.domain-name {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+}
+.domain-score {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.domain-grade {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+}
+.domain-card-weakest .domain-name,
+.domain-card-weakest .domain-score,
+.domain-card-weakest .domain-grade {
+    -fx-text-fill: #EAB308;
+}
