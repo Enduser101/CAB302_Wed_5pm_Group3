@@ -5,12 +5,14 @@ import com.ecotwin.dao.HouseholdDao;
 import com.ecotwin.dao.HouseholdMembershipDao;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
+import com.ecotwin.model.ActivityLogEntry;
 import com.ecotwin.model.User;
 import com.ecotwin.dao.UserDao;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -19,6 +21,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HouseholdServiceTest {
 
@@ -53,15 +57,37 @@ class HouseholdServiceTest {
     }
 
     @Test
+    void historyComesFromTheActivityLog() {
+        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
+        List<ActivityLogEntry> entries = List.of(
+                new ActivityLogEntry(1, household.getId(), 2L, "Joiner joined the household", "2026-10-07T06:25:00Z"));
+        when(activityLogDao.findByHousehold(household.getId())).thenReturn(entries);
+
+        assertEquals(entries, service.getHistory(household));
+    }
+
+    @Test
+    void leavingAHouseholdRecordsItInActivityHistory() {
+        Household household = new Household(1, "Test House", "ABC234", 2, "House", "QLD", "now");
+        User joiner = new User(2, "joiner", "j@example.com", "hash", "Joiner", "now");
+        HouseholdMembership membership = new HouseholdMembership(1, joiner.getId(), household.getId(), HouseholdMembership.Role.MEMBER, "now", null);
+        when(membershipDao.findActiveByUserAndHousehold(joiner.getId(), household.getId()))
+                .thenReturn(Optional.of(membership));
+
+        service.leaveHousehold(joiner, household);
+        verify(activityLogDao, times(1)).log(eqLong(household.getId()), eqLong(joiner.getId()), contains("left"));
+    }
+
+    @Test
     void creatingAHouseholdRejectsABlankName() {
         assertThrows(IllegalArgumentException.class,
-            () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
+                () -> service.createHousehold(creator, "  ", 2, "House", "QLD"));
     }
 
     @Test
     void creatingAHouseholdRejectsZeroOccupants() {
         assertThrows(IllegalArgumentException.class,
-            () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
+                () -> service.createHousehold(creator, "Test House", 0, "House", "QLD"));
     }
 
     @Test

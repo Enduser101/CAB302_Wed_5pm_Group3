@@ -123,6 +123,36 @@
                         </VBox>
                     </HBox>
 
+                    <Label text="Score comparison"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;"/>
+
+                    <HBox spacing="16">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Current score"
+                                   styleClass="field-label"/>
+                            <Label fx:id="currentScoreLabel"
+                                   styleClass="page-title"/>
+                        </VBox>
+
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Scenario score"
+                                   styleClass="field-label"/>
+                            <Label fx:id="scenarioScoreLabel"
+                                   styleClass="page-title"/>
+                        </VBox>
+
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Difference"
+                                   styleClass="field-label"/>
+                            <Label fx:id="scoreDifferenceLabel"
+                                   wrapText="true"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label text="Scores are indicative only, out of 100. A higher score is better."
+                           styleClass="muted-text"
+                           wrapText="true"/>
+
                     <Label fx:id="statusLabel"
                            styleClass="muted-text"
                            wrapText="true"
@@ -138,6 +168,38 @@
                                 styleClass="btn-secondary"
                                 onAction="#handleResetScenario"/>
                     </HBox>
+
+                    <Label text="Save this scenario"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;"/>
+
+                    <Label text="Scenario name"
+                           styleClass="field-label"/>
+
+                    <HBox spacing="12">
+                        <TextField fx:id="scenarioNameField"
+                                   promptText="e.g. Shorter showers"
+                                   HBox.hgrow="ALWAYS"/>
+
+                        <Button text="Save Scenario"
+                                styleClass="btn-primary"
+                                onAction="#handleSaveScenario"/>
+                    </HBox>
+
+                </VBox>
+
+                <VBox styleClass="card"
+                      spacing="14"
+                      maxWidth="700">
+
+                    <Label text="Saved scenarios"
+                           styleClass="page-title"/>
+
+                    <Label text="Scenarios saved by anyone in your household. Open one to see its details again."
+                           styleClass="muted-text"
+                           wrapText="true"/>
+
+                    <VBox fx:id="savedScenariosList"
+                          spacing="10"/>
 
                 </VBox>
 

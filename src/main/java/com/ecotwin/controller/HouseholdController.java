@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import com.ecotwin.model.ActivityLogEntry;
 
 import java.util.Optional;
 
@@ -64,6 +65,7 @@ public class HouseholdController {
     private void initialize() {
         stateCombo.getItems().addAll(AUSTRALIAN_STATES);
         refresh();
+
     }
 
     @FXML
@@ -192,6 +194,7 @@ public class HouseholdController {
 
                 Button activityButton = new Button("Activity History");
                 activityButton.getStyleClass().add("edit-button");
+                activityButton.setOnAction(event -> handleShowActivityHistory());
 
                 // US-33: rename a household
                 Button renameButton = new Button("Rename Household");
@@ -272,7 +275,46 @@ public class HouseholdController {
             showError(removeMemberErrorLabel, e.getMessage());
         }
     }
+    // US-12: view household activity history, newest first
+    private void handleShowActivityHistory() {
+        Household household = ctx.session.getCurrentHousehold();
+        java.util.List<ActivityLogEntry> history = ctx.householdService.getHistory(household);
 
+        VBox list = new VBox(8);
+        list.setPadding(new javafx.geometry.Insets(12));
+
+        if (history.isEmpty()) {
+            list.getChildren().add(new Label("No activity yet."));
+        }
+
+        for (ActivityLogEntry entry : history) {
+            Label line = new Label(formatTime(entry.getCreatedAt()) + "   " + entry.getMessage());
+            line.setWrapText(true);
+            list.getChildren().add(line);
+        }
+
+        ScrollPane scroll = new ScrollPane(list);
+        scroll.setFitToWidth(true);
+        scroll.setPrefSize(480, 360);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Activity History");
+        dialog.setHeaderText(household.getName() + ": newest first");
+        dialog.getDialogPane().setContent(scroll);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
+    }
+
+    // US 12: show times in the computer's own time zone
+    private static String formatTime(String createdAt) {
+        try {
+            return java.time.Instant.parse(createdAt)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a"));
+        } catch (java.time.format.DateTimeParseException e) {
+            return createdAt;
+        }
+    }
     // US-33: rename a household
     private void handleRenameHousehold() {
         TextInputDialog dialog = new TextInputDialog(

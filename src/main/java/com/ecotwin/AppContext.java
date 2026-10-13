@@ -4,6 +4,7 @@ import com.ecotwin.dao.sqlite.SqliteActivityLogDao;
 import com.ecotwin.dao.sqlite.SqliteEnergyEntryDao;
 import com.ecotwin.dao.sqlite.SqliteHouseholdDao;
 import com.ecotwin.dao.sqlite.SqliteHouseholdMembershipDao;
+import com.ecotwin.dao.sqlite.SqliteScenarioDao;
 import com.ecotwin.dao.sqlite.SqliteTransportEntryDao;
 import com.ecotwin.dao.sqlite.SqliteUserDao;
 import com.ecotwin.dao.sqlite.SqliteVehicleDao;
@@ -12,7 +13,9 @@ import com.ecotwin.dao.sqlite.SqliteWaterEntryDao;
 import com.ecotwin.service.AuthService;
 import com.ecotwin.service.EnergyService;
 import com.ecotwin.service.HouseholdService;
+import com.ecotwin.service.IndicativeScoreCalculator;
 import com.ecotwin.service.PlaceholderScoreService;
+import com.ecotwin.service.ScenarioService;
 import com.ecotwin.service.ScoreService;
 import com.ecotwin.service.TransportService;
 import com.ecotwin.service.WasteService;
@@ -30,6 +33,7 @@ public class AppContext {
     public final WaterService waterService;
     public final WasteService wasteService;
     public final TransportService transportService;
+    public final ScenarioService scenarioService;
     public final SessionContext session = SessionContext.getInstance();
 
     public AppContext(Connection connection) {
@@ -42,6 +46,7 @@ public class AppContext {
         SqliteWasteEntryDao wasteEntryDao = new SqliteWasteEntryDao(connection);
         SqliteVehicleDao vehicleDao = new SqliteVehicleDao(connection);
         SqliteTransportEntryDao transportEntryDao = new SqliteTransportEntryDao(connection);
+        SqliteScenarioDao scenarioDao = new SqliteScenarioDao(connection);
         ScoreService scoreService = new PlaceholderScoreService();
 
         this.authService = new AuthService(userDao);
@@ -50,5 +55,6 @@ public class AppContext {
         this.waterService = new WaterService(waterEntryDao, activityLogDao, scoreService);
         this.wasteService = new WasteService(wasteEntryDao, activityLogDao, scoreService);
         this.transportService = new TransportService(vehicleDao, transportEntryDao, activityLogDao, scoreService);
+        this.scenarioService = new ScenarioService(scenarioDao, new IndicativeScoreCalculator());
     }
 }

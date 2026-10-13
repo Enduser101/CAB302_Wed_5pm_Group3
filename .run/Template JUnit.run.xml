@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    Shared JUnit template: every JUnit run configuration IntelliJ creates in this project
+    (gutter icons, right-click > Run tests) starts from these settings.
+
+    The project has a module-info.java, so IntelliJ runs tests on the module path and puts
+    JUnit there as its own module. Without the add-reads flag below, com.ecotwin is not allowed
+    to read it and any test calling assertEquals/assertThrows fails with:
+      IllegalAccessError: module com.ecotwin does not read module org.junit.jupiter.api
+    Maven (mvnw test) and CI are unaffected either way.
+  -->
+  <configuration default="true" type="JUnit" factoryName="JUnit">
+    <option name="VM_PARAMETERS" value="-ea --add-reads com.ecotwin=org.junit.jupiter.api" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

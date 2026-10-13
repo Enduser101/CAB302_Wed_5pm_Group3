@@ -1,0 +1,3 @@
+package com.ecotwin.util;
+
+public enum Page { DASHBOARD, RESOURCES, RECOMMENDATIONS, SCENARIOS, HOUSEHOLD, ACCOUNT }

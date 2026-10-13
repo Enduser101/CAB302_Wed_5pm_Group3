@@ -1,0 +1,40 @@
+4/10/2026
+Attending  Michial, James, Ted 
+Missing Tinom, Frankie 
+
+Discussed : 
+Need to review each other – when we push assign to someone to review 
+
+Epics and tasks to be delegated this week : 
+Past sprint review : 
+Entire team missed meeting/tutorial on Weds apart from Michial and Ted. Comms have been quiet since the holidays. How is everyone ? 
+We have 2 US each left to complete & a check point this weds. Complete 2 US within the next fortnight or sprint. So week 13 is all preparation for presentation. 
+Refactors we need to look at and review these 
+CI – add an explanation – add an issue in github – list under enhancement. https://github.com/issues/assigned
+
+Submission is coming up and this is our final sprint, submission is week 12. 
+
+For this sprint 
+Upload personal logs to git 
+Complete US 
+Complete 1 refactor each 
+Raise 1 issue to be completed. 
+Find a person to test the app with and find bugs. 
+Sprint plan: 4 to 18 October 2026
+Week 1
+Sunday 4 Oct	M 5	T 6	W 7	T 8	F 9	S 10	S 11
+Team meeting.
+Notes to repo.
+Each: raise 1 issue, assign to self.	Public holiday.
+Personal logs to git.		Team meeting / tutorial.
+Checkpoint.
+Reviewer assigned on every PR from here.			Tester booked.	Team meeting.
+Refactor PRs up, pattern named in design-notes.
+Week 2
+Sunday 11 Oct	M 12	T 13	W 14	T 15	F 16	S 17	S 18
+Team meeting.
+Refactor PRs up, pattern named in design-notes.	Usability test run.		Team meeting / tutorial.
+Refactors merged.
+Test write-up in.	Bugs from test fixed, each tied to a commit in the feedback table.	Sprint ends.
+Decide: submit now or Thu 22.		Week 13: presentation prep only.
+

@@ -7,6 +7,7 @@ import com.ecotwin.dao.UserDao;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
+import com.ecotwin.model.ActivityLogEntry;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -85,9 +86,11 @@ public class HouseholdService {
     }
 
     // US-10: leave a household
+    // US-13: departures are recorded in the household activity history
     public void leaveHousehold(User user, Household household) {
         HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();
         membershipDao.leaveHousehold(membership.getId());
+        activityLogDao.log(household.getId(), user.getId(), displayName(user) + " left the household");
     }
 
     // US-11: view current household members
@@ -124,6 +127,9 @@ public class HouseholdService {
                 admin.getId(),
                 member.getDisplayName() + " was removed from the household"
         );
+    }
+    public List<ActivityLogEntry> getHistory(Household household) {
+        return activityLogDao.findByHousehold(household.getId());
     }
 
     // US-33: administrator renames the household
