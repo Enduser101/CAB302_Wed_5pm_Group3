@@ -141,4 +141,17 @@ public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
             throw new IllegalStateException("Could not transfer administrator rights", e);
         }
     }
+
+    // US-36: delete household memberships
+    @Override
+    public void deleteByHousehold(long householdId) {
+        String sql = "DELETE FROM household_memberships WHERE household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete household memberships", e);
+        }
+    }
 }

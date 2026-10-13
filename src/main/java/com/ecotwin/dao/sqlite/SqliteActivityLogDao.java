@@ -33,4 +33,17 @@ public class SqliteActivityLogDao implements ActivityLogDao {
             throw new IllegalStateException("Could not write activity log entry", e);
         }
     }
+
+    // US-36: delete household activity history
+    @Override
+    public void deleteByHousehold(long householdId) {
+        String sql = "DELETE FROM activity_log WHERE household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete household activity history", e);
+        }
+    }
 }

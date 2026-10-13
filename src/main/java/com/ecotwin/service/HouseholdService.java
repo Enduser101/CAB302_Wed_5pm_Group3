@@ -201,4 +201,22 @@ public class HouseholdService {
                         + newAdmin.getDisplayName()
         );
     }
+
+    // US-36: delete a household
+    public void deleteHousehold(User admin, Household household) {
+        HouseholdMembership adminMembership =
+                findActiveMembership(admin, household).orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "You are not an active member of this household"));
+
+        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException(
+                    "Only the household administrator can delete the household");
+        }
+
+        // Delete history and memberships before deleting the household.
+        activityLogDao.deleteByHousehold(household.getId());
+        membershipDao.deleteByHousehold(household.getId());
+        householdDao.deleteHousehold(household.getId());
+    }
 }

@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 class HouseholdServiceTest {
 
@@ -608,5 +609,51 @@ class HouseholdServiceTest {
                 eqLong(household.getId()),
                 eqLong(admin.getId()),
                 anyString());
+    }
+
+    // US-36: administrator can delete a household
+    @Test
+    void adminDeletesHousehold_householdAndRelatedRecordsAreDeleted() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, creator.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                creator.getId(), household.getId()))
+                .thenReturn(Optional.of(adminMembership));
+
+        service.deleteHousehold(creator, household);
+
+        verify(activityLogDao).deleteByHousehold(household.getId());
+        verify(membershipDao).deleteByHousehold(household.getId());
+        verify(householdDao).deleteHousehold(household.getId());
+    }
+
+    // US-36: ordinary members cannot delete a household
+    @Test
+    void memberCannotDeleteHousehold() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        User member = new User(
+                2, "member", "m@example.com", "hash", "Member", "now");
+
+        HouseholdMembership memberMembership = new HouseholdMembership(
+                11, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(memberMembership));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.deleteHousehold(member, household));
+
+        verify(activityLogDao, never()).deleteByHousehold(household.getId());
+        verify(membershipDao, never()).deleteByHousehold(household.getId());
+        verify(householdDao, never()).deleteHousehold(household.getId());
     }
 }

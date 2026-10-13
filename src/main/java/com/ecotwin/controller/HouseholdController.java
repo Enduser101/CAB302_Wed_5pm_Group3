@@ -9,6 +9,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.util.Optional;
+
 /** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
  *  resulting household once the user has one. Member management (US-11+) is out of scope here. */
 public class HouseholdController {
@@ -47,7 +49,7 @@ public class HouseholdController {
 
     // US-32: household administrator actions
     @FXML
-    private HBox householdAdminButtons;
+    private VBox householdAdminButtons;
 
     // US-33: error message when renaming a household
     @FXML
@@ -185,6 +187,9 @@ public class HouseholdController {
             householdAdminButtons.getChildren().clear();
 
             if (admin) {
+                // US-36: arrange administrator buttons into separate rows
+                HBox adminButtonRow = new HBox(10);
+
                 Button activityButton = new Button("Activity History");
                 activityButton.getStyleClass().add("edit-button");
 
@@ -203,11 +208,24 @@ public class HouseholdController {
                 joinCodeButton.getStyleClass().add("edit-button");
                 joinCodeButton.setOnAction(event -> handleChangeJoinCode());
 
-                householdAdminButtons.getChildren().addAll(
+                adminButtonRow.getChildren().addAll(
                         activityButton,
                         renameButton,
                         transferButton,
                         joinCodeButton
+                );
+
+                // US-36: delete a household
+                Button deleteHouseholdButton = new Button("Delete Household");
+                deleteHouseholdButton.getStyleClass().add("btn-danger");
+                deleteHouseholdButton.setOnAction(event -> handleDeleteHousehold());
+
+                HBox deleteButtonRow = new HBox(10);
+                deleteButtonRow.getChildren().add(deleteHouseholdButton);
+
+                householdAdminButtons.getChildren().addAll(
+                        adminButtonRow,
+                        deleteButtonRow
                 );
             }
         }
@@ -383,4 +401,34 @@ public class HouseholdController {
             }
         });
     }
+
+    // US-36: delete a household
+    @FXML
+    private void handleDeleteHousehold() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Household");
+        confirmation.setHeaderText("Permanently delete this household?");
+        confirmation.setContentText(
+                "All household memberships and activity history will be deleted. This cannot be undone.");
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                User user = ctx.session.getCurrentUser();
+                Household household = ctx.session.getCurrentHousehold();
+
+                ctx.householdService.deleteHousehold(user, household);
+                ctx.session.leaveHousehold();
+                refresh();
+            } catch (IllegalArgumentException e) {
+                Alert error = new Alert(Alert.AlertType.ERROR);
+                error.setTitle("Delete Household");
+                error.setHeaderText("Could not delete household");
+                error.setContentText(e.getMessage());
+                error.showAndWait();
+            }
+        }
+    }
+
 }
