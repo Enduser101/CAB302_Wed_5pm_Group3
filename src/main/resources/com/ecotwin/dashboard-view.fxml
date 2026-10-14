@@ -7,6 +7,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
@@ -29,7 +32,7 @@
 
             <VBox fx:id="scoresSection" spacing="20" maxWidth="900">
 
-                <HBox spacing="12">
+                <HBox spacing="12" maxHeight="150">
                     <VBox styleClass="card" spacing="8" minWidth="260">
                         <Label text="Overall score" styleClass="section-title"/>
                         <Label fx:id="totalScoreLabel" styleClass="page-title"/>
@@ -39,13 +42,21 @@
                         <Label fx:id="scoreExplanationLabel" styleClass="muted-text" wrapText="true"/>
                     </VBox>
 
-                    <!-- PLACEHOLDER ONLY: the "Score over time" box from the high-fidelity design.
-                         No chart is built here and it isn't in any user story yet;
-                         it only shows a "coming soon" message. -->
+                    <!-- US-23: overall score per period, from the high-fidelity design.
+                            Hidden until the household has two periods of readings. -->
                     <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS">
                         <Label text="Score over time" styleClass="section-title"/>
-                        <Label text="Coming soon: your overall score month by month."
-                               styleClass="muted-text" wrapText="true"/>
+                        <Label fx:id="historyEmptyLabel" styleClass="muted-text" wrapText="true"/>
+                        <LineChart fx:id="historyChart" legendVisible="false"
+                                   createSymbols="false" animated="false"
+                                   prefHeight="90" maxHeight="90"
+                                   horizontalGridLinesVisible="false" verticalGridLinesVisible="false"
+                                   alternativeRowFillVisible="false">
+                            <xAxis><CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false"/></xAxis>
+                            <yAxis><NumberAxis side="LEFT" lowerBound="0" upperBound="100"
+                                               autoRanging="false" tickLabelsVisible="false" tickMarkVisible="false"/></yAxis>
+                        </LineChart>
+                        <Label fx:id="historySummaryLabel" styleClass="success-text"/>
                     </VBox>
                 </HBox>
 

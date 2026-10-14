@@ -266,3 +266,32 @@
 .domain-card-weakest .domain-grade {
     -fx-text-fill: #EAB308;
 }
+
+.chart {
+    -fx-padding: 0;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines,
+.chart-alternative-row-fill,
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line {
+    -fx-stroke: transparent;
+    -fx-fill: transparent;
+}
+
+.axis {
+    -fx-tick-labels-visible: false;
+    -fx-tick-mark-visible: false;
+    -fx-minor-tick-visible: false;
+    -fx-border-color: transparent;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #22C55E;
+    -fx-stroke-width: 2;
+}

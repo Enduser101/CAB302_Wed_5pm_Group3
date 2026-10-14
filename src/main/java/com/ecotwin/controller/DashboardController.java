@@ -14,6 +14,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.ecotwin.model.ScorePoint;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import java.util.List;
+
 /**
  * US-20/21: the household's overall score with its four domain scores beside it.
  * Each domain card shows its number and a grade, and the weakest card says "Weakest",
@@ -29,6 +34,7 @@ public class DashboardController {
     @FXML private Label totalGradeLabel;
     @FXML private Label scoreExplanationLabel; // left empty for US-22 (score meaning)
     @FXML private HBox domainCards;
+    @FXML private Label historySummaryLabel;
 
     public DashboardController(Navigator nav, AppContext ctx) {
         this.ctx = ctx;
@@ -77,6 +83,7 @@ public class DashboardController {
         domainCards.getChildren().clear();
         domains.forEach((name, score) ->
                 domainCards.getChildren().add(domainCard(name, whole(score), whole(score) == weakest)));
+        showHistory();
     }
 
     private VBox domainCard(String name, long score, boolean weakest) {
@@ -114,6 +121,10 @@ public class DashboardController {
         clickNav("#resourcesNav");
     }
 
+    @FXML private LineChart<String, Number> historyChart;
+
+    @FXML private Label historyEmptyLabel;
+
     /** Presses the matching sidebar button, so the app shell stays in charge of switching pages. */
     private void clickNav(String navId) {
         Node node = domainCards.getScene().lookup(navId);
@@ -146,6 +157,34 @@ public class DashboardController {
             return "Fair";
         }
         return "Needs work";
+    }
+
+    /** US-23: the household's overall score for each period with a full set of readings. */
+    private void showHistory() {
+
+        List<ScorePoint> history = ctx.householdScoreService.scoreHistory(ctx.session.getCurrentHousehold());
+
+        if (history.size() < 2) {
+            historyEmptyLabel.setText("Record another month of readings to see your score over time.");
+            historyChart.setVisible(false);
+            historyChart.setManaged(false);
+            return;
+        }
+
+        historyEmptyLabel.setVisible(false);
+        historyEmptyLabel.setManaged(false);
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        history.forEach(point -> series.getData().add(
+                new XYChart.Data<>(point.period(), whole(point.scores().total()))));
+        historyChart.getData().setAll(series);
+
+        double first = history.get(0).scores().total();
+        double last = history.get(history.size() - 1).scores().total();
+        long change = Math.round(last - first);
+        historySummaryLabel.setText(change >= 0
+                ? "Up " + change + " points since " + history.get(0).period()
+                : "Down " + Math.abs(change) + " points since " + history.get(0).period());
     }
 
     private static long whole(double score) {
