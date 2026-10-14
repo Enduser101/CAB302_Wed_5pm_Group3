@@ -66,4 +66,44 @@ class HouseholdScoreServiceTest {
 
         assertTrue(service.currentScores(household).isEmpty());
     }
+
+    @Test
+    void scoreHistoryReturnsOnePointPerCompletePeriodOldestFirst() {
+        when(waterService.findEntriesForHousehold(household)).thenReturn(List.of(
+                new WaterEntry(1, 7, "2026-07", 11000, null, 1L, null),
+                new WaterEntry(2, 7, "2026-08", 10000, null, 1L, null),
+                new WaterEntry(3, 7, "2026-09", 9000, null, 1L, null)));
+        when(wasteService.findEntriesForHousehold(household)).thenReturn(List.of(
+                new WasteEntry(1, 7, "2026-07", 40, 10, 2, 1L, null),
+                new WasteEntry(2, 7, "2026-08", 35, 12, 3, 1L, null),
+                new WasteEntry(3, 7, "2026-09", 30, 15, 5, 1L, null)));
+        when(transportService.findEntriesForHousehold(household)).thenReturn(List.of(
+                new TransportEntry(1, 7, "2026-07", 4, 3, 1L, null),
+                new TransportEntry(2, 7, "2026-08", 6, 2, 1L, null),
+                new TransportEntry(3, 7, "2026-09", 8, 2, 1L, null)));
+
+        List<ScorePoint> history = service.scoreHistory(household);
+
+        assertEquals(3, history.size());
+        assertEquals("2026-07", history.get(0).period());
+        assertEquals("2026-09", history.get(2).period());
+    }
+
+    @Test
+    void periodsMissingADomainReadingAreLeftOut() {
+        List<ScorePoint> history = service.scoreHistory(household);
+
+        assertEquals(1, history.size());
+        assertEquals("2026-09", history.get(0).period());
+    }
+
+    @Test
+    void aHouseholdWithNoReadingsHasNoHistory() {
+        when(energyService.findEntriesForHousehold(household)).thenReturn(List.of());
+        when(waterService.findEntriesForHousehold(household)).thenReturn(List.of());
+        when(wasteService.findEntriesForHousehold(household)).thenReturn(List.of());
+        when(transportService.findEntriesForHousehold(household)).thenReturn(List.of());
+
+        assertTrue(service.scoreHistory(household).isEmpty());
+    }
 }
