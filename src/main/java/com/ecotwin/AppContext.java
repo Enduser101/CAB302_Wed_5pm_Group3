@@ -12,6 +12,7 @@ import com.ecotwin.dao.sqlite.SqliteWasteEntryDao;
 import com.ecotwin.dao.sqlite.SqliteWaterEntryDao;
 import com.ecotwin.service.AuthService;
 import com.ecotwin.service.EnergyService;
+import com.ecotwin.service.HouseholdScoreService;
 import com.ecotwin.service.HouseholdService;
 import com.ecotwin.service.IndicativeScoreCalculator;
 import com.ecotwin.service.PlaceholderScoreService;
@@ -34,6 +35,7 @@ public class AppContext {
     public final WasteService wasteService;
     public final TransportService transportService;
     public final ScenarioService scenarioService;
+    public final HouseholdScoreService householdScoreService;
     public final SessionContext session = SessionContext.getInstance();
 
     public AppContext(Connection connection) {
@@ -55,6 +57,9 @@ public class AppContext {
         this.waterService = new WaterService(waterEntryDao, activityLogDao, scoreService);
         this.wasteService = new WasteService(wasteEntryDao, activityLogDao, scoreService);
         this.transportService = new TransportService(vehicleDao, transportEntryDao, activityLogDao, scoreService);
-        this.scenarioService = new ScenarioService(scenarioDao, new IndicativeScoreCalculator());
+        IndicativeScoreCalculator scoreCalculator = new IndicativeScoreCalculator();
+        this.scenarioService = new ScenarioService(scenarioDao, scoreCalculator);
+        this.householdScoreService = new HouseholdScoreService(
+                energyService, waterService, wasteService, transportService, scoreCalculator);
     }
 }
