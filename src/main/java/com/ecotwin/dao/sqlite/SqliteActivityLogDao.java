@@ -80,4 +80,34 @@ public class SqliteActivityLogDao implements ActivityLogDao {
 
         return history;
     }
+
+    // US-34: update an activity history message
+    @Override
+    public void updateMessage(long entryId, long householdId, String message) {
+        String sql = "UPDATE activity_log SET message = ? WHERE id = ? AND household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, message);
+            statement.setLong(2, entryId);
+            statement.setLong(3, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update activity history entry", e);
+        }
+    }
+
+    // US-34: delete an individual activity history entry
+    @Override
+    public void deleteEntry(long entryId, long householdId) {
+        String sql = "DELETE FROM activity_log WHERE id = ? AND household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, entryId);
+            statement.setLong(2, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete activity history entry", e);
+        }
+    }
+
 }

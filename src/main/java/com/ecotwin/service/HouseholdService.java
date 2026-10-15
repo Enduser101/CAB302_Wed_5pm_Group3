@@ -225,4 +225,65 @@ public class HouseholdService {
         membershipDao.deleteByHousehold(household.getId());
         householdDao.deleteHousehold(household.getId());
     }
+
+    // US-34: check that the user is the household administrator
+    private void requireAdmin(User user, Household household) {
+        HouseholdMembership membership = findActiveMembership(user, household)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "You are not an active member of this household"));
+
+        if (membership.getRole() != HouseholdMembership.Role.ADMIN) {
+            throw new IllegalArgumentException(
+                    "Only the household administrator can edit activity history");
+        }
+    }
+
+    // US-34: edit an activity history entry and record the correction
+    public void editHistoryEntry(User admin, Household household,
+                                 long entryId, String newMessage) {
+        requireAdmin(admin, household);
+
+        if (newMessage == null || newMessage.trim().isEmpty()) {
+            throw new IllegalArgumentException("The activity message cannot be empty");
+        }
+
+        ActivityLogEntry entry = getHistory(household).stream()
+                .filter(item -> item.getId() == entryId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Activity history entry not found"));
+
+        String oldMessage = entry.getMessage();
+        String updatedMessage = newMessage.trim();
+
+        activityLogDao.updateMessage(entryId, household.getId(), updatedMessage);
+
+        // US-34: record the original and updated messages
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                displayName(admin) + " edited activity entry #" + entryId
+                        + ". Original: \"" + oldMessage
+                        + "\". Updated: \"" + updatedMessage + "\"");
+    }
+
+    // US-34: delete an activity history entry and record what was removed
+    public void deleteHistoryEntry(User admin, Household household, long entryId) {
+        requireAdmin(admin, household);
+
+        ActivityLogEntry entry = getHistory(household).stream()
+                .filter(item -> item.getId() == entryId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Activity history entry not found"));
+
+        activityLogDao.deleteEntry(entryId, household.getId());
+
+        // US-34: preserve a record of the deleted entry
+        activityLogDao.log(
+                household.getId(),
+                admin.getId(),
+                displayName(admin) + " deleted activity entry #" + entryId
+                        + ". Original message: \"" + entry.getMessage() + "\"");
+    }
 }
