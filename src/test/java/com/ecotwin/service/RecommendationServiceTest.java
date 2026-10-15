@@ -18,4 +18,15 @@ class RecommendationServiceTest {
 
         assertEquals(Recommendation.Domain.TRANSPORT, recommendations.get(0).domain());
     }
+    @Test
+    void everyDomainGetsARecommendation() {
+        List<Recommendation> recommendations =
+                new RecommendationService().forScores(new ScoreBreakdown(50, 50, 50, 50, 50));
+
+        assertEquals(4, recommendations.size());
+        for (Recommendation.Domain domain : Recommendation.Domain.values()) {
+            assertTrue(recommendations.stream().anyMatch(r -> r.domain() == domain),
+                    "no recommendation for " + domain);
+        }
+    }
 }
