@@ -51,7 +51,8 @@ public class AppShellController {
 
     @FXML
     private void showRecommendations() {
-        showPlaceholder(recommendationsNav, "Recommendations");
+        setActive(recommendationsNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/recommendations-view.fxml"));
     }
 
     @FXML

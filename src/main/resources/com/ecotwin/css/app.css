@@ -295,3 +295,41 @@
     -fx-stroke: #22C55E;
     -fx-stroke-width: 2;
 }
+
+
+.filter-tabs {
+    -fx-border-color: transparent transparent #26362C transparent;
+    -fx-padding: 0 0 4 0;
+}
+.filter-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.filter-tab-active {
+    -fx-text-fill: #22C55E;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent #22C55E transparent;
+}
+.rec-card-weakest {
+    -fx-border-color: #3B82F6;
+}
+.rec-domain {
+    -fx-text-fill: #22C55E;
+    -fx-font-size: 11px;
+}
+.rec-title {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 13px;
+}
+.rec-detail {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 11px;
+}
+.rec-points {
+    -fx-text-fill: #22C55E;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
