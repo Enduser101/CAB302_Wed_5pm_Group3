@@ -1,52 +1,47 @@
 package com.ecotwin.service;
 
+import com.ecotwin.model.Recommendation;
+import com.ecotwin.model.Recommendation.Domain;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RecommendationExplanationServiceTest {
 
+    private final RecommendationExplanationService service =
+            new RecommendationExplanationService();
+
     @Test
-    void waterExplanationReferencesHouseholdValue() {
-        RecommendationExplanationService service =
-                new RecommendationExplanationService();
+    void explanationUsesRecommendationHouseholdDetail() {
+        Recommendation recommendation = new Recommendation(
+                Domain.WATER,
+                "Install low-flow shower heads",
+                "You use 12000 L a month, 3000 L per person against a 2500 L benchmark.",
+                4
+        );
 
-        String explanation = service.explainWater(190);
+        String explanation = service.explain(recommendation);
 
-        assertTrue(explanation.contains("190"));
-        assertTrue(explanation.toLowerCase().contains("water"));
+        assertTrue(explanation.contains("12000"));
+        assertTrue(explanation.contains("3000"));
+        assertTrue(explanation.contains("2500"));
     }
 
     @Test
-    void energyExplanationReferencesHouseholdValue() {
-        RecommendationExplanationService service =
-                new RecommendationExplanationService();
+    void explanationKeepsPlainLanguageReason() {
+        Recommendation recommendation = new Recommendation(
+                Domain.ENERGY,
+                "Cut electricity use by 15%",
+                "You use 145 kWh per person a month against a 120 kWh benchmark.",
+                3
+        );
 
-        String explanation = service.explainEnergy(145);
+        String explanation = service.explain(recommendation);
 
-        assertTrue(explanation.contains("145"));
-        assertTrue(explanation.toLowerCase().contains("energy"));
-    }
-
-    @Test
-    void wasteExplanationReferencesHouseholdValue() {
-        RecommendationExplanationService service =
-                new RecommendationExplanationService();
-
-        String explanation = service.explainWaste(65);
-
-        assertTrue(explanation.contains("65"));
-        assertTrue(explanation.toLowerCase().contains("waste"));
-    }
-
-    @Test
-    void transportExplanationReferencesHouseholdValue() {
-        RecommendationExplanationService service =
-                new RecommendationExplanationService();
-
-        String explanation = service.explainTransport(8);
-
-        assertTrue(explanation.contains("8"));
-        assertTrue(explanation.toLowerCase().contains("transport"));
+        assertEquals(
+                "You use 145 kWh per person a month against a 120 kWh benchmark.",
+                explanation
+        );
     }
 }
