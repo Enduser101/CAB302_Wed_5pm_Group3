@@ -294,11 +294,9 @@ public class ScenariosController {
     }
 
     private String describeDifference(ScenarioComparison comparison) {
-        String points = formatScore(Math.abs(comparison.getDifference())) + " points";
-
         return switch (comparison.getDirection()) {
-            case IMPROVED -> "+" + points + " - better than your current score";
-            case WORSENED -> "-" + points + " - worse than your current score";
+            case IMPROVED -> comparison.signedPoints() + " - better than your current score";
+            case WORSENED -> comparison.signedPoints() + " - worse than your current score";
             case UNCHANGED -> "No change from your current score";
         };
     }
