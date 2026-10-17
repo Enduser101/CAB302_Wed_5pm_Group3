@@ -71,6 +71,7 @@ public class DashboardController {
         long total = whole(scores.total());
         totalScoreLabel.setText(total + " / 100");
         totalGradeLabel.setText(letter(total) + " - " + word(total));
+        scoreExplanationLabel.setText(ctx.scoreExplanationService.getExplanation());
 
         Map<String, Double> domains = new LinkedHashMap<>();
         domains.put("Energy", scores.energy());

@@ -22,6 +22,7 @@ import com.ecotwin.service.TransportService;
 import com.ecotwin.service.WasteService;
 import com.ecotwin.service.WaterService;
 import com.ecotwin.util.SessionContext;
+import com.ecotwin.service.ScoreExplanationService;
 
 import java.sql.Connection;
 
@@ -36,6 +37,7 @@ public class AppContext {
     public final TransportService transportService;
     public final ScenarioService scenarioService;
     public final HouseholdScoreService householdScoreService;
+    public final ScoreExplanationService scoreExplanationService;
     public final SessionContext session = SessionContext.getInstance();
 
     public AppContext(Connection connection) {
@@ -61,5 +63,6 @@ public class AppContext {
         this.scenarioService = new ScenarioService(scenarioDao, scoreCalculator);
         this.householdScoreService = new HouseholdScoreService(
                 energyService, waterService, wasteService, transportService, scoreCalculator);
+        this.scoreExplanationService = new ScoreExplanationService();
     }
 }

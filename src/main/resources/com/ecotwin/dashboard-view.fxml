@@ -32,7 +32,7 @@
 
             <VBox fx:id="scoresSection" spacing="20" maxWidth="900">
 
-                <HBox spacing="12" maxHeight="150">
+                <HBox spacing="12">
                     <VBox styleClass="card" spacing="8" minWidth="260">
                         <Label text="Overall score" styleClass="section-title"/>
                         <Label fx:id="totalScoreLabel" styleClass="page-title"/>
