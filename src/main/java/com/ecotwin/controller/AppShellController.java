@@ -1,6 +1,8 @@
 package com.ecotwin.controller;
 
 import com.ecotwin.AppContext;
+import com.ecotwin.util.Page;
+import com.ecotwin.util.SessionContext;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -30,12 +32,15 @@ public class AppShellController {
 
     @FXML
     private void initialize() {
-        showHousehold();
+        boolean canSeeHousehold = SessionContext.getInstance().canAccessPage(Page.HOUSEHOLD);
+        householdNav.setDisable(!canSeeHousehold);                    // guests: greyed out
+        if (canSeeHousehold) showHousehold(); else showDashboard();   // guests land on the dashboard
     }
 
     @FXML
     private void showDashboard() {
-        showPlaceholder(dashboardNav, "Dashboard");
+        setActive(dashboardNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/dashboard-view.fxml"));
     }
 
     @FXML
@@ -46,12 +51,16 @@ public class AppShellController {
 
     @FXML
     private void showRecommendations() {
-        showPlaceholder(recommendationsNav, "Recommendations");
+        setActive(recommendationsNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/recommendations-view.fxml"));
     }
 
     @FXML
     private void showScenarios() {
-        showPlaceholder(scenariosNav, "Scenarios");
+        setActive(scenariosNav);
+        contentArea.getChildren().setAll(
+                nav.load("/com/ecotwin/scenarios-view.fxml")
+        );
     }
 
     @FXML

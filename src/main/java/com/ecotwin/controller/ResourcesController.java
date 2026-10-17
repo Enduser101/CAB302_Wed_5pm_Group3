@@ -75,10 +75,11 @@ public class ResourcesController {
 
     private void refresh() {
         boolean hasHousehold = ctx.session.hasActiveHousehold();
-        noHouseholdSection.setVisible(!hasHousehold);
-        noHouseholdSection.setManaged(!hasHousehold);
-        resourcesTabPane.setVisible(hasHousehold);
-        resourcesTabPane.setManaged(hasHousehold);
+        boolean showTabs = hasHousehold || ctx.session.isGuest(); //let guests type and look but they can't save.
+        noHouseholdSection.setVisible(!showTabs);
+        noHouseholdSection.setManaged(!showTabs);
+        resourcesTabPane.setVisible(showTabs);
+        resourcesTabPane.setManaged(showTabs);
 
         if (!hasHousehold) {
             return;
@@ -97,6 +98,7 @@ public class ResourcesController {
 
     @FXML
     private void handleSaveEnergy() {
+        if (blockedFromSaving(energyErrorLabel)) return;
         try {
             double electricityKwh = Double.parseDouble(electricityKwhField.getText().trim());
             Double solarGenerationKwh = solarGenerationKwhField.getText().isBlank()
@@ -178,6 +180,7 @@ public class ResourcesController {
 
     @FXML
     private void handleSaveWater() {
+        if (blockedFromSaving(waterErrorLabel)) return;
         try {
             double litres = Double.parseDouble(litresField.getText().trim());
             User user = ctx.session.getCurrentUser();
@@ -257,6 +260,7 @@ public class ResourcesController {
 
     @FXML
     private void handleSaveWaste() {
+        if (blockedFromSaving(wasteErrorLabel)) return;
         try {
             double generalKg = Double.parseDouble(generalKgField.getText().trim());
             double recycledKg = Double.parseDouble(recycledKgField.getText().trim());
@@ -363,6 +367,7 @@ public class ResourcesController {
 
     @FXML
     private void handleAddVehicle() {
+        if (blockedFromSaving(vehicleErrorLabel)) return;
         try {
             String label = vehicleLabelField.getText();
             String fuelType = vehicleFuelTypeCombo.getValue();
@@ -464,6 +469,7 @@ public class ResourcesController {
     }
     @FXML
     private void handleSaveTransport() {
+        if (blockedFromSaving(transportErrorLabel)) return;
         try {
             double publicTransportTripsPerWeek =
                     Double.parseDouble(publicTransportTripsField.getText().trim());
@@ -568,6 +574,13 @@ public class ResourcesController {
         label.setText(message);
         label.setVisible(true);
         label.setManaged(true);
+    }
+
+    /** US-03 / #85: guests and users without a household see a message instead of saving. */
+    private boolean blockedFromSaving(Label errorLabel) {
+        if (ctx.session.canRecordEntries()) return false;
+        showError(errorLabel, "Sign in and join a household to save readings");
+        return true;
     }
 
     private void hideError(Label label) {

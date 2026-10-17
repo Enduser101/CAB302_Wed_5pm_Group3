@@ -6,7 +6,9 @@ import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import com.ecotwin.model.ActivityLogEntry;
 
 /** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
  *  resulting household once the user has one. Member management (US-11+) is out of scope here. */
@@ -40,6 +42,18 @@ public class HouseholdController {
     // US-11: view current household members
     @FXML private VBox membersListView;
 
+    // US-32: error message when removing a member
+    @FXML
+    private Label removeMemberErrorLabel;
+
+    // US-32: household administrator actions
+    @FXML
+    private HBox householdAdminButtons;
+
+    // US-33: error message when renaming a household
+    @FXML
+    private Label renameHouseholdErrorLabel;
+
     public HouseholdController(Navigator nav, AppContext ctx) {
         this.nav = nav;
         this.ctx = ctx;
@@ -49,6 +63,7 @@ public class HouseholdController {
     private void initialize() {
         stateCombo.getItems().addAll(AUSTRALIAN_STATES);
         refresh();
+
     }
 
     @FXML
@@ -114,6 +129,12 @@ public class HouseholdController {
                 User member = members.get(i);
 
                 javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(16);
+
+                // US-32: keep all member rows the same height
+                row.setMinHeight(45);
+                row.setPrefHeight(45);
+                row.setMaxHeight(45);
+
                 row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                 row.setStyle(
                         "-fx-background-color: transparent;" +
@@ -146,7 +167,51 @@ public class HouseholdController {
                     row.getChildren().add(youLabel);
                 }
 
+                // US-32: show remove button for the administrator
+                if (admin && i != 0) {
+                    javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+                    javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                    row.getChildren().add(spacer);
+
+                    javafx.scene.control.Button removeButton =
+                            new javafx.scene.control.Button("Remove");
+                    removeButton.getStyleClass().add("btn-danger");
+                    removeButton.setOnAction(event -> handleRemoveMember(member));
+                    row.getChildren().add(removeButton);
+                }
+
                 membersListView.getChildren().add(row);
+            }
+
+            // US-32: household administrator actions
+            householdAdminButtons.getChildren().clear();
+
+            if (admin) {
+                Button activityButton = new Button("Activity History");
+                activityButton.getStyleClass().add("edit-button");
+                activityButton.setOnAction(event -> handleShowActivityHistory());
+
+                // US-33: rename a household
+                Button renameButton = new Button("Rename Household");
+                renameButton.getStyleClass().add("edit-button");
+                renameButton.setOnAction(event -> handleRenameHousehold());
+
+                // US-35: transfer administrator rights
+                Button transferButton = new Button("Transfer Admin");
+                transferButton.getStyleClass().add("edit-button");
+                transferButton.setOnAction(event -> handleTransferAdmin());
+
+                // US-33: change the household join code
+                Button joinCodeButton = new Button("Generate New Join Code");
+                joinCodeButton.getStyleClass().add("edit-button");
+                joinCodeButton.setOnAction(event -> handleChangeJoinCode());
+
+                householdAdminButtons.getChildren().addAll(
+                        activityButton,
+                        renameButton,
+                        transferButton,
+                        joinCodeButton
+                );
             }
         }
     }
@@ -176,5 +241,188 @@ public class HouseholdController {
         } catch (IllegalArgumentException e) {
             showError(leaveErrorLabel, e.getMessage());
         }
+    }
+
+    // US-32: remove a household member
+    private void handleRemoveMember(User member) {
+        try {
+            User admin = ctx.session.getCurrentUser();
+            Household household = ctx.session.getCurrentHousehold();
+
+            ctx.householdService.removeMember(admin, household, member);
+
+            hideError(removeMemberErrorLabel);
+            refresh();
+        } catch (IllegalArgumentException e) {
+            showError(removeMemberErrorLabel, e.getMessage());
+        }
+    }
+    // US-12: view household activity history, newest first
+    private void handleShowActivityHistory() {
+        Household household = ctx.session.getCurrentHousehold();
+        java.util.List<ActivityLogEntry> history = ctx.householdService.getHistory(household);
+
+        VBox list = new VBox(8);
+        list.setPadding(new javafx.geometry.Insets(12));
+
+        if (history.isEmpty()) {
+            list.getChildren().add(new Label("No activity yet."));
+        }
+
+        for (ActivityLogEntry entry : history) {
+            Label line = new Label(formatTime(entry.getCreatedAt()) + "   " + entry.getMessage());
+            line.setWrapText(true);
+            list.getChildren().add(line);
+        }
+
+        ScrollPane scroll = new ScrollPane(list);
+        scroll.setFitToWidth(true);
+        scroll.setPrefSize(480, 360);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Activity History");
+        dialog.setHeaderText(household.getName() + ": newest first");
+        dialog.getDialogPane().setContent(scroll);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
+    }
+
+    // US 12: show times in the computer's own time zone
+    private static String formatTime(String createdAt) {
+        try {
+            return java.time.Instant.parse(createdAt)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a"));
+        } catch (java.time.format.DateTimeParseException e) {
+            return createdAt;
+        }
+    }
+    // US-33: rename a household
+    private void handleRenameHousehold() {
+        TextInputDialog dialog = new TextInputDialog(
+                ctx.session.getCurrentHousehold().getName()
+        );
+
+        dialog.setTitle("Rename Household");
+        dialog.setHeaderText("Rename your household");
+        dialog.setContentText("New household name:");
+
+        dialog.showAndWait().ifPresent(newName -> {
+            try {
+                User admin = ctx.session.getCurrentUser();
+                Household household = ctx.session.getCurrentHousehold();
+
+                ctx.householdService.renameHousehold(admin, household, newName);
+
+                hideError(renameHouseholdErrorLabel);
+
+                ctx.householdService.findActiveHouseholdForUser(admin)
+                        .ifPresent(updatedHousehold ->
+                                ctx.session.enterHousehold(
+                                        updatedHousehold,
+                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()
+                                )
+                        );
+
+                refresh();
+            } catch (IllegalArgumentException e) {
+                showError(renameHouseholdErrorLabel, e.getMessage());
+            }
+        });
+    }
+
+    // US-35: transfer administrator rights
+    private void handleTransferAdmin() {
+        User admin = ctx.session.getCurrentUser();
+        Household household = ctx.session.getCurrentHousehold();
+
+        java.util.List<User> members = ctx.householdService.findActiveMembers(household)
+                .stream()
+                .filter(member -> member.getId() != admin.getId())
+                .toList();
+
+        if (members.isEmpty()) {
+            showError(renameHouseholdErrorLabel, "There are no other active members to transfer administrator rights to");
+            return;
+        }
+
+        java.util.List<String> memberNames = members.stream()
+                .map(member -> member.getDisplayName() != null
+                        ? member.getDisplayName()
+                        : member.getUsername())
+                .toList();
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(memberNames.get(0), memberNames);
+
+        dialog.setTitle("Transfer Admin");
+        dialog.setHeaderText("Transfer administrator rights");
+        dialog.setContentText("Choose a member:");
+
+        dialog.showAndWait().ifPresent(selectedName -> {
+            User newAdmin = members.stream()
+                    .filter(member -> {
+                        String name = member.getDisplayName() != null
+                                ? member.getDisplayName()
+                                : member.getUsername();
+                        return name.equals(selectedName);
+                    })
+                    .findFirst()
+                    .orElseThrow();
+
+            try {
+                ctx.householdService.transferAdmin(admin, household, newAdmin);
+
+                // Refresh the household membership so the current user is now a member
+                ctx.householdService.findActiveHouseholdForUser(admin)
+                        .ifPresent(updatedHousehold ->
+                                ctx.session.enterHousehold(
+                                        updatedHousehold,
+                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()
+                                )
+                        );
+
+                refresh();
+            } catch (IllegalArgumentException e) {
+                showError(renameHouseholdErrorLabel, e.getMessage());
+            }
+        });
+    }
+
+    // US-33: change the household join code
+    private void handleChangeJoinCode() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+
+        confirmation.setTitle("Generate New Join Code");
+        confirmation.setHeaderText("Generate a new household join code?");
+        confirmation.setContentText(
+                "The old join code will no longer work."
+        );
+
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    User admin = ctx.session.getCurrentUser();
+                    Household household = ctx.session.getCurrentHousehold();
+
+                    ctx.householdService.changeJoinCode(admin, household);
+
+                    // Refresh the household so the new join code is displayed
+                    ctx.householdService.findActiveHouseholdForUser(admin)
+                            .ifPresent(updatedHousehold ->
+                                    ctx.session.enterHousehold(
+                                            updatedHousehold,
+                                            ctx.householdService.findActiveMembership(
+                                                    admin,
+                                                    updatedHousehold
+                                            ).orElseThrow()
+                                    )
+                            );
+
+                    refresh();
+                } catch (IllegalArgumentException e) {
+                    showError(renameHouseholdErrorLabel, e.getMessage());
+                }
+            }
+        });
     }
 }
