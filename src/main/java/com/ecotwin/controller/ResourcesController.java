@@ -3,6 +3,9 @@ package com.ecotwin.controller;
 import com.ecotwin.AppContext;
 import com.ecotwin.model.EnergyEntry;
 import com.ecotwin.model.Household;
+import com.ecotwin.model.Recommendation.Domain;
+import com.ecotwin.model.ScenarioComparison;
+import com.ecotwin.model.ScoreChange;
 import com.ecotwin.model.TransportEntry;
 import com.ecotwin.model.User;
 import com.ecotwin.model.WasteEntry;
@@ -17,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
 import java.util.List;
+import java.util.Optional;
 
 /** US-15..18: record energy, water, waste and transport information for the current household. */
 public class ResourcesController {
@@ -59,6 +63,10 @@ public class ResourcesController {
     @FXML private TextField flightsPerYearField;
     @FXML private Label transportErrorLabel;
     @FXML private VBox transportEntriesList;
+
+    @FXML private VBox scoreChangeCard;
+    @FXML private Label overallChangeLabel;
+    @FXML private Label domainChangeLabel;
 
 
 
@@ -106,18 +114,20 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            if (editingEnergyEntryId == null) {
-                ctx.energyService.recordEntry(
-                        user, household, electricityKwh,
-                        solarGenerationKwh, energyNotesField.getText()
-                );
-            } else {
-                ctx.energyService.updateEntry(
-                        user, household, editingEnergyEntryId,
-                        electricityKwh, solarGenerationKwh, energyNotesField.getText()
-                );
-                editingEnergyEntryId = null;
-            }
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.ENERGY, () -> {
+                if (editingEnergyEntryId == null) {
+                    ctx.energyService.recordEntry(
+                            user, household, electricityKwh,
+                            solarGenerationKwh, energyNotesField.getText()
+                    );
+                } else {
+                    ctx.energyService.updateEntry(
+                            user, household, editingEnergyEntryId,
+                            electricityKwh, solarGenerationKwh, energyNotesField.getText()
+                    );
+                    editingEnergyEntryId = null;
+                }
+            }));
             hideError(energyErrorLabel);
             electricityKwhField.clear();
             solarGenerationKwhField.clear();
@@ -186,17 +196,19 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            if (editingWaterEntryId == null) {
-                ctx.waterService.recordEntry(
-                        user, household, litres, waterNotesField.getText()
-                );
-            } else {
-                ctx.waterService.updateEntry(
-                        user, household, editingWaterEntryId,
-                        litres, waterNotesField.getText()
-                );
-                editingWaterEntryId = null;
-            }
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WATER, () -> {
+                if (editingWaterEntryId == null) {
+                    ctx.waterService.recordEntry(
+                            user, household, litres, waterNotesField.getText()
+                    );
+                } else {
+                    ctx.waterService.updateEntry(
+                            user, household, editingWaterEntryId,
+                            litres, waterNotesField.getText()
+                    );
+                    editingWaterEntryId = null;
+                }
+            }));
 
             hideError(waterErrorLabel);
             litresField.clear();
@@ -269,26 +281,28 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            if (editingWasteEntryId == null) {
-                ctx.wasteService.recordEntry(
-                        user,
-                        household,
-                        generalKg,
-                        recycledKg,
-                        compostKg
-                );
-            } else {
-                ctx.wasteService.updateEntry(
-                        user,
-                        household,
-                        editingWasteEntryId,
-                        generalKg,
-                        recycledKg,
-                        compostKg
-                );
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WASTE, () -> {
+                if (editingWasteEntryId == null) {
+                    ctx.wasteService.recordEntry(
+                            user,
+                            household,
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
+                } else {
+                    ctx.wasteService.updateEntry(
+                            user,
+                            household,
+                            editingWasteEntryId,
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
 
-                editingWasteEntryId = null;
-            }
+                    editingWasteEntryId = null;
+                }
+            }));
 
             hideError(wasteErrorLabel);
 
@@ -480,24 +494,26 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            if (editingTransportEntryId == null) {
-                ctx.transportService.recordEntry(
-                        user,
-                        household,
-                        publicTransportTripsPerWeek,
-                        flightsPerYear
-                );
-            } else {
-                ctx.transportService.updateEntry(
-                        user,
-                        household,
-                        editingTransportEntryId,
-                        publicTransportTripsPerWeek,
-                        flightsPerYear
-                );
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.TRANSPORT, () -> {
+                if (editingTransportEntryId == null) {
+                    ctx.transportService.recordEntry(
+                            user,
+                            household,
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
+                } else {
+                    ctx.transportService.updateEntry(
+                            user,
+                            household,
+                            editingTransportEntryId,
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
 
-                editingTransportEntryId = null;
-            }
+                    editingTransportEntryId = null;
+                }
+            }));
 
             hideError(transportErrorLabel);
             publicTransportTripsField.clear();
@@ -564,6 +580,64 @@ public class ResourcesController {
             transportEntriesList.getChildren().add(row);
         }
     }
+    // US-23: show how the update changed the score
+
+    private void showScoreChange(Optional<ScoreChange> change) {
+        scoreChangeCard.setVisible(change.isPresent());
+        scoreChangeCard.setManaged(change.isPresent());
+        if (change.isEmpty()) {
+            return;
+        }
+
+        ScoreChange scores = change.get();
+        boolean showDomain = !scores.isFirstScore();
+        domainChangeLabel.setVisible(showDomain);
+        domainChangeLabel.setManaged(showDomain);
+
+        if (scores.isFirstScore()) {
+            overallChangeLabel.setText("Your household's first overall score is "
+                    + formatScore(scores.overall().getScenarioScore()));
+            setDirectionStyle(overallChangeLabel, scores.overall());
+            return;
+        }
+
+        showChangeLine(overallChangeLabel, "Overall score", scores.overall());
+        showChangeLine(domainChangeLabel, domainName(scores.domain()) + " score", scores.domainChange());
+    }
+
+    private void showChangeLine(Label label, String title, ScenarioComparison comparison) {
+        label.setText(title + ": " + formatScore(comparison.getCurrentScore())
+                + " → " + formatScore(comparison.getScenarioScore())
+                + "  (" + describeDifference(comparison) + ")");
+        setDirectionStyle(label, comparison);
+    }
+
+    private void setDirectionStyle(Label label, ScenarioComparison comparison) {
+        label.getStyleClass().removeAll("success-text", "error-text", "muted-text");
+        label.getStyleClass().add(switch (comparison.getDirection()) {
+            case IMPROVED -> "success-text";
+            case WORSENED -> "error-text";
+            case UNCHANGED -> "muted-text";
+        });
+    }
+
+    private String describeDifference(ScenarioComparison comparison) {
+        return switch (comparison.getDirection()) {
+            case IMPROVED -> comparison.signedPoints() + ", better";
+            case WORSENED -> comparison.signedPoints() + ", worse";
+            case UNCHANGED -> "no change";
+        };
+    }
+
+    private String domainName(Domain domain) {
+        String name = domain.name().toLowerCase();
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    }
+
+    private String formatScore(double score) {
+        return String.format("%.1f", score);
+    }
+
     private Label mutedLabel(String text) {
         Label label = new Label(text);
         label.getStyleClass().add("muted-text");
