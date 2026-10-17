@@ -94,6 +94,19 @@ public class SqliteHouseholdDao implements HouseholdDao {
         }
     }
 
+    // US-36: delete a household
+    @Override
+    public void deleteHousehold(long householdId) {
+        String sql = "DELETE FROM households WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete household", e);
+        }
+    }
+
     private Household map(ResultSet rs) throws SQLException {
         return new Household(
             rs.getLong("id"),

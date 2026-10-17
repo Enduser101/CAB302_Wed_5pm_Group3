@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -635,4 +636,146 @@ class HouseholdServiceTest {
                 eqLong(admin.getId()),
                 anyString());
     }
+
+    // US-36: administrator can delete a household
+    @Test
+    void adminDeletesHousehold_householdAndRelatedRecordsAreDeleted() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, creator.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                creator.getId(), household.getId()))
+                .thenReturn(Optional.of(adminMembership));
+
+        service.deleteHousehold(creator, household);
+
+        verify(activityLogDao).deleteByHousehold(household.getId());
+        verify(membershipDao).deleteByHousehold(household.getId());
+        verify(householdDao).deleteHousehold(household.getId());
+    }
+
+    // US-36: ordinary members cannot delete a household
+    @Test
+    void memberCannotDeleteHousehold() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        User member = new User(
+                2, "member", "m@example.com", "hash", "Member", "now");
+
+        HouseholdMembership memberMembership = new HouseholdMembership(
+                11, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(memberMembership));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.deleteHousehold(member, household));
+
+        verify(activityLogDao, never()).deleteByHousehold(household.getId());
+        verify(membershipDao, never()).deleteByHousehold(household.getId());
+        verify(householdDao, never()).deleteHousehold(household.getId());
+    }
+
+
+    // US-34: administrator can edit an activity history entry
+    @Test
+    void adminEditsHistoryEntry_updatesMessageAndRecordsCorrection() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, creator.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        ActivityLogEntry entry = new ActivityLogEntry(
+                20, household.getId(), creator.getId(), "Old message", "now");
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                creator.getId(), household.getId()))
+                .thenReturn(Optional.of(adminMembership));
+
+        when(activityLogDao.findByHousehold(household.getId()))
+                .thenReturn(List.of(entry));
+
+        service.editHistoryEntry(
+                creator, household, entry.getId(), "Corrected message");
+
+        verify(activityLogDao).updateMessage(
+                entry.getId(), household.getId(), "Corrected message");
+
+        verify(activityLogDao).log(
+                household.getId(), creator.getId(),
+                "Creator edited activity entry #20. Original: \"Old message\". Updated: \"Corrected message\"");
+    }
+
+
+    // US-34: ordinary members cannot edit or delete activity history
+    @Test
+    void memberCannotEditOrDeleteHistoryEntry() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        User member = new User(
+                2, "member", "m@example.com", "hash", "Member", "now");
+
+        HouseholdMembership memberMembership = new HouseholdMembership(
+                11, member.getId(), household.getId(),
+                HouseholdMembership.Role.MEMBER, "now", null);
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                member.getId(), household.getId()))
+                .thenReturn(Optional.of(memberMembership));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.editHistoryEntry(
+                        member, household, 20, "Corrected message"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.deleteHistoryEntry(member, household, 20));
+
+        verify(activityLogDao, never()).updateMessage(
+                anyLong(), anyLong(), anyString());
+
+        verify(activityLogDao, never()).deleteEntry(anyLong(), anyLong());
+    }
+
+
+    // US-34: administrator can delete an activity history entry
+    @Test
+    void adminDeletesHistoryEntry_recordsOriginalMessage() {
+        Household household = new Household(
+                1, "Test House", "ABC234", 2, "House", "QLD", "now");
+
+        HouseholdMembership adminMembership = new HouseholdMembership(
+                10, creator.getId(), household.getId(),
+                HouseholdMembership.Role.ADMIN, "now", null);
+
+        ActivityLogEntry entry = new ActivityLogEntry(
+                20, household.getId(), creator.getId(), "Incorrect message", "now");
+
+        when(membershipDao.findActiveByUserAndHousehold(
+                creator.getId(), household.getId()))
+                .thenReturn(Optional.of(adminMembership));
+
+        when(activityLogDao.findByHousehold(household.getId()))
+                .thenReturn(List.of(entry));
+
+        service.deleteHistoryEntry(creator, household, entry.getId());
+
+        verify(activityLogDao).deleteEntry(entry.getId(), household.getId());
+
+        verify(activityLogDao).log(
+                household.getId(), creator.getId(),
+                "Creator deleted activity entry #20. Original message: \"Incorrect message\"");
+    }
+
+
+
 }
