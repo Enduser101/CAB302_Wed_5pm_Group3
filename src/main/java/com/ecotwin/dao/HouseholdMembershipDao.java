@@ -10,4 +10,7 @@ public interface HouseholdMembershipDao {
     Optional<HouseholdMembership> findAnyActiveByUser(long userId); // which household to land in after login
     void leaveHousehold(long membershipId); // US-10: leave a household
     java.util.List<HouseholdMembership> findActiveByHousehold(long householdId); // US-11
+
+    // US-35: transfer administrator rights to another active member
+    void transferAdmin(long householdId, long currentAdminUserId, long newAdminUserId);
 }
