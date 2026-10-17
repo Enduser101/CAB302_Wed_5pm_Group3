@@ -182,7 +182,34 @@ class EnergyServiceTest {
                 household.getId(),
                 user.getId(),
                 "Resident changed energy usage from 120.0 kWh to 100.0 kWh"
+                        + " and solar generation from 15.0 kWh to 20.0 kWh"
         );
+    }
+
+    @Test
+    void editingOnlySolarLogsTheSolarChange() {
+        EnergyEntry oldEntry = new EnergyEntry(1, household.getId(), "2026-09", 120.0, 15.0, null, user.getId(), "before");
+        when(energyEntryDao.findByHousehold(household.getId())).thenReturn(List.of(oldEntry));
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(new EnergyEntry(1, household.getId(), "2026-09", 120.0, 40.0, null, user.getId(), "now"));
+
+        service.updateEntry(user, household, 1, 120.0, 40.0, null);
+
+        verify(activityLogDao).log(household.getId(), user.getId(),
+                "Resident changed solar generation from 15.0 kWh to 40.0 kWh");
+    }
+
+    @Test
+    void removingSolarLogsItAsNone() {
+        EnergyEntry oldEntry = new EnergyEntry(1, household.getId(), "2026-09", 120.0, 15.0, null, user.getId(), "before");
+        when(energyEntryDao.findByHousehold(household.getId())).thenReturn(List.of(oldEntry));
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(new EnergyEntry(1, household.getId(), "2026-09", 120.0, null, null, user.getId(), "now"));
+
+        service.updateEntry(user, household, 1, 120.0, null, null);
+
+        verify(activityLogDao).log(household.getId(), user.getId(),
+                "Resident changed solar generation from 15.0 kWh to none");
     }
 
     private static long eqLong(long value) {

@@ -33,6 +33,16 @@ class ScenarioComparisonTest {
     }
 
     @Test
+    void improvementIsShownAsPositivePoints() {
+        assertEquals("+7.5 points", new ScenarioComparison(48.0, 55.5).signedPoints());
+    }
+
+    @Test
+    void declineIsShownAsNegativePoints() {
+        assertEquals("-0.5 points", new ScenarioComparison(48.0, 47.5).signedPoints());
+    }
+
+    @Test
     void changeTooSmallToDisplayIsReportedAsUnchanged() {
         ScenarioComparison comparison = new ScenarioComparison(48.01, 48.02);
 

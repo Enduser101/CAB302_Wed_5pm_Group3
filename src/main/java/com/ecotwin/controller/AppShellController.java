@@ -39,7 +39,8 @@ public class AppShellController {
 
     @FXML
     private void showDashboard() {
-        showPlaceholder(dashboardNav, "Dashboard");
+        setActive(dashboardNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/dashboard-view.fxml"));
     }
 
     @FXML
@@ -50,7 +51,8 @@ public class AppShellController {
 
     @FXML
     private void showRecommendations() {
-        showPlaceholder(recommendationsNav, "Recommendations");
+        setActive(recommendationsNav);
+        contentArea.getChildren().setAll(nav.load("/com/ecotwin/recommendations-view.fxml"));
     }
 
     @FXML

@@ -7,7 +7,9 @@ import com.ecotwin.model.Household;
 import com.ecotwin.model.User;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class EnergyService {
 
@@ -66,13 +68,20 @@ public class EnergyService {
                 actor.getId()
         );
 
-        if (oldEntry != null) {
+        List<String> changes = new ArrayList<>();
+        if (oldEntry != null && oldEntry.getElectricityKwh() != electricityKwh) {
+            changes.add("energy usage from " + oldEntry.getElectricityKwh() + " kWh to " + electricityKwh + " kWh");
+        }
+        if (oldEntry != null && !Objects.equals(oldEntry.getSolarGenerationKwh(), solarGenerationKwh)) {
+            changes.add("solar generation from " + solarText(oldEntry.getSolarGenerationKwh())
+                    + " to " + solarText(solarGenerationKwh));
+        }
+
+        if (!changes.isEmpty()) {
             activityLogDao.log(
                     household.getId(),
                     actor.getId(),
-                    displayName(actor) + " changed energy usage from "
-                            + oldEntry.getElectricityKwh() + " kWh to "
-                            + electricityKwh + " kWh"
+                    displayName(actor) + " changed " + String.join(" and ", changes)
             );
         } else {
             activityLogDao.log(
@@ -90,6 +99,10 @@ public class EnergyService {
 
     public List<EnergyEntry> findEntriesForHousehold(Household household) {
         return energyEntryDao.findByHousehold(household.getId());
+    }
+
+    private String solarText(Double kwh) {
+        return kwh == null ? "none" : kwh + " kWh";
     }
 
     private String displayName(User user) {

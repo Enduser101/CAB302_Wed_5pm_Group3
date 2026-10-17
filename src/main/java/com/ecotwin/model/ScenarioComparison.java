@@ -43,6 +43,12 @@ public class ScenarioComparison {
         return Direction.UNCHANGED;
     }
 
+    /** The difference as displayed, e.g. "+7.5 points" or "-0.5 points". */
+    public String signedPoints() {
+        String sign = difference < 0 ? "-" : "+";
+        return sign + String.format("%.1f", Math.abs(difference)) + " points";
+    }
+
     private static double round(double value) {
         return Math.round(value * 10) / 10.0;
     }

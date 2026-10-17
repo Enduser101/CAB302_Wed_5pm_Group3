@@ -25,6 +25,12 @@
             <Label text="Record your household's energy, water, waste and transport information."
                    styleClass="muted-text" wrapText="true" />
 
+            <VBox fx:id="scoreChangeCard" styleClass="card" spacing="6" maxWidth="520" visible="false" managed="false">
+                <Label text="Score after your update" styleClass="field-label" />
+                <Label fx:id="overallChangeLabel" wrapText="true" />
+                <Label fx:id="domainChangeLabel" wrapText="true" />
+            </VBox>
+
             <VBox fx:id="noHouseholdSection" spacing="12">
                 <Label text="Join or create a household first to start tracking resources." styleClass="muted-text" wrapText="true" />
             </VBox>
