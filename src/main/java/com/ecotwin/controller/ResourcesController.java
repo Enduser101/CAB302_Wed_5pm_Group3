@@ -622,11 +622,9 @@ public class ResourcesController {
     }
 
     private String describeDifference(ScenarioComparison comparison) {
-        String points = formatScore(Math.abs(comparison.getDifference())) + " points";
-
         return switch (comparison.getDirection()) {
-            case IMPROVED -> "+" + points + ", better";
-            case WORSENED -> "-" + points + ", worse";
+            case IMPROVED -> comparison.signedPoints() + ", better";
+            case WORSENED -> comparison.signedPoints() + ", worse";
             case UNCHANGED -> "no change";
         };
     }
