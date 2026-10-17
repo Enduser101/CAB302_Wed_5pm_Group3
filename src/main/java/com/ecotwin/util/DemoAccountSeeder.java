@@ -70,6 +70,25 @@ public class DemoAccountSeeder {
             return false;
         }
 
+        // One transaction: about 80 writes become one disk write, and a failure leaves no half-made account.
+        try {
+            connection.setAutoCommit(false);
+            try {
+                seed();
+                connection.commit();
+            } catch (RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not create the demo account", e);
+        }
+        return true;
+    }
+
+    private void seed() {
         user = ctx.authService.register(USERNAME, "cab302@example.com", PASSWORD);
         household = ctx.householdService.createHousehold(user, "CAB302 Demo House", 2, "House", "QLD");
         String created = at(5, 1, 10, 0);
@@ -81,7 +100,6 @@ public class DemoAccountSeeder {
         recordPastMonths();
         recordSeptember();
         recordOctober();
-        return true;
     }
 
     /** May - Aug: heating pushes energy up over winter, a June holiday adds flights, August is dry. */
