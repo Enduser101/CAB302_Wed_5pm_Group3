@@ -78,7 +78,10 @@ public class HouseholdScoreService {
 
     /** US-23: run an update and report the household's scores before and after it. */
     public Optional<ScoreChange> trackChange(Household household, Domain domain, Runnable update) {
-        return Optional.empty();
+        Optional<ScoreBreakdown> before = currentScores(household);
+        update.run();
+        return currentScores(household)
+                .map(after -> new ScoreChange(before.orElse(null), after, domain));
     }
 
     /** Newest period wins; within the same period, the most recently added entry wins. */
