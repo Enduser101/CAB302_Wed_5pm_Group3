@@ -15,4 +15,7 @@ public interface HouseholdDao {
     
     // US-33: change the household join code
     void updateJoinCode(long householdId, String newJoinCode);
+
+    // US-36: delete a household
+    void deleteHousehold(long householdId);
 }

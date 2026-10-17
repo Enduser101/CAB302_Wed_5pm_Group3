@@ -10,6 +10,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import com.ecotwin.model.ActivityLogEntry;
 
+import java.util.Optional;
+
 /** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
  *  resulting household once the user has one. Member management (US-11+) is out of scope here. */
 public class HouseholdController {
@@ -48,7 +50,7 @@ public class HouseholdController {
 
     // US-32: household administrator actions
     @FXML
-    private HBox householdAdminButtons;
+    private VBox householdAdminButtons;
 
     // US-33: error message when renaming a household
     @FXML
@@ -187,6 +189,9 @@ public class HouseholdController {
             householdAdminButtons.getChildren().clear();
 
             if (admin) {
+                // US-36: arrange administrator buttons into separate rows
+                HBox adminButtonRow = new HBox(10);
+
                 Button activityButton = new Button("Activity History");
                 activityButton.getStyleClass().add("edit-button");
                 activityButton.setOnAction(event -> handleShowActivityHistory());
@@ -206,11 +211,24 @@ public class HouseholdController {
                 joinCodeButton.getStyleClass().add("edit-button");
                 joinCodeButton.setOnAction(event -> handleChangeJoinCode());
 
-                householdAdminButtons.getChildren().addAll(
+                adminButtonRow.getChildren().addAll(
                         activityButton,
                         renameButton,
                         transferButton,
                         joinCodeButton
+                );
+
+                // US-36: delete a household
+                Button deleteHouseholdButton = new Button("Delete Household");
+                deleteHouseholdButton.getStyleClass().add("btn-danger");
+                deleteHouseholdButton.setOnAction(event -> handleDeleteHousehold());
+
+                HBox deleteButtonRow = new HBox(10);
+                deleteButtonRow.getChildren().add(deleteHouseholdButton);
+
+                householdAdminButtons.getChildren().addAll(
+                        adminButtonRow,
+                        deleteButtonRow
                 );
             }
         }
@@ -257,35 +275,148 @@ public class HouseholdController {
             showError(removeMemberErrorLabel, e.getMessage());
         }
     }
+
     // US-12: view household activity history, newest first
+    // US-34: admins can edit and delete activity history entries
     private void handleShowActivityHistory() {
         Household household = ctx.session.getCurrentHousehold();
-        java.util.List<ActivityLogEntry> history = ctx.householdService.getHistory(household);
+        User user = ctx.session.getCurrentUser();
+
+        // US-34: only show editing controls to the administrator
+        boolean isAdmin = ctx.householdService.findActiveMembership(user, household)
+                .map(membership ->
+                        membership.getRole() == HouseholdMembership.Role.ADMIN)
+                .orElse(false);
 
         VBox list = new VBox(8);
         list.setPadding(new javafx.geometry.Insets(12));
+
+        ScrollPane scroll = new ScrollPane(list);
+        scroll.setFitToWidth(true);
+        scroll.setPrefSize(560, 360);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle(household.getName() + ": Activity History");
+        dialog.setHeaderText("Newest first");
+        dialog.getDialogPane().setContent(scroll);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        // US-34: populate the history when the dialog opens
+        populateActivityHistory(list, household, user, isAdmin);
+
+        dialog.showAndWait();
+    }
+
+    // US-34: refresh the existing activity history list
+    private void populateActivityHistory(
+            VBox list, Household household, User user, boolean isAdmin) {
+
+        list.getChildren().clear();
+
+        // Get the latest history after every edit or deletion
+        java.util.List<ActivityLogEntry> history =
+                ctx.householdService.getHistory(household);
 
         if (history.isEmpty()) {
             list.getChildren().add(new Label("No activity yet."));
         }
 
         for (ActivityLogEntry entry : history) {
-            Label line = new Label(formatTime(entry.getCreatedAt()) + "   " + entry.getMessage());
+            Label line = new Label(
+                    formatTime(entry.getCreatedAt()) + "   " + entry.getMessage());
             line.setWrapText(true);
-            list.getChildren().add(line);
+            line.setPrefWidth(350);
+            line.setMinWidth(350);
+            line.setMaxWidth(350);
+
+            // US-34: prevent changing entries that have already been modified or deleted
+            boolean isAuditEntry =
+                    entry.getMessage().contains(" edited activity entry #")
+                            || entry.getMessage().contains(" deleted activity entry #");
+
+            boolean alreadyChanged = history.stream().anyMatch(item ->
+                    item.getMessage().contains("edited activity entry #" + entry.getId() + ".")
+                            || item.getMessage().contains("deleted activity entry #" + entry.getId() + "."));
+
+            boolean canModify = !isAuditEntry && !alreadyChanged;
+
+            if (isAdmin && canModify) {
+                // US-34: edit an activity history entry
+                Button editButton = new Button("Edit");
+                editButton.setPrefSize(75, 30);
+                editButton.setMinSize(75, 30);
+                editButton.setMaxSize(75, 30);
+                editButton.setOnAction(event -> {
+                    javafx.scene.control.TextInputDialog editDialog =
+                            new javafx.scene.control.TextInputDialog(entry.getMessage());
+
+                    editDialog.setTitle("Edit Activity");
+                    editDialog.setHeaderText("Correct activity history");
+                    editDialog.setContentText("Activity message:");
+
+                    editDialog.showAndWait().ifPresent(newMessage -> {
+                        try {
+                            ctx.householdService.editHistoryEntry(
+                                    user, household, entry.getId(), newMessage);
+
+                            // US-34: refresh the same dialog's list
+                            populateActivityHistory(list, household, user, isAdmin);
+                        } catch (IllegalArgumentException e) {
+                            showHistoryError(e.getMessage());
+                        }
+                    });
+                });
+
+                // US-34: delete an activity history entry
+                Button deleteButton = new Button("Delete");
+                deleteButton.getStyleClass().add("btn-danger");
+                deleteButton.setOnAction(event -> {
+                    javafx.scene.control.Alert confirmation =
+                            new javafx.scene.control.Alert(
+                                    javafx.scene.control.Alert.AlertType.CONFIRMATION);
+
+                    confirmation.setTitle("Delete Activity");
+                    confirmation.setHeaderText("Delete this activity entry?");
+                    confirmation.setContentText(
+                            "The original message will be recorded in the activity history.");
+
+                    confirmation.showAndWait().ifPresent(result -> {
+                        if (result == ButtonType.OK) {
+                            try {
+                                ctx.householdService.deleteHistoryEntry(
+                                        user, household, entry.getId());
+
+                                // US-34: refresh the same dialog's list
+                                populateActivityHistory(list, household, user, isAdmin);
+                            } catch (IllegalArgumentException e) {
+                                showHistoryError(e.getMessage());
+                            }
+                        }
+                    });
+                });
+
+                HBox entryRow = new HBox(8, line, editButton, deleteButton);
+                entryRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                HBox.setHgrow(line, javafx.scene.layout.Priority.ALWAYS);
+                list.getChildren().add(entryRow);
+            } else {
+                list.getChildren().add(line);
+            }
         }
-
-        ScrollPane scroll = new ScrollPane(list);
-        scroll.setFitToWidth(true);
-        scroll.setPrefSize(480, 360);
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Activity History");
-        dialog.setHeaderText(household.getName() + ": newest first");
-        dialog.getDialogPane().setContent(scroll);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        dialog.showAndWait();
     }
+
+    // US-34: display activity history errors
+    private void showHistoryError(String message) {
+        javafx.scene.control.Alert error =
+                new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.ERROR);
+
+        error.setTitle("Activity History");
+        error.setHeaderText("Could not update activity history");
+        error.setContentText(message);
+        error.showAndWait();
+    }
+
 
     // US 12: show times in the computer's own time zone
     private static String formatTime(String createdAt) {
@@ -425,4 +556,34 @@ public class HouseholdController {
             }
         });
     }
+
+    // US-36: delete a household
+    @FXML
+    private void handleDeleteHousehold() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Household");
+        confirmation.setHeaderText("Permanently delete this household?");
+        confirmation.setContentText(
+                "All household memberships and activity history will be deleted. This cannot be undone.");
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                User user = ctx.session.getCurrentUser();
+                Household household = ctx.session.getCurrentHousehold();
+
+                ctx.householdService.deleteHousehold(user, household);
+                ctx.session.leaveHousehold();
+                refresh();
+            } catch (IllegalArgumentException e) {
+                Alert error = new Alert(Alert.AlertType.ERROR);
+                error.setTitle("Delete Household");
+                error.setHeaderText("Could not delete household");
+                error.setContentText(e.getMessage());
+                error.showAndWait();
+            }
+        }
+    }
+
 }

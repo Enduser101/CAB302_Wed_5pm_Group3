@@ -108,7 +108,7 @@
                         onAction="#handleLeaveHousehold" />
 
                 <!-- US-32: household administrator actions -->
-                <HBox fx:id="householdAdminButtons" spacing="10" />
+                <VBox fx:id="householdAdminButtons" spacing="10" />
 
             </VBox>
         </VBox>

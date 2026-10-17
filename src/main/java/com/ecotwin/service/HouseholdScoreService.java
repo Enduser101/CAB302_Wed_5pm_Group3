@@ -2,7 +2,9 @@ package com.ecotwin.service;
 
 import com.ecotwin.model.EnergyEntry;
 import com.ecotwin.model.Household;
+import com.ecotwin.model.Recommendation.Domain;
 import com.ecotwin.model.ScoreBreakdown;
+import com.ecotwin.model.ScoreChange;
 import com.ecotwin.model.SustainabilityScenario;
 import com.ecotwin.model.TransportEntry;
 import com.ecotwin.model.WasteEntry;
@@ -72,6 +74,14 @@ public class HouseholdScoreService {
     public Optional<ScoreBreakdown> currentScores(Household household) {
         return currentValues(household)
                 .map(values -> scoreCalculator.breakdown(values, household.getOccupants()));
+    }
+
+    /** US-23: run an update and report the household's scores before and after it. */
+    public Optional<ScoreChange> trackChange(Household household, Domain domain, Runnable update) {
+        Optional<ScoreBreakdown> before = currentScores(household);
+        update.run();
+        return currentScores(household)
+                .map(after -> new ScoreChange(before.orElse(null), after, domain));
     }
 
     /** Newest period wins; within the same period, the most recently added entry wins. */
