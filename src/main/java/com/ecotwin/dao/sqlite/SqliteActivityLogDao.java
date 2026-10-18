@@ -38,17 +38,34 @@ public class SqliteActivityLogDao implements ActivityLogDao {
         }
     }
 
+
+    // US-36: delete household activity history
+    @Override
+    public void deleteByHousehold(long householdId) {
+        String sql = "DELETE FROM activity_log WHERE household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete household activity history", e);
+        }
+    }
+
     @Override
     public List<ActivityLogEntry> findByHousehold(long householdId) {
         String sql = "SELECT id, household_id, actor_user_id, message, created_at "
                 + "FROM activity_log WHERE household_id = ? ORDER BY id DESC";
         List<ActivityLogEntry> history = new ArrayList<>();
+
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, householdId);
+
             try (ResultSet rows = statement.executeQuery()) {
                 while (rows.next()) {
                     long actor = rows.getLong("actor_user_id");
                     Long actorUserId = rows.wasNull() ? null : actor;
+
                     history.add(new ActivityLogEntry(
                             rows.getLong("id"),
                             rows.getLong("household_id"),
@@ -60,6 +77,37 @@ public class SqliteActivityLogDao implements ActivityLogDao {
         } catch (SQLException e) {
             throw new IllegalStateException("Could not read activity log", e);
         }
+
         return history;
     }
+
+    // US-34: update an activity history message
+    @Override
+    public void updateMessage(long entryId, long householdId, String message) {
+        String sql = "UPDATE activity_log SET message = ? WHERE id = ? AND household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, message);
+            statement.setLong(2, entryId);
+            statement.setLong(3, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update activity history entry", e);
+        }
+    }
+
+    // US-34: delete an individual activity history entry
+    @Override
+    public void deleteEntry(long entryId, long householdId) {
+        String sql = "DELETE FROM activity_log WHERE id = ? AND household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, entryId);
+            statement.setLong(2, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete activity history entry", e);
+        }
+    }
+
 }

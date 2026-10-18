@@ -16,6 +16,8 @@ import javafx.scene.layout.VBox;
 
 import java.util.List;
 import java.util.Optional;
+import com.ecotwin.service.RecommendationExplanationService;
+
 
 /**
  * US-24: the household's recommendations, weakest domain first, filterable by domain.
@@ -26,6 +28,9 @@ public class RecommendationsController {
     private final AppContext ctx;
     private final RecommendationService recommendationService =
             new RecommendationService(new IndicativeScoreCalculator());
+
+    private final RecommendationExplanationService explanationService =
+            new RecommendationExplanationService();
 
     private List<Recommendation> recommendations = List.of();
     private Domain weakest;
@@ -108,11 +113,15 @@ public class RecommendationsController {
         Label title = new Label(recommendation.title());
         title.getStyleClass().add("rec-title");
 
-        Label detail = new Label(recommendation.detail());
-        detail.getStyleClass().add("rec-detail");
-        detail.setWrapText(true);
+        Label whyLabel = new Label("Why this recommendation?");
+        whyLabel.getStyleClass().add("rec-detail");
 
-        VBox text = new VBox(2, domain, title, detail);
+        Label explanation = new Label(explanationService.explain(recommendation));
+        explanation.getStyleClass().add("rec-detail");
+        explanation.setWrapText(true);
+
+        VBox text = new VBox(2, domain, title, whyLabel, explanation);
+
         HBox.setHgrow(text, Priority.ALWAYS);
 
         Label points = new Label("+" + recommendation.points());

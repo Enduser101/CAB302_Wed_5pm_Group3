@@ -13,4 +13,7 @@ public interface HouseholdMembershipDao {
 
     // US-35: transfer administrator rights to another active member
     void transferAdmin(long householdId, long currentAdminUserId, long newAdminUserId);
+
+    // US-36: delete household memberships
+    void deleteByHousehold(long householdId);
 }
