@@ -1,0 +1,625 @@
+# Individual Weekly Log — Favour Bature
+Student Number: 12190284
+
+
+## 15/08/2026
+
+### Team Meeting / Project Setup
+
+* Met with the team to go through the CAB302 project requirements and what we needed to get done for Checkpoint 1.
+* Discussed the GitHub setup, Java Readiness quizzes, individual work logs and how we would divide responsibilities.
+* Shared GitHub usernames with the team and helped organise repository access.
+
+
+## 17/08/2026
+
+### Project Research and Checkpoint 1
+
+* Went through the CAB302 project theme, project phases, checkpoint requirements and assessment criteria so I understood what we actually needed to build and show throughout the semester.
+* Reviewed the Week 5 checkpoint requirements and worked out what we still needed to complete as a team.
+* Looked at different sustainability project ideas and compared their users, main features and how realistic they would be to build in Java.
+* Prepared some project ideas to discuss with the team before deciding on the final concept.
+
+
+## 18/08/2026
+
+### EcoTwin Requirements
+
+* Reviewed and updated the initial requirements for EcoTwin.
+* Worked on defining the project scope, functional requirements and non-functional requirements.
+* Committed and pushed my requirements changes to the team's requirements branch.
+
+
+## 19/08/2026
+
+### Team Meeting and User Story Planning
+
+* Attended the tutorial and team meeting and discussed the project setup, user stories, GitHub Projects and UI design.
+* Helped with the initial user-story discussion and created a general summary and roadmap for EcoTwin.
+* Contributed to defining the different user roles and permissions.
+* Suggested that household owners should have different permissions and that ownership should be transferred if an admin leaves the household.
+* Suggested using a consistent user-story format with an ID, priority, story points, acceptance criteria, status and owner.
+
+
+## 23/08/2026
+
+### User Stories and Epics
+
+* Attended the team meeting to go through and improve the EcoTwin user stories.
+* Discussed removing the premium-user idea and keeping the project more focused.
+* Discussed household permissions and how the user stories and epics should be divided between the team.
+* Went through how we would organise our GitHub documentation and project work.
+
+
+## 30/08/2026
+
+### Checkpoint 2 Catch-up
+
+* I couldn't attend the scheduled team meeting because of a family commitment, so I went through the meeting notes and Discord messages afterwards.
+* Caught up on what I needed to complete for Checkpoint 2.
+* Reviewed the sprint-planning work and the low/mid-fidelity Figma designs that needed to be completed.
+
+
+## 01/09/2026
+
+### GitHub Project Planning
+
+* Reviewed the team's GitHub issues and project board for Checkpoint 2.
+* Followed up with Michael about access to the GitHub Project board and how the sprint was being organised.
+* Met with Michael to fix the project setup and went through how issues and tasks should be organised.
+
+### Scenario UI Design
+
+* Created low-fidelity desktop designs in Figma for the Scenario Simulator and Saved Scenarios screens.
+* Included the main parts needed for creating scenarios, predicted scores, comparing results and viewing saved scenarios.
+
+### Authentication UI Design
+
+* Created low-fidelity Login and Registration screens for EcoTwin.
+* Included normal registered-user authentication and guest access in the designs.
+
+
+## 02/09/2026
+
+### UI Refinement
+
+* Continued working on my assigned EcoTwin screens in Figma.
+* Took the original low-fidelity designs and refined them towards mid/high-fidelity versions.
+* Kept the designs consistent with the visual style the team had agreed on.
+
+
+## 09/09/2026
+
+### Architecture Planning
+
+* Worked on the overall architecture map for EcoTwin.
+* Planned how the JavaFX/FXML screens, controllers, services, models and database/persistence layer would connect.
+* Also mapped where the sustainability scoring and scenario simulator would fit into the application.
+* Used Draw.io to document the architecture for GitHub issue #71.
+
+### Maths Function Mapping
+
+* Worked on the maths/function mapping for the sustainability system.
+* Defined the planned Energy, Water, Transport and Waste scoring functions.
+* Mapped how the individual scores would contribute to an overall sustainability score.
+* Also documented how the scenario score difference would be calculated.
+* Documented the scoring ranges and where the calculations would connect to the rest of EcoTwin.
+
+### Project Structure
+
+* Looked at how the architecture should translate into the actual Java project.
+* Planned the separation between the UI, controllers, services, models and persistence layer.
+* Tried to keep the design so later scoring and scenario functionality could be added without putting all of the logic directly into the controllers.
+
+### Development Setup
+
+* Synced the team repository and created a feature branch for my development work.
+* Set up the initial Java 21, Maven, JavaFX and JUnit configuration needed to start building EcoTwin.
+
+
+## 12/09/2026
+
+### Repository Update
+
+* Reviewed the repository after the team changed the shared development branch to `dev`.
+* Checked the updated branch workflow and project structure.
+* Made sure my existing work could still be integrated with the new development setup.
+
+
+## 13/09/2026
+
+### JavaFX Application Setup
+
+* Developed the initial JavaFX application structure for EcoTwin.
+* Set up the application launcher, FXML loading and initial Login interface.
+* Worked through JavaFX and FXML setup problems until the project compiled and the application launched correctly.
+
+### Login and Registration Navigation
+
+* Implemented the initial Login and Registration screens.
+* Added navigation between the two screens.
+* Ran the application and checked that users could move between Login and Registration correctly.
+
+### Git Cleanup
+
+* Reviewed the generated project files before pushing my work.
+* Updated `.gitignore` so build output and unnecessary IntelliJ files would not keep being committed.
+* Cleaned up my feature branch before continuing with the integration.
+
+
+## 14–15/09/2026
+
+### US-01 and US-02 — Register and Login
+
+* Worked on my assigned authentication user stories, US-01 Register and US-02 Login.
+* Reviewed the authentication implementation against the acceptance criteria.
+* Checked registration validation, duplicate usernames and password requirements.
+* Checked that passwords were hashed using BCrypt instead of being stored as plain text.
+* Checked that invalid logins returned a generic error instead of exposing whether the username or password was wrong.
+
+
+## 15/09/2026
+
+### Application Integration Testing
+
+* Ran the integrated EcoTwin application after the authentication and household functionality had been combined.
+* Checked that the project compiled with the updated architecture and that the JavaFX application still launched correctly.
+
+### Automated Testing and Debugging
+
+* Ran the Maven test suite and found that `HouseholdServiceTest` no longer matched the updated `HouseholdService` constructor.
+* The service now required a `UserDao` for the household-member functionality.
+* Updated the test setup with the required mocked `UserDao`.
+* Reran the tests after the fix.
+
+### Test Verification
+
+* Ran `./mvnw clean test` on the integrated project.
+* Confirmed all 15 automated tests passed with 0 failures and 0 errors.
+* This included the authentication, household service and database connection tests.
+
+### Git Integration
+
+* Committed and pushed the test compatibility fix to `feature/login-setup`.
+* Created PR #81 into `dev` so the integrated authentication and household work could be reviewed before merging.
+* The test compatibility fix was included in commit `a498727`.
+
+
+## 17/09/2026
+
+### Week 9 Checkpoint
+
+* Reviewed my individual work and evidence for the Week 9 checkpoint.
+* Prepared to show my assigned authentication stories and the architecture/planning work I had contributed.
+* Also prepared my Git history, automated testing evidence and the current working EcoTwin prototype.
+
+
+## 21/09/2026
+
+### US-19 — Resource Editing Planning
+
+* Started working on US-19 for editing existing household resource data.
+* Looked through the existing Energy, Water, Waste and Transport implementation before changing anything.
+* Planned how editing needed to work through the DAO, service and JavaFX controller layers.
+* Made sure the plan would add editing without breaking the existing resource-entry functionality.
+
+
+## 22/09/2026
+
+### US-19 — Energy Editing
+
+* Started implementing editing for existing Energy records.
+* Added DAO and service update functionality.
+* Added validation so invalid edited values could not be saved.
+* Added activity logging so changes could show the previous and new values.
+* Kept the editing functionality connected to the existing score recalculation behaviour.
+
+
+## 23/09/2026
+
+### US-19 — Energy Testing and Debugging
+
+* Developed automated tests for editing Energy records.
+* Tested successful updates, invalid values, score recalculation and activity logging.
+* Worked through the failing tests and implementation problems until the Energy editing tests passed.
+
+### US-19 — Water Editing
+
+* Extended US-19 so existing Water records could also be edited.
+* Added the required DAO and service update support.
+* Added validation, activity logging and score recalculation for Water edits.
+* Started connecting the Water editing behaviour to the Resources interface.
+
+
+## 24/09/2026
+
+### US-19 — Waste Editing
+
+* Added editing for existing Waste records.
+* Implemented the update functionality across the DAO, SQLite persistence and service layers.
+* Added validation and activity logging showing the old and new values.
+* Made sure the sustainability score was recalculated after a valid edit.
+* Added automated testing for the new behaviour.
+
+### US-19 — Transport Editing / TDD
+
+* Used TDD while adding editing for household Transport information.
+* Wrote the automated tests before implementing the update functionality.
+* Ran the tests in the RED state and then implemented the required DAO and service behaviour.
+* Checked that edited public transport and flight values were saved correctly.
+
+
+## 25/09/2026
+
+### US-19 — Vehicle Editing / TDD
+
+* Extended US-19 again so existing household vehicles could be edited.
+* Wrote failing tests first for the required Vehicle editing behaviour.
+* Added the Vehicle DAO and SQLite update functionality.
+* Added the service update logic, validation, activity logging and score recalculation.
+* Reran the tests until the Vehicle editing functionality was GREEN.
+
+
+## 26/09/2026
+
+### US-19 — Resources UI Integration
+
+* Updated the Resources controller and JavaFX interface to support editing Energy, Water, Waste, Transport and Vehicle records.
+* Added the editing state and buttons needed to select and update existing entries.
+* Worked through UI behaviour problems during the integration.
+* Fixed scrolling/layout problems in the Resources screen.
+
+
+## 27/09/2026
+
+### US-19 — Manual Testing
+
+* Ran EcoTwin and manually tested editing across the different resource sections.
+* Checked that the updated values were actually saved after editing.
+* Tested the different editing states in the Resources interface.
+* Fixed integration and UI issues I found while manually testing the feature.
+
+
+## 28/09/2026
+
+### US-19 — Regression Testing
+
+* Ran the complete automated test suite after finishing the resource-editing work.
+* Confirmed all 63 tests passed with 0 failures and 0 errors.
+* Checked that the new editing functionality had not broken the existing authentication, household or resource functionality.
+
+
+## 29/09/2026
+
+### US-19 — Git Integration and Pull Request
+
+* Reviewed the completed US-19 changes before pushing.
+* Staged only the project files that were supposed to be included.
+* Committed and pushed the feature branch.
+* Created PR #92 into `dev`.
+* Confirmed the completed resource-editing functionality was merged into the shared development branch.
+* Main US-19 commits included `31b611a` and `6e56165`.
+
+
+## 30/09/2026
+
+### US-22 — Score Explanation Planning
+
+* Started looking at US-22, which required explaining what the household sustainability score actually means.
+* Reviewed the acceptance criteria and the score architecture that existed at the time.
+* Found that the main score implementation and Dashboard UI were being developed separately by other team members.
+* Planned my part so it could later connect to their work instead of duplicating the scoring functionality.
+
+
+## 01/10/2026
+
+### US-22 — Score Explanation TDD
+
+* Used TDD to develop the sustainability score explanation.
+* Wrote tests first for the required 0–100 score range and the plain-language meaning of a higher score.
+* Ran the tests and confirmed the RED state because `ScoreExplanationService` did not exist yet.
+* Implemented `ScoreExplanationService`.
+* Reran the tests and got them passing.
+
+### US-22 — Testing and Branch Management
+
+* Ran the full project test suite after implementing the score explanation.
+* Confirmed all 65 tests passed.
+* Reviewed the implementation and committed it on the US-22 feature branch.
+* Pushed the branch so the explanation could later be connected to the Dashboard once the team's score functionality was ready.
+* The initial implementation was committed as `8ce0ca6`.
+
+
+## 02/10/2026
+
+### US-26 — Requirements and Repository Review
+
+* Started looking at US-26, which required explaining why EcoTwin was making a recommendation.
+* Reviewed the acceptance criteria and looked through the current repository for the recommendation functionality.
+* Confirmed that the Recommendations screen was still a placeholder at this point.
+* Planned the explanation functionality separately so I wouldn't duplicate the recommendation feature another team member was building.
+
+
+## 03/10/2026
+
+### US-26 — Recommendation Explanation TDD
+
+* Used TDD to start the recommendation explanation functionality.
+* Wrote tests first for Energy, Water, Waste and Transport recommendation explanations.
+* Ran the tests and confirmed the RED state because `RecommendationExplanationService` did not exist.
+* Implemented the service so the explanations could reference the household's own values.
+* Kept the wording simple and non-technical as required by the user story.
+* Reran the tests to get the implementation GREEN.
+
+
+## 04/10/2026
+
+### US-26 — Testing and Git Integration
+
+* Ran the targeted tests for `RecommendationExplanationService`.
+* Ran the complete Maven test suite afterwards.
+* Confirmed all 67 tests passed with 0 failures and 0 errors.
+* Reviewed the changes and committed and pushed the initial US-26 implementation.
+* The implementation was committed as `81b09d5`.
+
+### US-27 — Scenario Planning
+
+* Started looking at US-27 and reviewed the other Scenario Simulation stories before implementing anything.
+* Checked the existing database/schema and project architecture.
+* Worked out how temporary scenarios should fit into the controller, service and model structure.
+* Confirmed that saving and viewing scenarios were separate user stories, so US-27 only needed to create a temporary scenario without changing the real household data.
+
+
+## 05/10/2026
+
+### US-27 — Scenario Model TDD
+
+* Started implementing US-27 using TDD.
+* Wrote failing tests for the `SustainabilityScenario` model first.
+* Confirmed the RED state and then implemented the model.
+* Used the model to hold hypothetical Energy, Water, Waste and Transport values.
+* Reran the tests and reached GREEN.
+
+### US-27 — Scenario Service TDD
+
+* Completed another TDD cycle for creating a scenario from the household's existing resource data.
+* Wrote tests around the required scenario behaviour.
+* Implemented `ScenarioService`.
+* Checked that a new scenario starts from the household's current resource values.
+* Also tested that changing the temporary scenario does not modify the original resource objects.
+
+
+## 06/10/2026
+
+### US-27 — Scenario Controller
+
+* Developed `ScenariosController` to load the household's current Energy, Water, Waste and Transport information into a temporary scenario.
+* Added input handling and validation.
+* Added functionality for applying changes and resetting the temporary scenario.
+* Kept the hypothetical scenario data separate from the household's real persisted records.
+
+### US-27 — JavaFX Scenario Simulator
+
+* Developed and integrated the Scenario Simulator JavaFX screen.
+* Added fields for the different sustainability values.
+* Added Apply and Reset functionality and user feedback.
+* Connected the Scenarios screen to the application navigation.
+* Tested the interface using existing household resource data.
+
+### Integration Debugging
+
+* Ran into an application-shell/FXML loading problem while integrating the Scenario Simulator.
+* Traced what initially looked like a login problem back to a missing `showRecommendations` handler in `AppShellController`.
+* Restored the handler and checked that authentication and application navigation worked again.
+
+
+## 07/10/2026
+
+### US-27 — Manual Scenario Testing
+
+* Manually tested scenario creation using existing household resource information.
+* Changed hypothetical scenario values and tested Apply and Reset.
+* Returned to the Resources screen afterwards to check that the real saved household information had not changed.
+
+### US-27 — Regression Testing
+
+* Ran the full automated test suite after integrating the Scenario Simulator.
+* Confirmed all 67 tests passed with 0 failures and 0 errors.
+* Checked that the scenario work had not broken the existing project functionality.
+
+### US-27 — Pull Request and CI
+
+* Reviewed the completed US-27 files and staged only the intended changes.
+* Committed and pushed the feature branch.
+* Created PR #98 into `dev`.
+* Monitored the GitHub Actions workflow.
+* Confirmed both automated build/test checks passed before merging the pull request.
+* The main US-27 implementation was committed as `6ba72db`.
+
+### Development Branch Check
+
+* Switched back to `dev` after US-27 was merged.
+* Pulled the latest remote changes.
+* Checked that my local `dev` matched `origin/dev` and that the working tree was clean.
+* Looked through the current controllers, services and FXML files to see where the score and recommendation features were up to.
+
+### Week 11 CI Checkpoint Preparation
+
+* Reviewed EcoTwin against the Week 11 Continuous Integration checkpoint requirements.
+* Prepared evidence for the enhanced prototype and Maven build setup.
+* Reviewed the automated GitHub Actions build/test workflow.
+* Prepared examples of the project's OO design, DAO structure, automated testing, Git workflow and refactoring work.
+
+
+## 08/10/2026
+
+### Project and Task Review
+
+* Reviewed the project after US-27 had been merged.
+* Checked my remaining assigned user stories and their dependencies.
+* Confirmed that finishing US-22 depended on the team's Dashboard/score work.
+* Confirmed that finishing US-26 depended on the main recommendation functionality being integrated first.
+
+
+## 09/10/2026
+
+### US-22 — Integration Preparation
+
+* Reviewed my existing `ScoreExplanationService` implementation.
+* Checked the current `dev` branch to see whether the Dashboard and score functionality needed for the final integration was available yet.
+* Went back over the US-22 acceptance criteria to make sure my implementation still covered the 0–100 scale and a simple explanation for non-technical users.
+
+
+## 10/10/2026
+
+### US-26 — Integration Preparation
+
+* Reviewed my existing recommendation explanation work against the current shared project.
+* Checked the status of the main Recommendations functionality.
+* Kept my work separate while the dependency was still being developed so I wouldn't add another copy of the recommendation logic.
+
+
+## 11/10/2026
+
+### Scenario Feature Review
+
+* Reviewed my merged US-27 Scenario Simulator and its tests after it had been integrated into `dev`.
+* Checked again that temporary scenario values remained separate from the household's saved resource data.
+* Looked at how the later Scenario user stories could build on the US-27 implementation.
+
+
+## 12/10/2026
+
+### Automated Tests and Project Check
+
+* Reviewed the current Maven tests after more team work had been integrated.
+* Checked that my authentication, resource-editing and scenario functionality was still represented in the automated tests.
+* Looked over the current project state before continuing with my remaining integration work.
+
+
+## 13/10/2026
+
+### User Story Status Review
+
+* Checked the status of my remaining assigned work, mainly US-22 and US-26.
+* Reviewed the shared `dev` branch for the Dashboard/score and recommendation dependencies needed to finish those stories.
+* Checked the GitHub issues/project board to see what had been completed and what was still waiting on other work.
+
+
+## 14/10/2026
+
+### Architecture and Integration Review
+
+* Reviewed the current EcoTwin project structure after more team features had been added.
+* Looked at how the Dashboard, scoring, Recommendations and Scenario functionality now fitted together.
+* Checked the controller, service, model and DAO structure before integrating my remaining feature branches.
+
+
+## 15/10/2026
+
+### US-22 and US-26 Branch Review
+
+* Reviewed my existing US-22 and US-26 feature branches against the latest shared development work.
+* Went back through the implementations and tests I had already created.
+* Prepared the branches so they could be integrated cleanly once the related team functionality was available.
+
+
+## 16/10/2026
+
+### Sprint Completion Planning
+
+* Reviewed the remaining sprint work before finishing my assigned user stories.
+* Checked the recent team changes in the repository.
+* Identified the Dashboard as the final integration point for US-22.
+* Identified the Recommendations screen as the final integration point for US-26.
+
+
+## 17/10/2026
+
+### US-22 — Dashboard Integration
+
+* Returned to US-22 after the team's Dashboard and sustainability scoring functionality had been integrated into `dev`.
+* Integrated my completed `ScoreExplanationService` with the Dashboard.
+* Added the service to `AppContext` so it could be accessed through the existing application structure.
+* Updated `DashboardController` so the score explanation was displayed with the household sustainability score.
+
+### US-22 — UI Debugging and Testing
+
+* Ran the application and manually checked the score explanation on the Dashboard.
+* Found that the explanation text was being cut off because of an existing layout height restriction.
+* Updated the FXML layout so the full explanation could be displayed.
+* Reran the automated tests after the integration.
+
+### US-22 — Regression Testing, PR and CI
+
+* Ran the full Maven regression suite after finishing the integration.
+* Confirmed all 134 tests passed.
+* Committed and pushed the completed US-22 integration.
+* Created PR #112 into `dev`.
+* Confirmed the GitHub Actions checks passed before merging the feature.
+* The completed integration included commit `b41dfac`.
+
+
+## 18/10/2026
+
+### US-26 — Recommendation Integration Review
+
+* Returned to US-26 after the team's US-24 recommendation functionality had been merged.
+* Reviewed the new `Recommendation` model, recommendation rules, service and controller.
+* Compared that implementation with my existing US-26 work.
+* Found that some of my original explanation logic would now duplicate calculations already being done by the recommendation system.
+
+### US-26 — Refactoring and Integration
+
+* Refactored `RecommendationExplanationService` to work directly with the completed `Recommendation` model.
+* Reused the household-specific recommendation detail instead of keeping separate Energy, Water, Waste and Transport calculations in my service.
+* This kept the explanation consistent with the actual recommendation being displayed and removed duplicated logic.
+
+### US-26 — UI and Testing
+
+* Updated `RecommendationsController` so each recommendation could display a "Why this recommendation?" explanation.
+* Updated the tests for the integrated version of `RecommendationExplanationService`.
+* Ran the targeted recommendation tests.
+* Manually checked the Recommendations screen using household data.
+
+
+## 19/10/2026
+
+### US-26 — Regression Testing and Pull Request
+
+* Synced the US-26 branch with the latest `dev` changes.
+* Ran the full Maven regression suite.
+* Confirmed all 163 tests passed with 0 failures and 0 errors.
+* Finished PR #117 into `dev`.
+* Confirmed the required GitHub Actions checks passed before merging US-26.
+* Switched back to the shared development branch after the merge and checked the latest project state.
+
+### EnergyService Refactor
+
+* Reviewed my previous Energy resource code to find something that could be properly refactored.
+* Found that the electricity and solar validation was repeated in both `recordEntry` and `updateEntry`.
+* Used Extract Method to move the repeated checks into a private `validateEnergyValues` method.
+* Kept the existing behaviour the same instead of changing how Energy validation worked.
+* Ran the existing `EnergyServiceTest` after the production-code refactor.
+* Confirmed all 12 existing EnergyService tests still passed.
+* Committed the production refactor separately as `7ed210a`.
+
+### Energy Validation Test Refactor
+
+* Reviewed the Energy validation tests and found repeated tests for negative electricity and solar values.
+* Reworked the tests so the recording validation cases were grouped together and the editing validation cases were grouped together.
+* Still covered all four cases: negative electricity when recording, negative solar when recording, negative electricity when editing and negative solar when editing.
+* Strengthened the edit validation testing by checking that invalid values don't interact with the DAO, activity log or score service.
+* Kept the test changes in a separate commit from the production refactor.
+* Committed the test refactor as `4b14018`.
+
+### Final Regression Testing and CI
+
+* Ran the complete Maven test suite after the code and test refactoring.
+* Confirmed all 161 tests passed with 0 failures and 0 errors.
+* Pushed `refactor/energy-validation-tests` and created PR #118 into `dev`.
+* Waited for the GitHub Actions CI check and confirmed it passed before merging.
+* Merged PR #118 into `dev`.
+* Switched back to `dev` and pulled the latest changes.
+* Confirmed my local `dev` matched `origin/dev` and the working tree was clean.
+* The final PR #118 merge commit was `7301c28`.
