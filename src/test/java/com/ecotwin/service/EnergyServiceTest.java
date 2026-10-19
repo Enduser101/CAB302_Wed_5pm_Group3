@@ -61,17 +61,7 @@ class EnergyServiceTest {
         verify(scoreService, times(1)).recalculate(household.getId());
     }
 
-    @Test
-    void negativeElectricityUsageIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> service.recordEntry(user, household, -1.0, null, null));
-        verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
-    }
 
-    @Test
-    void negativeSolarGenerationIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> service.recordEntry(user, household, 100.0, -5.0, null));
-        verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
-    }
 
     @Test
     void canEditEnergyEntry() {
@@ -120,23 +110,47 @@ class EnergyServiceTest {
     }
 
     @Test
-    void negativeElectricityEditIsRejected() {
-        assertThrows(IllegalArgumentException.class, () ->
-                service.updateEntry(
-                        user, household, 1,
-                        -50.0, 20.0, "Updated usage"
-                )
+    void invalidEnergyValuesAreRejectedWhenRecording() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.recordEntry(user, household, -1.0, 10.0, null)
         );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.recordEntry(user, household, 100.0, -5.0, null)
+        );
+
+        verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
     }
 
     @Test
-    void negativeSolarEditIsRejected() {
-        assertThrows(IllegalArgumentException.class, () ->
-                service.updateEntry(
-                        user, household, 1,
-                        100.0, -20.0, "Updated usage"
+    void invalidEnergyValuesAreRejectedWhenEditing() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        -50.0,
+                        20.0,
+                        "Updated usage"
                 )
         );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        100.0,
+                        -20.0,
+                        "Updated usage"
+                )
+        );
+
+        verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
     }
 
     @Test
