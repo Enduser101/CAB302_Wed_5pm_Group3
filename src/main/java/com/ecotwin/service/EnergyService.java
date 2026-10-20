@@ -26,12 +26,7 @@ public class EnergyService {
     /** US-15: record the household's energy usage for the current period. */
     public EnergyEntry recordEntry(User actor, Household household, double electricityKwh, Double solarGenerationKwh,
                                     String notes) {
-        if (electricityKwh < 0) {
-            throw new IllegalArgumentException("Electricity usage cannot be negative");
-        }
-        if (solarGenerationKwh != null && solarGenerationKwh < 0) {
-            throw new IllegalArgumentException("Solar generation cannot be negative");
-        }
+        validateEnergyValues(electricityKwh, solarGenerationKwh);
 
         String period = YearMonth.now().toString();
         EnergyEntry entry = energyEntryDao.create(household.getId(), period, electricityKwh, solarGenerationKwh,
@@ -43,14 +38,7 @@ public class EnergyService {
     /** US-19: update an existing energy entry. */
     public EnergyEntry updateEntry(User actor, Household household, long entryId,
                                    double electricityKwh, Double solarGenerationKwh, String notes) {
-        if (electricityKwh < 0) {
-            throw new IllegalArgumentException("Electricity usage cannot be negative");
-        }
-
-        if (solarGenerationKwh != null && solarGenerationKwh < 0) {
-            throw new IllegalArgumentException("Solar generation cannot be negative");
-        }
-
+        validateEnergyValues(electricityKwh, solarGenerationKwh);
         EnergyEntry oldEntry = null;
 
         for (EnergyEntry entry : energyEntryDao.findByHousehold(household.getId())) {
@@ -99,6 +87,16 @@ public class EnergyService {
 
     public List<EnergyEntry> findEntriesForHousehold(Household household) {
         return energyEntryDao.findByHousehold(household.getId());
+    }
+
+    private void validateEnergyValues(double electricityKwh, Double solarGenerationKwh) {
+        if (electricityKwh < 0) {
+            throw new IllegalArgumentException("Electricity usage cannot be negative");
+        }
+
+        if (solarGenerationKwh != null && solarGenerationKwh < 0) {
+            throw new IllegalArgumentException("Solar generation cannot be negative");
+        }
     }
 
     private String solarText(Double kwh) {
