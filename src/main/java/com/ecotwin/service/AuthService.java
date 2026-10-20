@@ -13,12 +13,13 @@ public class AuthService {
     }
 
     public User register(String username, String email, String password) {
+        if (email == null || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("Please enter a valid email address");
+        }
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username is required");
         }
-        if (password == null || password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters");
-        }
+        validatePassword(password);
         if (userDao.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("That username is already taken");
         }
