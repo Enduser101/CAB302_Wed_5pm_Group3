@@ -193,22 +193,26 @@ public class HouseholdController {
                 HBox adminButtonRow = new HBox(10);
 
                 Button activityButton = new Button("Activity History");
-                activityButton.getStyleClass().add("edit-button");
+                activityButton.getStyleClass().add("btn-secondary");
+                activityButton.setMaxWidth(Double.MAX_VALUE);
                 activityButton.setOnAction(event -> handleShowActivityHistory());
 
                 // US-33: rename a household
                 Button renameButton = new Button("Rename Household");
-                renameButton.getStyleClass().add("edit-button");
+                renameButton.getStyleClass().add("btn-secondary");
+                renameButton.setMaxWidth(Double.MAX_VALUE);
                 renameButton.setOnAction(event -> handleRenameHousehold());
 
                 // US-35: transfer administrator rights
                 Button transferButton = new Button("Transfer Admin");
-                transferButton.getStyleClass().add("edit-button");
+                transferButton.getStyleClass().add("btn-secondary");
+                transferButton.setMaxWidth(Double.MAX_VALUE);
                 transferButton.setOnAction(event -> handleTransferAdmin());
 
                 // US-33: change the household join code
                 Button joinCodeButton = new Button("Generate New Join Code");
-                joinCodeButton.getStyleClass().add("edit-button");
+                joinCodeButton.getStyleClass().add("btn-secondary");
+                joinCodeButton.setMaxWidth(Double.MAX_VALUE);
                 joinCodeButton.setOnAction(event -> handleChangeJoinCode());
 
                 adminButtonRow.getChildren().addAll(
@@ -217,6 +221,7 @@ public class HouseholdController {
                         transferButton,
                         joinCodeButton
                 );
+
 
                 // US-36: delete a household
                 Button deleteHouseholdButton = new Button("Delete Household");

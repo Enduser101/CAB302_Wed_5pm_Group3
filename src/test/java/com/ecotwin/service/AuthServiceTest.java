@@ -31,7 +31,7 @@ class AuthServiceTest {
 
         service.register("newuser", "n@example.com", "password123");
 
-        verify(userDao).create(eq("newuser"), any(), argThat(hash -> hash != null && !hash.equals("password123")), anyString());
+        verify(userDao).create(eq("newuser"), any(), argThat(hash -> hash != null && !hash.equals("password123") && BCrypt.checkpw("password123", hash)), anyString());
     }
 
     @Test
@@ -121,7 +121,7 @@ class AuthServiceTest {
 
         service.changePassword("someone", "oldpassword", "newpassword123");
 
-        verify(userDao).updatePassword(eq(1L), argThat(h -> !BCrypt.checkpw("oldpassword", h)));
+        verify(userDao).updatePassword(eq(1L), argThat(h -> !BCrypt.checkpw("oldpassword", h)&& BCrypt.checkpw("newpassword123", h)));
     }
 }
 

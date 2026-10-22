@@ -1,0 +1,56 @@
+This weeks plan finish the video 
+Action TDD development, refractors, rewriting tests and allocating tasks. 
+
+Final video – who is doing what 
+Tinom
+A well structured video might follow this order (timing is only a suggestions):
+•    Brief overview these were marked in week 9, and we will not mark them again but a refresher is needed to give the marker some context (~1 minute)
+o    Brief refresher of the project purpose, benefits, and main requirements
+o    Brief refresher of user stories and planning documents
+o    Brief refresher (e.g. screenshots) from the preliminary prototype UIs
+Frankie
+•    Demo the final project in action (~1 minute)
+o    go very fast on what you already presented in week 9 (if you did have a demo then)
+o    give more emphasis on what was implemented after the week 9 submission
+o    use your feedback from week 9 to clarify, add detail, highlight improvements
+James
+•    Walk through relevant Java code (~3 minutes)
+o    show and discuss your adoption of OO design patterns
+o    show evidence of refactorings, e.g in repository commits, or comparing different versions of a class
+o    justify your technical/process choices
+Micheal
+•    Discuss your Continuous Integration/Automated Build Workflow (~2 minutes)
+o    show and run your GitHub actions scripts
+o    show and run your test suits
+o    show your use of javadoc comments and javadoc pages
+o    show evidence of sustained use
+Ted
+•    give evidence of Feedback Driven Improvement (~3 minutes)
+o    From whom did the team seek feedback, and how was it discussed and implemented?
+o    Show evidence of code quality assessment (e.g. test coverage)
+o    Show evidence of UI quality assessment (e.g. Usability assessment)
+o    Show evidence of reflective team practices (e.g. sprint retrospective)
+o    Show how all of these is reflected in iterative improvement in your process, product, and teamwork.
+Final presentation SEPARATE FROM VIDEO THIS IS DUE WEDS 
+The Problem, the Users, and the Purpose - Tinom
+How You Worked as a Team - Ted
+Your Development Approach and Key Decisions – James
+Quality Across the System – Michial
+Key Lessons and Professional Insights – Frankie
+Feedback from last sprint 
+Everyone tired
+Need to keep an eye on PRs – we’re assigning them but no one is doing them – message in chat 
+Good comms keep it up 
+Video section due Thursday night by 12 
+
+Need to do 
+Refactor make tasks and assign
+One refactor And test rewrite from everyone
+Update and upload logs to Github
+Demo Weds – prep for this – learn your section, then everyone else’s
+Complete video section for Friday
+Have Id and webcam ready
+https://canvas.qut.edu.au/courses/23243/pages/assessment-2-description-project-progress-and-performance
+video reqs and page ^
+Slide show for weds prep. - https://canvas.qut.edu.au/courses/23243/pages/assessment-3-description-final-presentation-2
+Marking rubric - https://canvas.qut.edu.au/courses/23243/assignments/224869 
