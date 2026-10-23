@@ -1,0 +1,262 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > HouseholdScoreService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: HouseholdScoreService (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HouseholdScoreService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (10/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (58/58)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.model.EnergyEntry;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;import com.ecotwin.model.Recommendation.Domain;
+&nbsp;import com.ecotwin.model.ScoreBreakdown;
+&nbsp;import com.ecotwin.model.ScoreChange;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;import com.ecotwin.model.TransportEntry;
+&nbsp;import com.ecotwin.model.WasteEntry;
+&nbsp;import com.ecotwin.model.WaterEntry;
+&nbsp;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.function.Function;
+&nbsp;import java.util.function.ToLongFunction;
+&nbsp;
+&nbsp;import java.util.AbstractMap;
+&nbsp;import com.ecotwin.model.ScorePoint;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.TreeSet;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * A household&#39;s current values and scores, taken from its latest reading in each domain.
+&nbsp; * Used by the dashboard
+&nbsp; */
+&nbsp;public class HouseholdScoreService {
+&nbsp;
+&nbsp;    private final EnergyService energyService;
+&nbsp;    private final WaterService waterService;
+&nbsp;    private final WasteService wasteService;
+&nbsp;    private final TransportService transportService;
+&nbsp;    private final ScoreCalculator scoreCalculator;
+&nbsp;
+&nbsp;    public HouseholdScoreService(EnergyService energyService, WaterService waterService,
+&nbsp;                                 WasteService wasteService, TransportService transportService,
+<b class="fc">&nbsp;                                 ScoreCalculator scoreCalculator) {</b>
+<b class="fc">&nbsp;        this.energyService = energyService;</b>
+<b class="fc">&nbsp;        this.waterService = waterService;</b>
+<b class="fc">&nbsp;        this.wasteService = wasteService;</b>
+<b class="fc">&nbsp;        this.transportService = transportService;</b>
+<b class="fc">&nbsp;        this.scoreCalculator = scoreCalculator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** @return empty until the household has at least one reading in every domain */
+&nbsp;    public Optional&lt;SustainabilityScenario&gt; currentValues(Household household) {
+<b class="fc">&nbsp;        Optional&lt;EnergyEntry&gt; energy = latest(energyService.findEntriesForHousehold(household),</b>
+&nbsp;                EnergyEntry::getPeriod, EnergyEntry::getId);
+<b class="fc">&nbsp;        Optional&lt;WaterEntry&gt; water = latest(waterService.findEntriesForHousehold(household),</b>
+&nbsp;                WaterEntry::getPeriod, WaterEntry::getId);
+<b class="fc">&nbsp;        Optional&lt;WasteEntry&gt; waste = latest(wasteService.findEntriesForHousehold(household),</b>
+&nbsp;                WasteEntry::getPeriod, WasteEntry::getId);
+<b class="fc">&nbsp;        Optional&lt;TransportEntry&gt; transport = latest(transportService.findEntriesForHousehold(household),</b>
+&nbsp;                TransportEntry::getPeriod, TransportEntry::getId);
+&nbsp;
+<b class="pc">&nbsp;        if (energy.isEmpty() || water.isEmpty() || waste.isEmpty() || transport.isEmpty()) {</b>
+<b class="fc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return Optional.of(new SustainabilityScenario(</b>
+<b class="fc">&nbsp;                energy.get().getElectricityKwh(),</b>
+<b class="fc">&nbsp;                energy.get().getSolarGenerationKwh(),</b>
+<b class="fc">&nbsp;                water.get().getLitres(),</b>
+<b class="fc">&nbsp;                waste.get().getGeneralKg(),</b>
+<b class="fc">&nbsp;                waste.get().getRecycledKg(),</b>
+<b class="fc">&nbsp;                waste.get().getCompostKg(),</b>
+<b class="fc">&nbsp;                transport.get().getPublicTransportTripsPerWeek(),</b>
+<b class="fc">&nbsp;                transport.get().getFlightsPerYear()</b>
+&nbsp;        ));
+&nbsp;    }
+&nbsp;
+&nbsp;    public Optional&lt;ScoreBreakdown&gt; currentScores(Household household) {
+<b class="fc">&nbsp;        return currentValues(household)</b>
+<b class="fc">&nbsp;                .map(values -&gt; scoreCalculator.breakdown(values, household.getOccupants()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-23: run an update and report the household&#39;s scores before and after it. */
+&nbsp;    public Optional&lt;ScoreChange&gt; trackChange(Household household, Domain domain, Runnable update) {
+<b class="fc">&nbsp;        Optional&lt;ScoreBreakdown&gt; before = currentScores(household);</b>
+<b class="fc">&nbsp;        update.run();</b>
+<b class="fc">&nbsp;        return currentScores(household)</b>
+<b class="fc">&nbsp;                .map(after -&gt; new ScoreChange(before.orElse(null), after, domain));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Newest period wins; within the same period, the most recently added entry wins. */
+&nbsp;    private static &lt;T&gt; Optional&lt;T&gt; latest(List&lt;T&gt; entries, Function&lt;T, String&gt; period, ToLongFunction&lt;T&gt; id) {
+<b class="fc">&nbsp;        return entries.stream().max(Comparator.comparing(period).thenComparingLong(id));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-23: one score per period with readings in every domain, oldest first. */
+&nbsp;    public List&lt;ScorePoint&gt; scoreHistory(Household household) {
+<b class="fc">&nbsp;        List&lt;EnergyEntry&gt; energy = energyService.findEntriesForHousehold(household);</b>
+<b class="fc">&nbsp;        List&lt;WaterEntry&gt; water = waterService.findEntriesForHousehold(household);</b>
+<b class="fc">&nbsp;        List&lt;WasteEntry&gt; waste = wasteService.findEntriesForHousehold(household);</b>
+<b class="fc">&nbsp;        List&lt;TransportEntry&gt; transport = transportService.findEntriesForHousehold(household);</b>
+&nbsp;
+<b class="fc">&nbsp;        return allPeriods(energy, water, waste, transport).stream()</b>
+<b class="fc">&nbsp;                .map(period -&gt; scenarioFor(period, energy, water, waste, transport))</b>
+<b class="fc">&nbsp;                .flatMap(Optional::stream)</b>
+<b class="fc">&nbsp;                .map(e -&gt; new ScorePoint(e.getKey(),</b>
+<b class="fc">&nbsp;                        scoreCalculator.breakdown(e.getValue(), household.getOccupants())))</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Every period that appears in any domain, oldest first. */
+&nbsp;    private static List&lt;String&gt; allPeriods(List&lt;EnergyEntry&gt; energy, List&lt;WaterEntry&gt; water,
+&nbsp;                                           List&lt;WasteEntry&gt; waste, List&lt;TransportEntry&gt; transport) {
+<b class="fc">&nbsp;        TreeSet&lt;String&gt; periods = new TreeSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        energy.forEach(e -&gt; periods.add(e.getPeriod()));</b>
+<b class="fc">&nbsp;        water.forEach(e -&gt; periods.add(e.getPeriod()));</b>
+<b class="fc">&nbsp;        waste.forEach(e -&gt; periods.add(e.getPeriod()));</b>
+<b class="fc">&nbsp;        transport.forEach(e -&gt; periods.add(e.getPeriod()));</b>
+<b class="fc">&nbsp;        return List.copyOf(periods);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** A scenario for one period, or empty if any domain has no reading that period. */
+&nbsp;    private static Optional&lt;Map.Entry&lt;String, SustainabilityScenario&gt;&gt; scenarioFor(
+&nbsp;            String period, List&lt;EnergyEntry&gt; energy, List&lt;WaterEntry&gt; water,
+&nbsp;            List&lt;WasteEntry&gt; waste, List&lt;TransportEntry&gt; transport) {
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;EnergyEntry&gt; e = inPeriod(energy, EnergyEntry::getPeriod, EnergyEntry::getId, period);</b>
+<b class="fc">&nbsp;        Optional&lt;WaterEntry&gt; w = inPeriod(water, WaterEntry::getPeriod, WaterEntry::getId, period);</b>
+<b class="fc">&nbsp;        Optional&lt;WasteEntry&gt; s = inPeriod(waste, WasteEntry::getPeriod, WasteEntry::getId, period);</b>
+<b class="fc">&nbsp;        Optional&lt;TransportEntry&gt; t = inPeriod(transport, TransportEntry::getPeriod, TransportEntry::getId, period);</b>
+&nbsp;
+<b class="pc">&nbsp;        if (e.isEmpty() || w.isEmpty() || s.isEmpty() || t.isEmpty()) {</b>
+<b class="fc">&nbsp;            return Optional.empty();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return Optional.of(new AbstractMap.SimpleEntry&lt;&gt;(period, new SustainabilityScenario(</b>
+<b class="fc">&nbsp;                e.get().getElectricityKwh(), e.get().getSolarGenerationKwh(),</b>
+<b class="fc">&nbsp;                w.get().getLitres(),</b>
+<b class="fc">&nbsp;                s.get().getGeneralKg(), s.get().getRecycledKg(), s.get().getCompostKg(),</b>
+<b class="fc">&nbsp;                t.get().getPublicTransportTripsPerWeek(), t.get().getFlightsPerYear())));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** The last entry recorded for a period. */
+&nbsp;    private static &lt;T&gt; Optional&lt;T&gt; inPeriod(List&lt;T&gt; entries, Function&lt;T, String&gt; period,
+&nbsp;                                            ToLongFunction&lt;T&gt; id, String wanted) {
+<b class="fc">&nbsp;        return entries.stream()</b>
+<b class="fc">&nbsp;                .filter(entry -&gt; wanted.equals(period.apply(entry)))</b>
+<b class="fc">&nbsp;                .max(Comparator.comparingLong(id));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

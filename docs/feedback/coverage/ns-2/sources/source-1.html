@@ -1,0 +1,303 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AccountController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AccountController (com.ecotwin.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AccountController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/73)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.controller;
+&nbsp;import javafx.scene.control.Button;
+&nbsp;import javafx.scene.control.TextField;
+&nbsp;import javafx.scene.layout.VBox;
+&nbsp;import com.ecotwin.AppContext;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;import javafx.fxml.FXML;
+&nbsp;import javafx.scene.control.Label;
+&nbsp;import javafx.scene.control.PasswordField;
+&nbsp;
+&nbsp;import java.time.Instant;
+&nbsp;import java.time.ZoneId;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;
+&nbsp;/** US-05: view account details. US-06: change password. US-07: sign out clears the session and returns to Login. */
+&nbsp;public class AccountController {
+&nbsp;
+<b class="nc">&nbsp;    private static final DateTimeFormatter MEMBER_SINCE =</b>
+<b class="nc">&nbsp;            DateTimeFormatter.ofPattern(&quot;d MMM yyyy&quot;).withZone(ZoneId.systemDefault());</b>
+&nbsp;
+&nbsp;    private final Navigator nav;
+&nbsp;    private final AppContext ctx;
+&nbsp;
+&nbsp;    @FXML private Label usernameLabel;
+&nbsp;    @FXML private Label usernameValue;
+&nbsp;    @FXML private Label emailValue;
+&nbsp;    @FXML private Label memberSinceValue;
+&nbsp;
+&nbsp;    @FXML private PasswordField currentPasswordField;
+&nbsp;    @FXML private PasswordField newPasswordField;
+&nbsp;    @FXML private PasswordField confirmPasswordField;
+&nbsp;
+&nbsp;    @FXML private TextField visibleCurrentPasswordField;
+&nbsp;    @FXML private TextField visibleNewPasswordField;
+&nbsp;    @FXML private TextField visibleConfirmPasswordField;
+&nbsp;
+&nbsp;    @FXML private Button toggleCurrentPasswordButton;
+&nbsp;    @FXML private Button toggleNewPasswordButton;
+&nbsp;    @FXML private Button toggleConfirmPasswordButton;
+&nbsp;
+&nbsp;    @FXML private Label passwordMessageLabel;
+&nbsp;    @FXML private VBox guestSection;
+&nbsp;    @FXML private VBox memberSection;
+&nbsp;
+<b class="nc">&nbsp;    public AccountController(Navigator nav, AppContext ctx) {</b>
+<b class="nc">&nbsp;        this.nav = nav;</b>
+<b class="nc">&nbsp;        this.ctx = ctx;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void initialize() {
+&nbsp;        // Keep hidden and visible password fields synchronized
+<b class="nc">&nbsp;        visibleCurrentPasswordField.textProperty().bindBidirectional(currentPasswordField.textProperty());</b>
+<b class="nc">&nbsp;        visibleNewPasswordField.textProperty().bindBidirectional(newPasswordField.textProperty());</b>
+<b class="nc">&nbsp;        visibleConfirmPasswordField.textProperty().bindBidirectional(confirmPasswordField.textProperty());</b>
+&nbsp;
+<b class="nc">&nbsp;        boolean guest = ctx.session.isGuest();</b>
+<b class="nc">&nbsp;        guestSection.setVisible(guest);   guestSection.setManaged(guest);</b>
+<b class="nc">&nbsp;        memberSection.setVisible(!guest); memberSection.setManaged(!guest);</b>
+<b class="nc">&nbsp;        if (guest) {</b>
+<b class="nc">&nbsp;            usernameLabel.setText(&quot;Browsing as a guest&quot;);</b>
+&nbsp;            return;                                        //check what page to display on whether the user is a guest or not
+&nbsp;        }
+<b class="nc">&nbsp;        User user = ctx.session.getCurrentUser();</b>
+<b class="nc">&nbsp;        usernameLabel.setText(&quot;Signed in as &quot; + user.getUsername());</b>
+<b class="nc">&nbsp;        usernameValue.setText(user.getUsername());</b>
+<b class="nc">&nbsp;        emailValue.setText(user.getEmail());</b>
+<b class="nc">&nbsp;        memberSinceValue.setText(formatCreatedAt(user.getCreatedAt()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String formatCreatedAt(String createdAt) {
+&nbsp;        // created_at is stored as an ISO instant, fall back to the raw value if it won&#39;t parse
+&nbsp;        try {
+<b class="nc">&nbsp;            return MEMBER_SINCE.format(Instant.parse(createdAt));</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            return createdAt;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Show or hide current password
+&nbsp;    @FXML
+&nbsp;    private void handleToggleCurrentPassword() {
+<b class="nc">&nbsp;        boolean showPassword = !visibleCurrentPasswordField.isVisible();</b>
+&nbsp;
+<b class="nc">&nbsp;        visibleCurrentPasswordField.setVisible(showPassword);</b>
+<b class="nc">&nbsp;        visibleCurrentPasswordField.setManaged(showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        currentPasswordField.setVisible(!showPassword);</b>
+<b class="nc">&nbsp;        currentPasswordField.setManaged(!showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        toggleCurrentPasswordButton.setText(showPassword ? &quot;◉&quot; : &quot;◎&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Show or hide new password
+&nbsp;    @FXML
+&nbsp;    private void handleToggleNewPassword() {
+<b class="nc">&nbsp;        boolean showPassword = !visibleNewPasswordField.isVisible();</b>
+&nbsp;
+<b class="nc">&nbsp;        visibleNewPasswordField.setVisible(showPassword);</b>
+<b class="nc">&nbsp;        visibleNewPasswordField.setManaged(showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        newPasswordField.setVisible(!showPassword);</b>
+<b class="nc">&nbsp;        newPasswordField.setManaged(!showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        toggleNewPasswordButton.setText(showPassword ? &quot;◉&quot; : &quot;◎&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Show or hide confirm password
+&nbsp;    @FXML
+&nbsp;    private void handleToggleConfirmPassword() {
+<b class="nc">&nbsp;        boolean showPassword = !visibleConfirmPasswordField.isVisible();</b>
+&nbsp;
+<b class="nc">&nbsp;        visibleConfirmPasswordField.setVisible(showPassword);</b>
+<b class="nc">&nbsp;        visibleConfirmPasswordField.setManaged(showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        confirmPasswordField.setVisible(!showPassword);</b>
+<b class="nc">&nbsp;        confirmPasswordField.setManaged(!showPassword);</b>
+&nbsp;
+<b class="nc">&nbsp;        toggleConfirmPasswordButton.setText(showPassword ? &quot;◉&quot; : &quot;◎&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void handleChangePassword() {
+<b class="nc">&nbsp;        String current = currentPasswordField.getText();</b>
+<b class="nc">&nbsp;        String updated = newPasswordField.getText();</b>
+<b class="nc">&nbsp;        String confirm = confirmPasswordField.getText();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!updated.equals(confirm)) {</b>
+<b class="nc">&nbsp;            showPasswordMessage(&quot;Passwords do not match&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            ctx.authService.changePassword(ctx.session.getCurrentUser().getUsername(), current, updated);</b>
+<b class="nc">&nbsp;            showPasswordMessage(&quot;Password updated&quot;);</b>
+<b class="nc">&nbsp;            currentPasswordField.clear();</b>
+<b class="nc">&nbsp;            newPasswordField.clear();</b>
+<b class="nc">&nbsp;            confirmPasswordField.clear();</b>
+&nbsp;
+&nbsp;            // Hide all password fields after a successful update
+<b class="nc">&nbsp;            visibleCurrentPasswordField.setVisible(false);</b>
+<b class="nc">&nbsp;            visibleCurrentPasswordField.setManaged(false);</b>
+<b class="nc">&nbsp;            currentPasswordField.setVisible(true);</b>
+<b class="nc">&nbsp;            currentPasswordField.setManaged(true);</b>
+<b class="nc">&nbsp;            toggleCurrentPasswordButton.setText(&quot;◎&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            visibleNewPasswordField.setVisible(false);</b>
+<b class="nc">&nbsp;            visibleNewPasswordField.setManaged(false);</b>
+<b class="nc">&nbsp;            newPasswordField.setVisible(true);</b>
+<b class="nc">&nbsp;            newPasswordField.setManaged(true);</b>
+<b class="nc">&nbsp;            toggleNewPasswordButton.setText(&quot;◎&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            visibleConfirmPasswordField.setVisible(false);</b>
+<b class="nc">&nbsp;            visibleConfirmPasswordField.setManaged(false);</b>
+<b class="nc">&nbsp;            confirmPasswordField.setVisible(true);</b>
+<b class="nc">&nbsp;            confirmPasswordField.setManaged(true);</b>
+<b class="nc">&nbsp;            toggleConfirmPasswordButton.setText(&quot;◎&quot;);</b>
+&nbsp;
+&nbsp;        } catch (IllegalArgumentException e) {
+<b class="nc">&nbsp;            showPasswordMessage(e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void showPasswordMessage(String message) {
+<b class="nc">&nbsp;        passwordMessageLabel.setText(message);</b>
+<b class="nc">&nbsp;        passwordMessageLabel.setVisible(true);</b>
+<b class="nc">&nbsp;        passwordMessageLabel.setManaged(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void handleSignOut() {
+<b class="nc">&nbsp;        ctx.session.logout();</b>
+<b class="nc">&nbsp;        nav.showLogin();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void guestHandleSignIn() {
+<b class="nc">&nbsp;        ctx.session.logout();</b>
+<b class="nc">&nbsp;        nav.showLogin();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void guestHandleCreateAccount() {
+<b class="nc">&nbsp;        ctx.session.logout();</b>
+<b class="nc">&nbsp;        nav.showRegister();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

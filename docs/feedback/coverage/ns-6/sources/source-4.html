@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SessionContext</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.util</a>
+</div>
+
+<h1>Coverage Summary for Class: SessionContext (com.ecotwin.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SessionContext</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70%
+  </span>
+  <span class="absValue">
+    (14/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42.9%
+  </span>
+  <span class="absValue">
+    (6/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71.9%
+  </span>
+  <span class="absValue">
+    (23/32)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.util;
+&nbsp;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;import com.ecotwin.model.HouseholdMembership;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;
+&nbsp;/** Singleton: who&#39;s logged in and which household they&#39;re currently viewing. */
+&nbsp;public final class SessionContext {
+&nbsp;
+<b class="fc">&nbsp;    private static final SessionContext INSTANCE = new SessionContext();</b>
+&nbsp;
+&nbsp;    private User currentUser;
+&nbsp;    private Household currentHousehold;
+&nbsp;    private HouseholdMembership currentMembership;
+&nbsp;    private boolean guest;
+&nbsp;
+<b class="fc">&nbsp;    private SessionContext() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static SessionContext getInstance() {
+<b class="fc">&nbsp;        return INSTANCE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void login(User user) {
+<b class="fc">&nbsp;        this.currentUser = user;</b>
+<b class="fc">&nbsp;        this.guest = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void enterHousehold(Household household, HouseholdMembership membership) {
+<b class="pc">&nbsp;        if (!canJoinHousehold()) {</b>
+<b class="fc">&nbsp;            throw new IllegalStateException(&quot;Only registered users can join a household&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        this.currentHousehold = household;</b>
+<b class="nc">&nbsp;        this.currentMembership = membership;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void logout() {
+<b class="fc">&nbsp;        currentUser = null;</b>
+<b class="fc">&nbsp;        currentHousehold = null;</b>
+<b class="fc">&nbsp;        currentMembership = null;</b>
+<b class="fc">&nbsp;        guest = false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    //US-03: use the app without an account.
+&nbsp;    public void startGuestSession() {
+<b class="fc">&nbsp;        currentUser = null;</b>
+<b class="fc">&nbsp;        currentHousehold = null;</b>
+<b class="fc">&nbsp;        currentMembership = null;</b>
+<b class="fc">&nbsp;        guest = true;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    public boolean isGuest() { return guest; }</b>
+&nbsp;
+<b class="fc">&nbsp;    public boolean canCreateScenario() { return true; }</b>
+&nbsp;
+<b class="fc">&nbsp;    public boolean canSaveScenario() { return isLoggedIn(); }</b>
+&nbsp;
+&nbsp;    // US 04 only registered users join a household.
+<b class="fc">&nbsp;    public boolean canJoinHousehold() { return isLoggedIn(); }</b>
+&nbsp;
+&nbsp;    // US-03 / bug #85 guests may use every page except household
+&nbsp;    public boolean canAccessPage(Page page) {
+<b class="fc">&nbsp;        if (page == Page.HOUSEHOLD) return isLoggedIn();</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-03  #85 check whether a save press has entries and has an active household.
+&nbsp;    public boolean canRecordEntries() {
+<b class="pc">&nbsp;        return isLoggedIn() &amp;&amp; hasActiveHousehold();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isLoggedIn() {
+<b class="fc">&nbsp;        return currentUser != null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean hasActiveHousehold() {
+<b class="nc">&nbsp;        return currentHousehold != null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isAdmin() {
+<b class="nc">&nbsp;        return currentMembership != null &amp;&amp; currentMembership.getRole() == HouseholdMembership.Role.ADMIN;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public User getCurrentUser() {
+<b class="nc">&nbsp;        return currentUser;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Household getCurrentHousehold() {
+<b class="nc">&nbsp;        return currentHousehold;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public HouseholdMembership getCurrentMembership() {
+<b class="nc">&nbsp;        return currentMembership;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    // US-10: leave a household
+&nbsp;    public void leaveHousehold() {
+<b class="nc">&nbsp;        currentHousehold = null;</b>
+<b class="nc">&nbsp;        currentMembership = null;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

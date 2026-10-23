@@ -1,0 +1,237 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SqliteHouseholdDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao.sqlite</a>
+</div>
+
+<h1>Coverage Summary for Class: SqliteHouseholdDao (com.ecotwin.dao.sqlite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SqliteHouseholdDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.3%
+  </span>
+  <span class="absValue">
+    (33/53)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao.sqlite;
+&nbsp;
+&nbsp;import com.ecotwin.dao.HouseholdDao;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.time.Instant;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;public class SqliteHouseholdDao implements HouseholdDao {
+&nbsp;
+&nbsp;    private final Connection connection;
+&nbsp;
+<b class="fc">&nbsp;    public SqliteHouseholdDao(Connection connection) {</b>
+<b class="fc">&nbsp;        this.connection = connection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Household create(String name, int occupants, String dwellingType, String state, String joinCode) {
+<b class="fc">&nbsp;        String createdAt = Instant.now().toString();</b>
+<b class="fc">&nbsp;        String sql = &quot;INSERT INTO households (name, join_code, occupants, dwelling_type, state, created_at) &quot;</b>
+&nbsp;            + &quot;VALUES (?, ?, ?, ?, ?, ?)&quot;;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</b>
+<b class="fc">&nbsp;            statement.setString(1, name);</b>
+<b class="fc">&nbsp;            statement.setString(2, joinCode);</b>
+<b class="fc">&nbsp;            statement.setInt(3, occupants);</b>
+<b class="fc">&nbsp;            statement.setString(4, dwellingType);</b>
+<b class="fc">&nbsp;            statement.setString(5, state);</b>
+<b class="fc">&nbsp;            statement.setString(6, createdAt);</b>
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+<b class="fc">&nbsp;            try (ResultSet keys = statement.getGeneratedKeys()) {</b>
+<b class="fc">&nbsp;                keys.next();</b>
+<b class="fc">&nbsp;                return new Household(keys.getLong(1), name, joinCode, occupants, dwellingType, state, createdAt);</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not create household &quot; + name, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Optional&lt;Household&gt; findById(long id) {
+<b class="fc">&nbsp;        String sql = &quot;SELECT * FROM households WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, id);</b>
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="pc">&nbsp;                return rs.next() ? Optional.of(map(rs)) : Optional.empty();</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not look up household &quot; + id, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Optional&lt;Household&gt; findByJoinCode(String joinCode) {
+<b class="fc">&nbsp;        String sql = &quot;SELECT * FROM households WHERE join_code = ?&quot;;</b>
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setString(1, joinCode);</b>
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="pc">&nbsp;                return rs.next() ? Optional.of(map(rs)) : Optional.empty();</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not look up household by join code&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-33: rename a household
+&nbsp;    @Override
+&nbsp;    public void renameHousehold(long householdId, String newName) {
+<b class="nc">&nbsp;        String sql = &quot;UPDATE households SET name = ? WHERE id = ?&quot;;</b>
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setString(1, newName);</b>
+<b class="nc">&nbsp;            statement.setLong(2, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not rename household&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-33: change the household join code
+&nbsp;    @Override
+&nbsp;    public void updateJoinCode(long householdId, String newJoinCode) {
+<b class="nc">&nbsp;        String sql = &quot;UPDATE households SET join_code = ? WHERE id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setString(1, newJoinCode);</b>
+<b class="nc">&nbsp;            statement.setLong(2, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not update household join code&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-36: delete a household
+&nbsp;    @Override
+&nbsp;    public void deleteHousehold(long householdId) {
+<b class="nc">&nbsp;        String sql = &quot;DELETE FROM households WHERE id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not delete household&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Household map(ResultSet rs) throws SQLException {
+<b class="fc">&nbsp;        return new Household(</b>
+<b class="fc">&nbsp;            rs.getLong(&quot;id&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;name&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;join_code&quot;),</b>
+<b class="fc">&nbsp;            rs.getInt(&quot;occupants&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;dwelling_type&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;state&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;created_at&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

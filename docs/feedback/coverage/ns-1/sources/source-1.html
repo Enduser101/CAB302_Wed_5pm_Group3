@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppContext</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin</a>
+</div>
+
+<h1>Coverage Summary for Class: AppContext (com.ecotwin)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AppContext</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin;
+&nbsp;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteActivityLogDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteEnergyEntryDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteHouseholdDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteHouseholdMembershipDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteScenarioDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteTransportEntryDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteUserDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteVehicleDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteWasteEntryDao;
+&nbsp;import com.ecotwin.dao.sqlite.SqliteWaterEntryDao;
+&nbsp;import com.ecotwin.service.AuthService;
+&nbsp;import com.ecotwin.service.EnergyService;
+&nbsp;import com.ecotwin.service.HouseholdScoreService;
+&nbsp;import com.ecotwin.service.HouseholdService;
+&nbsp;import com.ecotwin.service.IndicativeScoreCalculator;
+&nbsp;import com.ecotwin.service.PlaceholderScoreService;
+&nbsp;import com.ecotwin.service.ScenarioService;
+&nbsp;import com.ecotwin.service.ScoreService;
+&nbsp;import com.ecotwin.service.TransportService;
+&nbsp;import com.ecotwin.service.WasteService;
+&nbsp;import com.ecotwin.service.WaterService;
+&nbsp;import com.ecotwin.util.SessionContext;
+&nbsp;import com.ecotwin.service.ScoreExplanationService;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;
+&nbsp;/** Manual dependency-injection container: wires DAOs into services once, at startup. */
+&nbsp;public class AppContext {
+&nbsp;
+&nbsp;    public final AuthService authService;
+&nbsp;    public final HouseholdService householdService;
+&nbsp;    public final EnergyService energyService;
+&nbsp;    public final WaterService waterService;
+&nbsp;    public final WasteService wasteService;
+&nbsp;    public final TransportService transportService;
+&nbsp;    public final ScenarioService scenarioService;
+&nbsp;    public final HouseholdScoreService householdScoreService;
+&nbsp;    public final ScoreExplanationService scoreExplanationService;
+<b class="fc">&nbsp;    public final SessionContext session = SessionContext.getInstance();</b>
+&nbsp;
+<b class="fc">&nbsp;    public AppContext(Connection connection) {</b>
+<b class="fc">&nbsp;        SqliteUserDao userDao = new SqliteUserDao(connection);</b>
+<b class="fc">&nbsp;        SqliteHouseholdDao householdDao = new SqliteHouseholdDao(connection);</b>
+<b class="fc">&nbsp;        SqliteHouseholdMembershipDao membershipDao = new SqliteHouseholdMembershipDao(connection);</b>
+<b class="fc">&nbsp;        SqliteActivityLogDao activityLogDao = new SqliteActivityLogDao(connection);</b>
+<b class="fc">&nbsp;        SqliteEnergyEntryDao energyEntryDao = new SqliteEnergyEntryDao(connection);</b>
+<b class="fc">&nbsp;        SqliteWaterEntryDao waterEntryDao = new SqliteWaterEntryDao(connection);</b>
+<b class="fc">&nbsp;        SqliteWasteEntryDao wasteEntryDao = new SqliteWasteEntryDao(connection);</b>
+<b class="fc">&nbsp;        SqliteVehicleDao vehicleDao = new SqliteVehicleDao(connection);</b>
+<b class="fc">&nbsp;        SqliteTransportEntryDao transportEntryDao = new SqliteTransportEntryDao(connection);</b>
+<b class="fc">&nbsp;        SqliteScenarioDao scenarioDao = new SqliteScenarioDao(connection);</b>
+<b class="fc">&nbsp;        ScoreService scoreService = new PlaceholderScoreService();</b>
+&nbsp;
+<b class="fc">&nbsp;        this.authService = new AuthService(userDao);</b>
+<b class="fc">&nbsp;        this.householdService = new HouseholdService(householdDao, membershipDao, activityLogDao, userDao);</b>
+<b class="fc">&nbsp;        this.energyService = new EnergyService(energyEntryDao, activityLogDao, scoreService);</b>
+<b class="fc">&nbsp;        this.waterService = new WaterService(waterEntryDao, activityLogDao, scoreService);</b>
+<b class="fc">&nbsp;        this.wasteService = new WasteService(wasteEntryDao, activityLogDao, scoreService);</b>
+<b class="fc">&nbsp;        this.transportService = new TransportService(vehicleDao, transportEntryDao, activityLogDao, scoreService);</b>
+<b class="fc">&nbsp;        IndicativeScoreCalculator scoreCalculator = new IndicativeScoreCalculator();</b>
+<b class="fc">&nbsp;        this.scenarioService = new ScenarioService(scenarioDao, scoreCalculator);</b>
+<b class="fc">&nbsp;        this.householdScoreService = new HouseholdScoreService(</b>
+&nbsp;                energyService, waterService, wasteService, transportService, scoreCalculator);
+<b class="fc">&nbsp;        this.scoreExplanationService = new ScoreExplanationService();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

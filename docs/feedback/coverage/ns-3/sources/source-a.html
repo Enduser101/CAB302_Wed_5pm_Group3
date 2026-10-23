@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SqliteWaterEntryDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao.sqlite</a>
+</div>
+
+<h1>Coverage Summary for Class: SqliteWaterEntryDao (com.ecotwin.dao.sqlite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SqliteWaterEntryDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (48/54)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao.sqlite;
+&nbsp;
+&nbsp;import com.ecotwin.dao.WaterEntryDao;
+&nbsp;import com.ecotwin.model.WaterEntry;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.sql.Types;
+&nbsp;import java.time.Instant;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class SqliteWaterEntryDao implements WaterEntryDao {
+&nbsp;
+&nbsp;    private final Connection connection;
+&nbsp;
+<b class="fc">&nbsp;    public SqliteWaterEntryDao(Connection connection) {</b>
+<b class="fc">&nbsp;        this.connection = connection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public WaterEntry create(long householdId, String period, double litres, String notes, Long updatedByUserId) {
+<b class="fc">&nbsp;        String updatedAt = Instant.now().toString();</b>
+<b class="fc">&nbsp;        String sql = &quot;INSERT INTO water_entries (household_id, period, litres, notes, updated_by_user_id, updated_at) &quot;</b>
+&nbsp;            + &quot;VALUES (?, ?, ?, ?, ?, ?)&quot;;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="fc">&nbsp;            statement.setString(2, period);</b>
+<b class="fc">&nbsp;            statement.setDouble(3, litres);</b>
+<b class="fc">&nbsp;            statement.setString(4, notes);</b>
+<b class="pc">&nbsp;            if (updatedByUserId == null) {</b>
+<b class="nc">&nbsp;                statement.setNull(5, Types.INTEGER);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                statement.setLong(5, updatedByUserId);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            statement.setString(6, updatedAt);</b>
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+<b class="fc">&nbsp;            try (ResultSet keys = statement.getGeneratedKeys()) {</b>
+<b class="fc">&nbsp;                keys.next();</b>
+<b class="fc">&nbsp;                return new WaterEntry(keys.getLong(1), householdId, period, litres, notes, updatedByUserId, updatedAt);</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not record water entry for household &quot; + householdId, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;WaterEntry&gt; findByHousehold(long householdId) {
+<b class="fc">&nbsp;        String sql = &quot;SELECT * FROM water_entries WHERE household_id = ? ORDER BY id DESC&quot;;</b>
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="fc">&nbsp;                List&lt;WaterEntry&gt; entries = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;                while (rs.next()) {</b>
+<b class="fc">&nbsp;                    entries.add(map(rs));</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return entries;</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not look up water entries for household &quot; + householdId, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public WaterEntry update(long entryId, double litres, String notes,
+&nbsp;                             long updatedByUserId) {
+<b class="fc">&nbsp;        String updatedAt = Instant.now().toString();</b>
+&nbsp;
+<b class="fc">&nbsp;        String sql = &quot;UPDATE water_entries SET litres = ?, notes = ?, &quot;</b>
+&nbsp;                + &quot;updated_by_user_id = ?, updated_at = ? WHERE id = ?&quot;;
+&nbsp;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setDouble(1, litres);</b>
+<b class="fc">&nbsp;            statement.setString(2, notes);</b>
+<b class="fc">&nbsp;            statement.setLong(3, updatedByUserId);</b>
+<b class="fc">&nbsp;            statement.setString(4, updatedAt);</b>
+<b class="fc">&nbsp;            statement.setLong(5, entryId);</b>
+&nbsp;
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not update water entry &quot; + entryId, e);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String findSql = &quot;SELECT * FROM water_entries WHERE id = ?&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, entryId);</b>
+&nbsp;
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="pc">&nbsp;                if (rs.next()) {</b>
+<b class="fc">&nbsp;                    return map(rs);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not find water entry &quot; + entryId, e);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        throw new IllegalArgumentException(&quot;Water entry not found&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private WaterEntry map(ResultSet rs) throws SQLException {
+<b class="fc">&nbsp;        long updatedBy = rs.getLong(&quot;updated_by_user_id&quot;);</b>
+<b class="pc">&nbsp;        Long updatedByValue = rs.wasNull() ? null : updatedBy;</b>
+&nbsp;
+<b class="fc">&nbsp;        return new WaterEntry(</b>
+<b class="fc">&nbsp;                rs.getLong(&quot;id&quot;),</b>
+<b class="fc">&nbsp;                rs.getLong(&quot;household_id&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;period&quot;),</b>
+<b class="fc">&nbsp;                rs.getDouble(&quot;litres&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;notes&quot;),</b>
+&nbsp;                updatedByValue,
+<b class="fc">&nbsp;                rs.getString(&quot;updated_at&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

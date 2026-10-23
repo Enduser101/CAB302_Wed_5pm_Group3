@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > WaterService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: WaterService (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WaterService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (10/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.dao.ActivityLogDao;
+&nbsp;import com.ecotwin.dao.WaterEntryDao;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;import com.ecotwin.model.WaterEntry;
+&nbsp;
+&nbsp;import java.time.YearMonth;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class WaterService {
+&nbsp;
+&nbsp;    private final WaterEntryDao waterEntryDao;
+&nbsp;    private final ActivityLogDao activityLogDao;
+&nbsp;    private final ScoreService scoreService;
+&nbsp;
+<b class="fc">&nbsp;    public WaterService(WaterEntryDao waterEntryDao, ActivityLogDao activityLogDao, ScoreService scoreService) {</b>
+<b class="fc">&nbsp;        this.waterEntryDao = waterEntryDao;</b>
+<b class="fc">&nbsp;        this.activityLogDao = activityLogDao;</b>
+<b class="fc">&nbsp;        this.scoreService = scoreService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-16: record the household&#39;s water usage for the current period. */
+&nbsp;    public WaterEntry recordEntry(User actor, Household household, double litres, String notes) {
+<b class="fc">&nbsp;        if (litres &lt; 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Water usage cannot be negative&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String period = YearMonth.now().toString();</b>
+<b class="fc">&nbsp;        WaterEntry entry = waterEntryDao.create(household.getId(), period, litres, notes, actor.getId());</b>
+<b class="fc">&nbsp;        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; recorded water usage for &quot; + period);</b>
+<b class="fc">&nbsp;        scoreService.recalculate(household.getId());</b>
+<b class="fc">&nbsp;        return entry;</b>
+&nbsp;    }
+&nbsp;    /** US-19: update an existing water entry. */
+&nbsp;    public WaterEntry updateEntry(User actor, Household household, long entryId,
+&nbsp;                                  double litres, String notes) {
+<b class="fc">&nbsp;        if (litres &lt; 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Water usage cannot be negative&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        WaterEntry oldEntry = null;</b>
+&nbsp;
+<b class="fc">&nbsp;        for (WaterEntry entry : waterEntryDao.findByHousehold(household.getId())) {</b>
+<b class="pc">&nbsp;            if (entry.getId() == entryId) {</b>
+<b class="fc">&nbsp;                oldEntry = entry;</b>
+&nbsp;                break;
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        WaterEntry updatedEntry = waterEntryDao.update(</b>
+&nbsp;                entryId,
+&nbsp;                litres,
+&nbsp;                notes,
+<b class="fc">&nbsp;                actor.getId()</b>
+&nbsp;        );
+&nbsp;
+<b class="fc">&nbsp;        if (oldEntry != null) {</b>
+<b class="fc">&nbsp;            activityLogDao.log(</b>
+<b class="fc">&nbsp;                    household.getId(),</b>
+<b class="fc">&nbsp;                    actor.getId(),</b>
+<b class="fc">&nbsp;                    displayName(actor) + &quot; changed water usage from &quot;</b>
+<b class="fc">&nbsp;                            + oldEntry.getLitres() + &quot; L to &quot;</b>
+&nbsp;                            + litres + &quot; L&quot;
+&nbsp;            );
+&nbsp;        } else {
+<b class="fc">&nbsp;            activityLogDao.log(</b>
+<b class="fc">&nbsp;                    household.getId(),</b>
+<b class="fc">&nbsp;                    actor.getId(),</b>
+<b class="fc">&nbsp;                    displayName(actor) + &quot; updated water usage for &quot;</b>
+<b class="fc">&nbsp;                            + updatedEntry.getPeriod()</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        scoreService.recalculate(household.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        return updatedEntry;</b>
+&nbsp;    }
+&nbsp;    public List&lt;WaterEntry&gt; findEntriesForHousehold(Household household) {
+<b class="fc">&nbsp;        return waterEntryDao.findByHousehold(household.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String displayName(User user) {
+<b class="pc">&nbsp;        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
