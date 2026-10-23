@@ -1,0 +1,210 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > WasteService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: WasteService (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WasteService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (16/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (36/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.dao.ActivityLogDao;
+&nbsp;import com.ecotwin.dao.WasteEntryDao;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;import com.ecotwin.model.WasteEntry;
+&nbsp;
+&nbsp;import java.time.YearMonth;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class WasteService {
+&nbsp;
+&nbsp;    private final WasteEntryDao wasteEntryDao;
+&nbsp;    private final ActivityLogDao activityLogDao;
+&nbsp;    private final ScoreService scoreService;
+&nbsp;
+<b class="fc">&nbsp;    public WasteService(WasteEntryDao wasteEntryDao, ActivityLogDao activityLogDao, ScoreService scoreService) {</b>
+<b class="fc">&nbsp;        this.wasteEntryDao = wasteEntryDao;</b>
+<b class="fc">&nbsp;        this.activityLogDao = activityLogDao;</b>
+<b class="fc">&nbsp;        this.scoreService = scoreService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-17: record the household&#39;s waste and recycling for the current period. */
+&nbsp;    public WasteEntry recordEntry(User actor, Household household, double generalKg, double recycledKg, double compostKg) {
+<b class="fc">&nbsp;        if (generalKg &lt; 0 || recycledKg &lt; 0 || compostKg &lt; 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Waste amounts cannot be negative&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String period = YearMonth.now().toString();</b>
+<b class="fc">&nbsp;        WasteEntry entry = wasteEntryDao.create(household.getId(), period, generalKg, recycledKg, compostKg, actor.getId());</b>
+<b class="fc">&nbsp;        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; recorded waste for &quot; + period);</b>
+<b class="fc">&nbsp;        scoreService.recalculate(household.getId());</b>
+<b class="fc">&nbsp;        return entry;</b>
+&nbsp;    }
+&nbsp;    /** US-19: update an existing waste entry. */
+&nbsp;    public WasteEntry updateEntry(User actor, Household household, long entryId,
+&nbsp;                                  double generalKg, double recycledKg, double compostKg) {
+&nbsp;
+<b class="pc">&nbsp;        if (generalKg &lt; 0 || recycledKg &lt; 0 || compostKg &lt; 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Waste amounts cannot be negative&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        WasteEntry oldEntry = null;</b>
+&nbsp;
+<b class="fc">&nbsp;        for (WasteEntry entry : wasteEntryDao.findByHousehold(household.getId())) {</b>
+<b class="pc">&nbsp;            if (entry.getId() == entryId) {</b>
+<b class="fc">&nbsp;                oldEntry = entry;</b>
+&nbsp;                break;
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        WasteEntry updatedEntry = wasteEntryDao.update(</b>
+&nbsp;                entryId,
+&nbsp;                generalKg,
+&nbsp;                recycledKg,
+&nbsp;                compostKg,
+<b class="fc">&nbsp;                actor.getId()</b>
+&nbsp;        );
+&nbsp;
+<b class="fc">&nbsp;        if (oldEntry != null) {</b>
+<b class="fc">&nbsp;            activityLogDao.log(</b>
+<b class="fc">&nbsp;                    household.getId(),</b>
+<b class="fc">&nbsp;                    actor.getId(),</b>
+<b class="fc">&nbsp;                    displayName(actor) + &quot; changed waste from general &quot;</b>
+<b class="fc">&nbsp;                            + oldEntry.getGeneralKg() + &quot;kg, recycled &quot;</b>
+<b class="fc">&nbsp;                            + oldEntry.getRecycledKg() + &quot;kg, compost &quot;</b>
+<b class="fc">&nbsp;                            + oldEntry.getCompostKg() + &quot;kg to general &quot;</b>
+&nbsp;                            + generalKg + &quot;kg, recycled &quot;
+&nbsp;                            + recycledKg + &quot;kg, compost &quot;
+&nbsp;                            + compostKg + &quot;kg&quot;
+&nbsp;            );
+&nbsp;        } else {
+<b class="fc">&nbsp;            activityLogDao.log(</b>
+<b class="fc">&nbsp;                    household.getId(),</b>
+<b class="fc">&nbsp;                    actor.getId(),</b>
+<b class="fc">&nbsp;                    displayName(actor) + &quot; updated waste for &quot;</b>
+<b class="fc">&nbsp;                            + updatedEntry.getPeriod()</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        scoreService.recalculate(household.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        return updatedEntry;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;WasteEntry&gt; findEntriesForHousehold(Household household) {
+<b class="fc">&nbsp;        return wasteEntryDao.findByHousehold(household.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String displayName(User user) {
+<b class="pc">&nbsp;        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

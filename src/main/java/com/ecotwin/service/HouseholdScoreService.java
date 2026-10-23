@@ -59,16 +59,7 @@ public class HouseholdScoreService {
             return Optional.empty();
         }
 
-        return Optional.of(new SustainabilityScenario(
-                energy.get().getElectricityKwh(),
-                energy.get().getSolarGenerationKwh(),
-                water.get().getLitres(),
-                waste.get().getGeneralKg(),
-                waste.get().getRecycledKg(),
-                waste.get().getCompostKg(),
-                transport.get().getPublicTransportTripsPerWeek(),
-                transport.get().getFlightsPerYear()
-        ));
+        return Optional.of(scenarioFrom(energy.get(), water.get(), waste.get(), transport.get()));
     }
 
     public Optional<ScoreBreakdown> currentScores(Household household) {
@@ -129,11 +120,8 @@ public class HouseholdScoreService {
             return Optional.empty();
         }
 
-        return Optional.of(new AbstractMap.SimpleEntry<>(period, new SustainabilityScenario(
-                e.get().getElectricityKwh(), e.get().getSolarGenerationKwh(),
-                w.get().getLitres(),
-                s.get().getGeneralKg(), s.get().getRecycledKg(), s.get().getCompostKg(),
-                t.get().getPublicTransportTripsPerWeek(), t.get().getFlightsPerYear())));
+        return Optional.of(new AbstractMap.SimpleEntry<>(period,
+                scenarioFrom(e.get(), w.get(), s.get(), t.get())));
     }
 
     /** The last entry recorded for a period. */
@@ -142,5 +130,19 @@ public class HouseholdScoreService {
         return entries.stream()
                 .filter(entry -> wanted.equals(period.apply(entry)))
                 .max(Comparator.comparingLong(id));
+    }
+
+    /** Builds scenario values from one reading in each domain. */
+    private static SustainabilityScenario scenarioFrom(EnergyEntry energy, WaterEntry water,
+                                                       WasteEntry waste, TransportEntry transport) {
+        return new SustainabilityScenario(
+                energy.getElectricityKwh(),
+                energy.getSolarGenerationKwh(),
+                water.getLitres(),
+                waste.getGeneralKg(),
+                waste.getRecycledKg(),
+                waste.getCompostKg(),
+                transport.getPublicTransportTripsPerWeek(),
+                transport.getFlightsPerYear());
     }
 }

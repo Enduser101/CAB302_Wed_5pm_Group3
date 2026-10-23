@@ -525,3 +525,74 @@ In implementation, I worked on US-10 (leave a household), US-11 (view household 
 * Reformatted logbook from .docx to .md.
 * Removed logbook tables.
 * Expanded upon rough and vague log entries.
+
+### Preparing Assignment 3 Presentation Slides (Individual, 1.5 hours)
+
+* Created slides covering our agile development approach and key technical decisions.
+* Included our GitHub workflow, UI design progression, and layered architecture.
+* Added relevant screenshots and organised the content into short dot points.
+
+### Group Presentation Practice (Group, 2 hours)
+
+* Joined a group call to practise the presentation and review everyone's slides.
+* Improved slide formatting, transitions, and explanations based on group feedback.
+* Checked the presentation timing and assessment criteria.
+
+---
+
+## 21/10/2026
+
+### Group Presentation Rehearsal (Group, 1 hour)
+
+* Rehearsed the presentation with the group and practised transitions between speakers.
+* Reviewed timing and prepared for possible Q&A questions.
+
+### Assignment 3 Presentation and Q&A (Group, 1 hour)
+
+* Presented my section on our development approach and technical decisions.
+* Participated in the Q&A about our development practices and project decisions.
+
+---
+
+## 22/10/2026
+
+### Preparing Group Presentation Slides (Individual, 1.5 hours)
+
+* Organised and improved slides for the Assignment 2 group presentation.
+* Reviewed the presentation structure, formatting, and required content.
+
+### User Testing and Authentication UI Improvements (Individual, 3 hours)
+
+* Conducted user testing with my sister on the Login, Register, and Account pages.
+* Used feedback to identify the need for show/hide password buttons.
+* Added password visibility controls across all three pages, with passwords hidden by default.
+* Updated the layouts and styling to match the existing interface.
+* Ensured passwords retained their values when toggling visibility.
+* Improved existing authentication tests and checked that login, registration, and password changes still worked.
+
+---
+
+## 23/10/2026
+
+### Reviewing Object-Oriented Refactoring Evidence (Individual, 1 hour)
+
+* Reviewed existing refactorings against the Assignment 2 rubric.
+* Examined the scoring-system refactor introducing the Strategy pattern and dependency injection.
+* Reviewed other code improvements and identified suitable before-and-after examples.
+
+### Preparing Java Code Walkthrough Slides (Individual, 2 hours)
+
+* Created four slides covering the application's architecture and object-oriented refactoring.
+* Added before-and-after code screenshots and diagrams for the scoring-system refactor.
+* Included the shared score-formatting refactor as another example.
+* Adjusted slide layouts to focus on visuals and short dot points.
+
+### Writing and Recording Java Code Walkthrough (Individual, 2 hours)
+
+* Wrote and refined my three-minute script explaining the code changes and their benefits.
+* Covered the Strategy pattern, dependency injection, and improvements to code structure.
+* Revised the script to reduce repetition and improve the flow between slides.
+* Recorded my section of the Assignment 2 video walkthrough.
+
+### Logbook Entries (Individual, 0.5 hours)
+* Wrote logbook entries for week 13

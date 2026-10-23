@@ -1,0 +1,97 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScoreCalculator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ScoreCalculator (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">ScoreCalculator$MockitoMock$rthTg3QO</td>
+  </tr>
+  <tr>
+    <td class="name">ScoreCalculator$MockitoMock$rthTg3QO$auxiliary$7Tpgvjdl</td>
+  </tr>
+  <tr>
+    <td class="name">ScoreCalculator$MockitoMock$rthTg3QO$auxiliary$tpvYB0Vw</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.model.ScoreBreakdown;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;
+&nbsp;/**
+&nbsp; * Turns a set of household resource values into an overall sustainability score.
+&nbsp; *
+&nbsp; * The current score and a scenario&#39;s score (US-28) are both produced by the same
+&nbsp; * calculator, so the two are always directly comparable. Epic 6 (US-20/21) can swap
+&nbsp; * in its own implementation without touching the scenario code.
+&nbsp; */
+&nbsp;public interface ScoreCalculator {
+&nbsp;
+&nbsp;    /** @return overall score from 0 (worst) to 100 (best) */
+&nbsp;    double calculate(SustainabilityScenario values, int occupants);
+&nbsp;
+&nbsp;    /** @return the four domain scores (US-21) and the overall score */
+&nbsp;    ScoreBreakdown breakdown(SustainabilityScenario values, int occupants);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

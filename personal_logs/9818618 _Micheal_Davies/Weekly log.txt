@@ -218,7 +218,7 @@
 * Approved PR #86 after confirming the tests passed, with a caution about the UI positioning changes.
 * Merged PR #86 into `dev`.
 
-##4/10/2026
+## 04/10
 
 ### Personal Logs branch
 
@@ -291,3 +291,135 @@
 
 * Changes are currently uncommitted on `feature/us-28-31-scenarios`.
 * Still to do: commit the work, push the branch, and open a pull request targeting `dev`.
+
+## 07/10
+
+### US-28–US-31 — Scenarios Pull Request
+
+* Committed the scenario work on `feature/us-28-31-scenarios` and pushed the branch.
+* Opened PR #100 targeting `dev`, covering US-28 (compare scores), US-29 (save), US-30 (view saved) and US-31 (delete).
+* CI passed on the pull request, and PR #100 was merged into `dev`.
+* The `ScoreCalculator` interface added for US-28 became the base that the Epic 6 domain scores (US-21) were later built on.
+
+## 17/10
+
+### Project Review and Planning
+
+* Refreshed the project context against the repository, the project board and the 04/10 sprint plan to work out what was left for the final sprint.
+* Checked US-14 and US-28 against their acceptance criteria:
+
+  * US-28 met all of its criteria.
+  * US-14 was missing history for solar generation edits and had no tests for water edits.
+* Found that US-23 only had the score-over-time chart and was missing the before-and-after score change.
+* Investigated bug #101 (scenario score not dropping when electricity goes up) and traced it to the energy score reaching its minimum of 0 for high usage. Parked it so the remaining user stories came first.
+
+### US-14 — Record Household Data Changes (PR #114)
+
+* Wrote failing tests first for solar generation edits, then fixed `EnergyService.updateEntry` so the history only lists the values that changed, e.g. "solar generation from none to 60.0 kWh".
+* Added the missing water edit tests: previous value logged, score recalculated and negative values rejected.
+* Opened PR #114, which was merged into `dev`.
+
+### US-23 — Score Change After Updating Data (PR #113)
+
+* Wrote failing tests first for a new `ScoreChange` model and `HouseholdScoreService.trackChange`.
+* Implemented the before-and-after score, overall and for the domain that was updated.
+* Added a score change card to the Resources page, coloured green for better and red for worse.
+* Refactored the "+2.8 points" wording into `ScenarioComparison.signedPoints()` so the Scenarios and Resources pages share it, and recorded the reason in `docs/design-notes.md`.
+* Opened PR #113, which was merged into `dev`.
+
+### Demo Account — #115 (PR #116)
+
+* Created issue #115 in the same format as the other user story tasks.
+* Wrote failing tests first for a "Cab 302" demo account with six months of readings and a month of edits.
+* Implemented `DemoAccountSeeder`, which creates the account on startup if it is missing, so the dashboard, score chart and history have data to show in the demo.
+* Refactored the seeder to run in a single database transaction.
+* Opened PR #116 targeting `dev`.
+
+### Project Board
+
+* Added start and target dates to every item on the GitHub Project board, using a one-week span ending on each item's completion date and 23/10 for outstanding items.
+* Matched merged pull requests to their US- tasks so they could be linked from each issue's Development panel.
+* Answered a reviewer question on US-14 about why a water reading of 0 shows "0.0 L" rather than "none": zero is a real reading, and "none" only applies to the optional solar field.
+
+### Pull Request Reviews
+
+* Reviewed and approved PR #109 (US-34 and US-36 household administration) and merged it into `dev`.
+
+## 18/10
+
+### Assessment 2 Game Plan
+
+* Read the final submission brief and rubric and checked the repository against each criterion.
+* Wrote a game plan for the team covering each person's video section and time limit, the tasks needed for a 7, and the submission checklist, and posted it in Discord.
+* Identified the main gaps: no Javadoc generation in CI, no test coverage report, thin feedback evidence and stale submission files.
+
+## 19/10
+
+### Assessment 3 Presentation
+
+* Prepared my section, Quality Across the System: a one-minute script and slide.
+* Covered what quality meant for EcoTwin (trustworthy, understandable and sustainable), how it was built into the process, and the limitations, including inconsistent pull request reviews.
+
+## 20/10
+
+### Pull Request Reviews
+
+* Reviewed, approved and merged PR #119 and PR #120 (meeting notes) and PR #123 (James's logbook) into `dev`.
+
+## 21/10
+
+### Team Contribution Summary
+
+* Put together a summary of who did what for the presentation, using the git history, pull requests and everyone's weekly logs.
+* Counted user stories per person for a pie chart and listed contributions outside the user stories.
+* Checked the summary against each person's log so nobody was misrepresented, and flagged two items to confirm with the team (US-07 and who "8ound" is).
+
+## 22/10
+
+### Pull Request Reviews
+
+* Reviewed and approved PR #127 (James's user testing changes: show/hide password buttons) and merged it into `dev`.
+* Reviewed and approved PR #128 (email validation tests) and PR #130 (IntelliJ test fix).
+* Merged PR #116 (demo account) into `dev`.
+
+### CI — Javadoc and Test Coverage (PR #131)
+
+* Added the `maven-javadoc-plugin` and `jacoco-maven-plugin` to `pom.xml`.
+* Extended `.github/workflows/build.yml` so every run:
+
+  * prints line coverage in the run summary
+  * uploads the coverage report as a `coverage-report` artifact
+  * generates the Javadoc pages and uploads them as a `javadoc` artifact
+* Confirmed all 167 tests passed and the CI run produced both artifacts.
+* Coverage: service layer 97%, model 87%, util 87%, DAOs 71%. The JavaFX controllers are not unit tested, which brings the overall figure to 48%.
+* Opened PR #131 targeting `dev`.
+
+### Javadoc Comments (PR #132)
+
+* Added Javadoc to 13 classes, one class per commit: `DatabaseConnection`, `AppContext`, `SessionContext`, `AuthService`, `EnergyService`, `WaterService`, `WasteService`, `TransportService`, `HouseholdService`, `EnergyEntryDao`, `SqliteEnergyEntryDao`, `UserDao` and `HouseholdDao`.
+* Each class has a summary, and public methods have `@param`, `@return` and `@throws` tags.
+* Corrected two out-of-date comments along the way.
+* Left methods written by other team members for them to document, so Javadoc credit matches who wrote the code.
+* Confirmed the Javadoc builds with no warnings, and opened PR #132 targeting `dev`.
+
+## 23/10
+
+### Task Reviews
+
+* Reviewed #106 (Improve TDD) against its acceptance criteria and posted a summary of the evidence: red, green and refactor commits for US-21, US-23 and #115, refactors from every team member, and the suite growing from 46 tests at week 9 to 169.
+* Checked US-20 (#28) and found it had been delivered by PR #105 (US-21), which shows the overall score on the dashboard.
+
+### #94 — Description of How the App Works (PR #135)
+
+* Wrote failing tests first for an `AppGuide` that describes EcoTwin and every sidebar tab.
+* Added an "About EcoTwin" card to the Household page explaining what the app does and what each tab is for.
+* Kept the text in `AppGuide` so it is tested: a new tab cannot be added without a description.
+* Confirmed all 172 tests passed and opened PR #135 targeting `dev`.
+
+### Pull Request Reviews
+
+* Reviewed, approved and merged PR #133 (Frankie's scenario construction refactor) and PR #124 (meeting notes) into `dev`.
+
+### Personal Log
+
+* Updated this weekly log with entries from 07/10 to 23/10.

@@ -1,0 +1,244 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SqliteWasteEntryDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao.sqlite</a>
+</div>
+
+<h1>Coverage Summary for Class: SqliteWasteEntryDao (com.ecotwin.dao.sqlite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SqliteWasteEntryDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89.5%
+  </span>
+  <span class="absValue">
+    (51/57)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao.sqlite;
+&nbsp;
+&nbsp;import com.ecotwin.dao.WasteEntryDao;
+&nbsp;import com.ecotwin.model.WasteEntry;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Statement;
+&nbsp;import java.sql.Types;
+&nbsp;import java.time.Instant;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class SqliteWasteEntryDao implements WasteEntryDao {
+&nbsp;
+&nbsp;    private final Connection connection;
+&nbsp;
+<b class="fc">&nbsp;    public SqliteWasteEntryDao(Connection connection) {</b>
+<b class="fc">&nbsp;        this.connection = connection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public WasteEntry create(long householdId, String period, double generalKg, double recycledKg, double compostKg,
+&nbsp;                              Long updatedByUserId) {
+<b class="fc">&nbsp;        String updatedAt = Instant.now().toString();</b>
+<b class="fc">&nbsp;        String sql = &quot;INSERT INTO waste_entries &quot;</b>
+&nbsp;            + &quot;(household_id, period, general_kg, recycled_kg, compost_kg, updated_by_user_id, updated_at) &quot;
+&nbsp;            + &quot;VALUES (?, ?, ?, ?, ?, ?, ?)&quot;;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="fc">&nbsp;            statement.setString(2, period);</b>
+<b class="fc">&nbsp;            statement.setDouble(3, generalKg);</b>
+<b class="fc">&nbsp;            statement.setDouble(4, recycledKg);</b>
+<b class="fc">&nbsp;            statement.setDouble(5, compostKg);</b>
+<b class="pc">&nbsp;            if (updatedByUserId == null) {</b>
+<b class="nc">&nbsp;                statement.setNull(6, Types.INTEGER);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                statement.setLong(6, updatedByUserId);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            statement.setString(7, updatedAt);</b>
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+<b class="fc">&nbsp;            try (ResultSet keys = statement.getGeneratedKeys()) {</b>
+<b class="fc">&nbsp;                keys.next();</b>
+<b class="fc">&nbsp;                return new WasteEntry(keys.getLong(1), householdId, period, generalKg, recycledKg, compostKg,</b>
+&nbsp;                    updatedByUserId, updatedAt);
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not record waste entry for household &quot; + householdId, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;WasteEntry&gt; findByHousehold(long householdId) {
+<b class="fc">&nbsp;        String sql = &quot;SELECT * FROM waste_entries WHERE household_id = ? ORDER BY id DESC&quot;;</b>
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="fc">&nbsp;                List&lt;WasteEntry&gt; entries = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;                while (rs.next()) {</b>
+<b class="fc">&nbsp;                    entries.add(map(rs));</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return entries;</b>
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not look up waste entries for household &quot; + householdId, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    @Override
+&nbsp;    public WasteEntry update(long entryId, double generalKg, double recycledKg,
+&nbsp;                             double compostKg, long updatedByUserId) {
+&nbsp;
+<b class="fc">&nbsp;        String updatedAt = Instant.now().toString();</b>
+&nbsp;
+<b class="fc">&nbsp;        String sql = &quot;UPDATE waste_entries SET general_kg = ?, recycled_kg = ?, &quot;</b>
+&nbsp;                + &quot;compost_kg = ?, updated_by_user_id = ?, updated_at = ? &quot;
+&nbsp;                + &quot;WHERE id = ?&quot;;
+&nbsp;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setDouble(1, generalKg);</b>
+<b class="fc">&nbsp;            statement.setDouble(2, recycledKg);</b>
+<b class="fc">&nbsp;            statement.setDouble(3, compostKg);</b>
+<b class="fc">&nbsp;            statement.setLong(4, updatedByUserId);</b>
+<b class="fc">&nbsp;            statement.setString(5, updatedAt);</b>
+<b class="fc">&nbsp;            statement.setLong(6, entryId);</b>
+&nbsp;
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(</b>
+&nbsp;                    &quot;Could not update waste entry &quot; + entryId, e
+&nbsp;            );
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String findSql = &quot;SELECT * FROM waste_entries WHERE id = ?&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, entryId);</b>
+&nbsp;
+<b class="fc">&nbsp;            try (ResultSet rs = statement.executeQuery()) {</b>
+<b class="pc">&nbsp;                if (rs.next()) {</b>
+<b class="fc">&nbsp;                    return map(rs);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(</b>
+&nbsp;                    &quot;Could not find waste entry &quot; + entryId, e
+&nbsp;            );
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        throw new IllegalArgumentException(&quot;Waste entry not found&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private WasteEntry map(ResultSet rs) throws SQLException {
+<b class="fc">&nbsp;        long updatedBy = rs.getLong(&quot;updated_by_user_id&quot;);</b>
+<b class="pc">&nbsp;        Long updatedByValue = rs.wasNull() ? null : updatedBy;</b>
+<b class="fc">&nbsp;        return new WasteEntry(</b>
+<b class="fc">&nbsp;            rs.getLong(&quot;id&quot;),</b>
+<b class="fc">&nbsp;            rs.getLong(&quot;household_id&quot;),</b>
+<b class="fc">&nbsp;            rs.getString(&quot;period&quot;),</b>
+<b class="fc">&nbsp;            rs.getDouble(&quot;general_kg&quot;),</b>
+<b class="fc">&nbsp;            rs.getDouble(&quot;recycled_kg&quot;),</b>
+<b class="fc">&nbsp;            rs.getDouble(&quot;compost_kg&quot;),</b>
+&nbsp;            updatedByValue,
+<b class="fc">&nbsp;            rs.getString(&quot;updated_at&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScenarioService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ScenarioService (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ScenarioService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.dao.ScenarioDao;
+&nbsp;import com.ecotwin.model.EnergyEntry;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;import com.ecotwin.model.SavedScenario;
+&nbsp;import com.ecotwin.model.ScenarioComparison;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;import com.ecotwin.model.TransportEntry;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;import com.ecotwin.model.WasteEntry;
+&nbsp;import com.ecotwin.model.WaterEntry;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Creates temporary sustainability scenarios from current household data.
+&nbsp; *
+&nbsp; * Scenario changes remain in memory and do not update the household&#39;s
+&nbsp; * persisted resource records. Saving a scenario (US-29) stores it in its own
+&nbsp; * table, again without touching the household&#39;s resource records or history.
+&nbsp; */
+&nbsp;public class ScenarioService {
+&nbsp;
+&nbsp;    private final ScenarioDao scenarioDao;
+&nbsp;    private final ScoreCalculator scoreCalculator;
+&nbsp;
+<b class="fc">&nbsp;    public ScenarioService(ScenarioDao scenarioDao, ScoreCalculator scoreCalculator) {</b>
+<b class="fc">&nbsp;        this.scenarioDao = scenarioDao;</b>
+<b class="fc">&nbsp;        this.scoreCalculator = scoreCalculator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public SustainabilityScenario createScenario(EnergyEntry energy,
+&nbsp;                                                 WaterEntry water,
+&nbsp;                                                 WasteEntry waste,
+&nbsp;                                                 TransportEntry transport) {
+&nbsp;
+<b class="fc">&nbsp;        return new SustainabilityScenario(</b>
+<b class="fc">&nbsp;                energy.getElectricityKwh(),</b>
+<b class="fc">&nbsp;                energy.getSolarGenerationKwh(),</b>
+<b class="fc">&nbsp;                water.getLitres(),</b>
+<b class="fc">&nbsp;                waste.getGeneralKg(),</b>
+<b class="fc">&nbsp;                waste.getRecycledKg(),</b>
+<b class="fc">&nbsp;                waste.getCompostKg(),</b>
+<b class="fc">&nbsp;                transport.getPublicTransportTripsPerWeek(),</b>
+<b class="fc">&nbsp;                transport.getFlightsPerYear()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-28: score the scenario and the current household data with the same calculation. */
+&nbsp;    public ScenarioComparison compareToCurrent(SustainabilityScenario current,
+&nbsp;                                               SustainabilityScenario scenario,
+&nbsp;                                               Household household) {
+<b class="fc">&nbsp;        double currentScore = scoreCalculator.calculate(current, household.getOccupants());</b>
+<b class="fc">&nbsp;        double scenarioScore = scoreCalculator.calculate(scenario, household.getOccupants());</b>
+<b class="fc">&nbsp;        return new ScenarioComparison(currentScore, scenarioScore);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-29: save the scenario under a name, for every member of the household to see. */
+&nbsp;    public SavedScenario saveScenario(User actor, Household household, String name,
+&nbsp;                                      SustainabilityScenario current,
+&nbsp;                                      SustainabilityScenario scenario) {
+<b class="fc">&nbsp;        if (actor == null) {</b>
+<b class="fc">&nbsp;            throw new IllegalStateException(&quot;Only registered users can save a scenario&quot;);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (name == null || name.isBlank()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Scenario name cannot be empty&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        ScenarioComparison comparison = compareToCurrent(current, scenario, household);</b>
+<b class="fc">&nbsp;        return scenarioDao.create(</b>
+<b class="fc">&nbsp;                household.getId(),</b>
+<b class="fc">&nbsp;                actor.getId(),</b>
+<b class="fc">&nbsp;                name.trim(),</b>
+&nbsp;                scenario,
+<b class="fc">&nbsp;                comparison.getCurrentScore(),</b>
+<b class="fc">&nbsp;                comparison.getScenarioScore()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-30: every scenario saved by any member of the household. */
+&nbsp;    public List&lt;SavedScenario&gt; findSavedScenarios(Household household) {
+<b class="fc">&nbsp;        return scenarioDao.findByHousehold(household.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** US-31: permanently remove a saved scenario. Household resource data is not touched. */
+&nbsp;    public void deleteScenario(Household household, long scenarioId) {
+<b class="fc">&nbsp;        scenarioDao.delete(scenarioId, household.getId());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
