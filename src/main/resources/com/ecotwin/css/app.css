@@ -333,3 +333,19 @@
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
+
+/* Password visibility toggle */
+.password-toggle {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #71877A;
+    -fx-font-size: 20px;
+    -fx-font-family: "Segoe UI Symbol";
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.password-toggle:hover {
+    -fx-text-fill: #4F7560;
+}
