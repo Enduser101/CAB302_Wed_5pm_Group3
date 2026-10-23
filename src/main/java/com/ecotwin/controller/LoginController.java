@@ -23,6 +23,8 @@ public class LoginController {
     @FXML private Label messageLabel;
     @FXML private Hyperlink registerLink;
     @FXML private Button guestButton;
+    @FXML private TextField visiblePasswordField;
+    @FXML private Button togglePasswordButton;
 
     public LoginController(Navigator nav, AppContext ctx) {
         this.nav = nav;
@@ -66,5 +68,23 @@ public class LoginController {
             HouseholdMembership membership = ctx.householdService.findActiveMembership(user, h).orElseThrow();
             ctx.session.enterHousehold(h, membership);
         });
+    }
+
+    @FXML
+    private void handleTogglePassword() {
+        boolean showPassword = !visiblePasswordField.isVisible();
+
+        visiblePasswordField.setVisible(showPassword);
+        visiblePasswordField.setManaged(showPassword);
+
+        passwordField.setVisible(!showPassword);
+        passwordField.setManaged(!showPassword);
+
+        togglePasswordButton.setText(showPassword ? "◉" : "◎");
+    }
+
+    @FXML
+    private void initialize() {
+        visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());
     }
 }
