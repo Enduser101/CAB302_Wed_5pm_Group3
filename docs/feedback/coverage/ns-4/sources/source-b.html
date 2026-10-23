@@ -1,0 +1,219 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SustainabilityScenario</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.model</a>
+</div>
+
+<h1>Coverage Summary for Class: SustainabilityScenario (com.ecotwin.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SustainabilityScenario</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.model;
+&nbsp;
+&nbsp;/**
+&nbsp; * Holds temporary household values for a sustainability scenario.
+&nbsp; * These values are kept separate from the household&#39;s real resource records.
+&nbsp; */
+&nbsp;public class SustainabilityScenario {
+&nbsp;
+&nbsp;    private double energyKwh;
+&nbsp;    private Double solarGenerationKwh;
+&nbsp;    private double waterLitres;
+&nbsp;
+&nbsp;    private double generalWasteKg;
+&nbsp;    private double recycledWasteKg;
+&nbsp;    private double compostKg;
+&nbsp;
+&nbsp;    private double publicTransportTripsPerWeek;
+&nbsp;    private double flightsPerYear;
+&nbsp;
+&nbsp;    public SustainabilityScenario(double energyKwh,
+&nbsp;                                  Double solarGenerationKwh,
+&nbsp;                                  double waterLitres,
+&nbsp;                                  double generalWasteKg,
+&nbsp;                                  double recycledWasteKg,
+&nbsp;                                  double compostKg,
+&nbsp;                                  double publicTransportTripsPerWeek,
+<b class="fc">&nbsp;                                  double flightsPerYear) {</b>
+<b class="fc">&nbsp;        this.energyKwh = energyKwh;</b>
+<b class="fc">&nbsp;        this.solarGenerationKwh = solarGenerationKwh;</b>
+<b class="fc">&nbsp;        this.waterLitres = waterLitres;</b>
+<b class="fc">&nbsp;        this.generalWasteKg = generalWasteKg;</b>
+<b class="fc">&nbsp;        this.recycledWasteKg = recycledWasteKg;</b>
+<b class="fc">&nbsp;        this.compostKg = compostKg;</b>
+<b class="fc">&nbsp;        this.publicTransportTripsPerWeek = publicTransportTripsPerWeek;</b>
+<b class="fc">&nbsp;        this.flightsPerYear = flightsPerYear;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** An independent copy: changing it leaves this scenario&#39;s values as they are. */
+&nbsp;    public SustainabilityScenario copy() {
+<b class="fc">&nbsp;        return new SustainabilityScenario(</b>
+&nbsp;                energyKwh,
+&nbsp;                solarGenerationKwh,
+&nbsp;                waterLitres,
+&nbsp;                generalWasteKg,
+&nbsp;                recycledWasteKg,
+&nbsp;                compostKg,
+&nbsp;                publicTransportTripsPerWeek,
+&nbsp;                flightsPerYear
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getEnergyKwh() {
+<b class="fc">&nbsp;        return energyKwh;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setEnergyKwh(double energyKwh) {
+<b class="fc">&nbsp;        this.energyKwh = energyKwh;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Double getSolarGenerationKwh() {
+<b class="fc">&nbsp;        return solarGenerationKwh;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setSolarGenerationKwh(Double solarGenerationKwh) {
+<b class="fc">&nbsp;        this.solarGenerationKwh = solarGenerationKwh;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getWaterLitres() {
+<b class="fc">&nbsp;        return waterLitres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setWaterLitres(double waterLitres) {
+<b class="fc">&nbsp;        this.waterLitres = waterLitres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getGeneralWasteKg() {
+<b class="fc">&nbsp;        return generalWasteKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setGeneralWasteKg(double generalWasteKg) {
+<b class="fc">&nbsp;        this.generalWasteKg = generalWasteKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getRecycledWasteKg() {
+<b class="fc">&nbsp;        return recycledWasteKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setRecycledWasteKg(double recycledWasteKg) {
+<b class="fc">&nbsp;        this.recycledWasteKg = recycledWasteKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getCompostKg() {
+<b class="fc">&nbsp;        return compostKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCompostKg(double compostKg) {
+<b class="fc">&nbsp;        this.compostKg = compostKg;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getPublicTransportTripsPerWeek() {
+<b class="fc">&nbsp;        return publicTransportTripsPerWeek;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPublicTransportTripsPerWeek(double publicTransportTripsPerWeek) {
+<b class="fc">&nbsp;        this.publicTransportTripsPerWeek = publicTransportTripsPerWeek;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getFlightsPerYear() {
+<b class="fc">&nbsp;        return flightsPerYear;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFlightsPerYear(double flightsPerYear) {
+<b class="fc">&nbsp;        this.flightsPerYear = flightsPerYear;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
