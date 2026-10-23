@@ -1,0 +1,207 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppShellController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AppShellController (com.ecotwin.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AppShellController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.controller;
+&nbsp;
+&nbsp;import com.ecotwin.AppContext;
+&nbsp;import com.ecotwin.util.Page;
+&nbsp;import com.ecotwin.util.SessionContext;
+&nbsp;import javafx.fxml.FXML;
+&nbsp;import javafx.scene.control.Button;
+&nbsp;import javafx.scene.control.Label;
+&nbsp;import javafx.scene.layout.StackPane;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/** The post-login app shell: sidebar nav + a content area. Household and Account are real screens;
+&nbsp; *  the rest are placeholders reserved for the epics that own them. */
+&nbsp;public class AppShellController {
+&nbsp;
+&nbsp;    private final Navigator nav;
+&nbsp;    private final AppContext ctx;
+&nbsp;
+&nbsp;    @FXML private Button dashboardNav;
+&nbsp;    @FXML private Button resourcesNav;
+&nbsp;    @FXML private Button recommendationsNav;
+&nbsp;    @FXML private Button scenariosNav;
+&nbsp;    @FXML private Button householdNav;
+&nbsp;    @FXML private Button accountNav;
+&nbsp;    @FXML private StackPane contentArea;
+&nbsp;
+<b class="nc">&nbsp;    public AppShellController(Navigator nav, AppContext ctx) {</b>
+<b class="nc">&nbsp;        this.nav = nav;</b>
+<b class="nc">&nbsp;        this.ctx = ctx;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void initialize() {
+<b class="nc">&nbsp;        boolean canSeeHousehold = SessionContext.getInstance().canAccessPage(Page.HOUSEHOLD);</b>
+<b class="nc">&nbsp;        householdNav.setDisable(!canSeeHousehold);                    // guests: greyed out</b>
+<b class="nc">&nbsp;        if (canSeeHousehold) showHousehold(); else showDashboard();   // guests land on the dashboard</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showDashboard() {
+<b class="nc">&nbsp;        setActive(dashboardNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(nav.load(&quot;/com/ecotwin/dashboard-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showResources() {
+<b class="nc">&nbsp;        setActive(resourcesNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(nav.load(&quot;/com/ecotwin/resources-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showRecommendations() {
+<b class="nc">&nbsp;        setActive(recommendationsNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(nav.load(&quot;/com/ecotwin/recommendations-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showScenarios() {
+<b class="nc">&nbsp;        setActive(scenariosNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(</b>
+<b class="nc">&nbsp;                nav.load(&quot;/com/ecotwin/scenarios-view.fxml&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showHousehold() {
+<b class="nc">&nbsp;        setActive(householdNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(nav.load(&quot;/com/ecotwin/household-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void showAccount() {
+<b class="nc">&nbsp;        setActive(accountNav);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(nav.load(&quot;/com/ecotwin/account-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void showPlaceholder(Button navButton, String title) {
+<b class="nc">&nbsp;        setActive(navButton);</b>
+<b class="nc">&nbsp;        Label label = new Label(title + &quot; — coming soon&quot;);</b>
+<b class="nc">&nbsp;        label.getStyleClass().add(&quot;muted-text&quot;);</b>
+<b class="nc">&nbsp;        contentArea.getChildren().setAll(new StackPane(label));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setActive(Button active) {
+<b class="nc">&nbsp;        for (Button button : List.of(dashboardNav, resourcesNav, recommendationsNav, scenariosNav, householdNav, accountNav)) {</b>
+<b class="nc">&nbsp;            button.getStyleClass().remove(&quot;nav-item-active&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        active.getStyleClass().add(&quot;nav-item-active&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

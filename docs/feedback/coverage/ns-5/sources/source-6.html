@@ -1,0 +1,152 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > IndicativeScoreCalculator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: IndicativeScoreCalculator (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndicativeScoreCalculator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.model.ScoreBreakdown;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;
+&nbsp;/**
+&nbsp; * Indicative scoring only - not a validated emissions model (out of scope, see docs/build_plan.md S4).
+&nbsp; *
+&nbsp; * Each domain is scored by its own DomainScorer (Strategy pattern).
+&nbsp; * The overall score is the average of the four domain scores.
+&nbsp; */
+&nbsp;public class IndicativeScoreCalculator implements ScoreCalculator {
+&nbsp;
+&nbsp;    private final DomainScorer energy;
+&nbsp;    private final DomainScorer water;
+&nbsp;    private final DomainScorer waste;
+&nbsp;    private final DomainScorer transport;
+&nbsp;
+&nbsp;    public IndicativeScoreCalculator() {
+<b class="fc">&nbsp;        this(new EnergyScorer(), new WaterScorer(), new WasteScorer(), new TransportScorer());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public IndicativeScoreCalculator(DomainScorer energy, DomainScorer water,
+<b class="fc">&nbsp;                                     DomainScorer waste, DomainScorer transport) {</b>
+<b class="fc">&nbsp;        this.energy = energy;</b>
+<b class="fc">&nbsp;        this.water = water;</b>
+<b class="fc">&nbsp;        this.waste = waste;</b>
+<b class="fc">&nbsp;        this.transport = transport;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public double calculate(SustainabilityScenario values, int occupants) {
+<b class="fc">&nbsp;        return breakdown(values, occupants).total();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** The four domain scores (US-21) and their average, the overall score. */
+&nbsp;    public ScoreBreakdown breakdown(SustainabilityScenario values, int occupants) {
+<b class="fc">&nbsp;        int people = Math.max(1, occupants);</b>
+&nbsp;
+<b class="fc">&nbsp;        double energyScore = energy.score(values, people);</b>
+<b class="fc">&nbsp;        double waterScore = water.score(values, people);</b>
+<b class="fc">&nbsp;        double wasteScore = waste.score(values, people);</b>
+<b class="fc">&nbsp;        double transportScore = transport.score(values, people);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new ScoreBreakdown(energyScore, waterScore, wasteScore, transportScore,</b>
+&nbsp;                (energyScore + waterScore + wasteScore + transportScore) / 4);
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
