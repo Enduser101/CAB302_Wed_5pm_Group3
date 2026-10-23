@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Navigator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: Navigator (com.ecotwin.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Navigator</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.controller;
+&nbsp;
+&nbsp;import com.ecotwin.AppContext;
+&nbsp;import javafx.fxml.FXMLLoader;
+&nbsp;import javafx.scene.Parent;
+&nbsp;import javafx.scene.Scene;
+&nbsp;import javafx.stage.Stage;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;/** Loads FXML screens, injecting (Navigator, AppContext) into each controller via a factory. */
+&nbsp;public class Navigator {
+&nbsp;
+&nbsp;    private final Stage stage;
+&nbsp;    private final AppContext ctx;
+&nbsp;
+<b class="nc">&nbsp;    public Navigator(Stage stage, AppContext ctx) {</b>
+<b class="nc">&nbsp;        this.stage = stage;</b>
+<b class="nc">&nbsp;        this.ctx = ctx;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void showLogin() {
+<b class="nc">&nbsp;        setSceneRoot(load(&quot;/com/ecotwin/login-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void showRegister() {
+<b class="nc">&nbsp;        setSceneRoot(load(&quot;/com/ecotwin/register-view.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void showShell() {
+<b class="nc">&nbsp;        setSceneRoot(load(&quot;/com/ecotwin/app-shell.fxml&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Loads a view for embedding inside another screen&#39;s content area (e.g. the app shell&#39;s tabs). */
+&nbsp;    public Parent load(String fxmlPath) {
+&nbsp;        try {
+<b class="nc">&nbsp;            FXMLLoader loader = new FXMLLoader(Navigator.class.getResource(fxmlPath));</b>
+<b class="nc">&nbsp;            loader.setControllerFactory(this::createController);</b>
+<b class="nc">&nbsp;            return loader.load();</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not load view &quot; + fxmlPath, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setSceneRoot(Parent root) {
+<b class="nc">&nbsp;        Scene scene = stage.getScene();</b>
+<b class="nc">&nbsp;        if (scene == null) {</b>
+<b class="nc">&nbsp;            scene = new Scene(root, 1000, 650);</b>
+<b class="nc">&nbsp;            scene.getStylesheets().add(Navigator.class.getResource(&quot;/com/ecotwin/css/app.css&quot;).toExternalForm());</b>
+<b class="nc">&nbsp;            stage.setScene(scene);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            scene.setRoot(root);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Object createController(Class&lt;?&gt; controllerClass) {
+&nbsp;        try {
+<b class="nc">&nbsp;            return controllerClass.getConstructor(Navigator.class, AppContext.class).newInstance(this, ctx);</b>
+&nbsp;        } catch (ReflectiveOperationException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not construct controller &quot; + controllerClass, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
