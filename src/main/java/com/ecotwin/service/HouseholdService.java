@@ -14,6 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Households and their members: creating and joining (US-08, US-09), leaving and viewing
+ * members (US-10, US-11), activity history (US-12, US-13) and administration (US-32 to US-36).
+ *
+ * <p>Each household has exactly one administrator. Membership changes are written to the
+ * household's activity history. Admin-only actions throw {@link IllegalArgumentException}
+ * when an ordinary member tries them, and the UI shows that message.
+ */
 public class HouseholdService {
 
     private static final String JOIN_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
@@ -25,6 +33,12 @@ public class HouseholdService {
     private final ActivityLogDao activityLogDao;
     private final UserDao userDao;
 
+    /**
+     * @param householdDao   where households are stored
+     * @param membershipDao  who belongs to which household, and their role
+     * @param activityLogDao where history messages are written
+     * @param userDao        used to look up members' accounts
+     */
     public HouseholdService(HouseholdDao householdDao, HouseholdMembershipDao membershipDao,
                             ActivityLogDao activityLogDao, UserDao userDao) {
         this.householdDao = householdDao;
@@ -33,7 +47,17 @@ public class HouseholdService {
         this.userDao = userDao;
     }
 
-    /** US-08: creator becomes admin, household persists after restart. */
+    /**
+     * US-08: creator becomes admin, household persists after restart.
+     *
+     * @param creator      the signed-in user creating the household; they become its admin
+     * @param name         the household's name
+     * @param occupants    how many people live there (at least 1); scores are per person
+     * @param dwellingType e.g. "House" or "Apartment"
+     * @param state        the Australian state, e.g. "QLD"
+     * @return the new household, with a unique 6-character join code
+     * @throws IllegalArgumentException if the name is blank or occupants is less than 1
+     */
     public Household createHousehold(User creator, String name, int occupants, String dwellingType, String state) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Household name is required");
@@ -48,7 +72,15 @@ public class HouseholdService {
         return household;
     }
 
-    /** US-09: join by code; invalid code raises an error the UI turns into "No household found with that code". */
+    /**
+     * US-09: join by code; invalid code raises an error the UI turns into "No household found with that code".
+     * The code is trimmed and upper-cased first, so " 95fcve" works.
+     *
+     * @param user     the signed-in user joining
+     * @param joinCode the code shared by the household's admin
+     * @return the household joined, with the user added as an ordinary member
+     * @throws IllegalArgumentException if the code is blank or matches no household
+     */
     public Household joinHousehold(User user, String joinCode) {
         if (joinCode == null || joinCode.isBlank()) {
             throw new IllegalArgumentException("Enter a join code");
@@ -60,15 +92,31 @@ public class HouseholdService {
         return household;
     }
 
+    /**
+     * @param user the user to look up
+     * @return the household the user currently belongs to, or empty if they have none
+     */
     public Optional<Household> findActiveHouseholdForUser(User user) {
         return membershipDao.findAnyActiveByUser(user.getId())
             .flatMap(membership -> householdDao.findById(membership.getHouseholdId()));
     }
 
+    /**
+     * @param user      the user to look up
+     * @param household the household to check
+     * @return the user's current membership (including their role), or empty if they are
+     *         not an active member
+     */
     public Optional<HouseholdMembership> findActiveMembership(User user, Household household) {
         return membershipDao.findActiveByUserAndHousehold(user.getId(), household.getId());
     }
 
+    /**
+     * Makes a random 6-character code, retrying until no other household uses it. Letters
+     * and digits that look alike (0/O, 1/I) are left out so codes are easy to read out.
+     *
+     * @return a join code no household currently has
+     */
     private String generateUniqueJoinCode() {
         String code;
         do {
@@ -81,6 +129,10 @@ public class HouseholdService {
         return code;
     }
 
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
     private String displayName(User user) {
         return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();
     }
