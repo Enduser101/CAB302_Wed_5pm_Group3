@@ -4,7 +4,8 @@ module com.ecotwin {
     requires java.sql;
     requires org.xerial.sqlitejdbc;
     requires jbcrypt;
-
+    opens com.ecotwin.model;
+    opens com.ecotwin.dao.sqlite;
     opens com.ecotwin to javafx.fxml;
     opens com.ecotwin.controller to javafx.fxml;
 

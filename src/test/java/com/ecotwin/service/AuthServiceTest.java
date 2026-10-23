@@ -123,6 +123,17 @@ class AuthServiceTest {
 
         verify(userDao).updatePassword(eq(1L), argThat(h -> !BCrypt.checkpw("oldpassword", h)&& BCrypt.checkpw("newpassword123", h)));
     }
+    @Test
+    void registerRejectsEmailWithoutAt() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.register("newuser", "n.example.com", "password123"));
+    }
+
+    @Test
+    void registerRejectsBlankEmail() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.register("newuser", "   ", "password123"));
+    }
 }
 
 

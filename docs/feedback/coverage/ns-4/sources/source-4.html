@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > HouseholdMembership</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.model</a>
+</div>
+
+<h1>Coverage Summary for Class: HouseholdMembership (com.ecotwin.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HouseholdMembership</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">HouseholdMembership$Role</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (6/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (12/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.model;
+&nbsp;
+&nbsp;public class HouseholdMembership {
+&nbsp;
+<b class="fc">&nbsp;    public enum Role { ADMIN, MEMBER }</b>
+&nbsp;
+&nbsp;    private final long id;
+&nbsp;    private final long userId;
+&nbsp;    private final long householdId;
+&nbsp;    private final Role role;
+&nbsp;    private final String joinedAt;
+&nbsp;    private final String leftAt; // null = currently active
+&nbsp;
+&nbsp;    public HouseholdMembership(long id, long userId, long householdId, Role role,
+<b class="fc">&nbsp;                                String joinedAt, String leftAt) {</b>
+<b class="fc">&nbsp;        this.id = id;</b>
+<b class="fc">&nbsp;        this.userId = userId;</b>
+<b class="fc">&nbsp;        this.householdId = householdId;</b>
+<b class="fc">&nbsp;        this.role = role;</b>
+<b class="fc">&nbsp;        this.joinedAt = joinedAt;</b>
+<b class="fc">&nbsp;        this.leftAt = leftAt;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isActive() {
+<b class="nc">&nbsp;        return leftAt == null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public long getId() {
+<b class="fc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public long getUserId() {
+<b class="fc">&nbsp;        return userId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public long getHouseholdId() {
+<b class="fc">&nbsp;        return householdId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Role getRole() {
+<b class="fc">&nbsp;        return role;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getJoinedAt() {
+<b class="nc">&nbsp;        return joinedAt;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getLeftAt() {
+<b class="nc">&nbsp;        return leftAt;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

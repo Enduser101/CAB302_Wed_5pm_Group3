@@ -1,0 +1,98 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > HouseholdDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao</a>
+</div>
+
+<h1>Coverage Summary for Class: HouseholdDao (com.ecotwin.dao)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">HouseholdDao$MockitoMock$7FmXsA3d</td>
+  </tr>
+  <tr>
+    <td class="name">HouseholdDao$MockitoMock$7FmXsA3d$auxiliary$m7HojLxJ</td>
+  </tr>
+  <tr>
+    <td class="name">HouseholdDao$MockitoMock$7FmXsA3d$auxiliary$qs2g7AW1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao;
+&nbsp;
+&nbsp;import com.ecotwin.model.Household;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;public interface HouseholdDao {
+&nbsp;    // US-08: creator becomes admin - HouseholdService creates the household then the admin membership.
+&nbsp;    Household create(String name, int occupants, String dwellingType, String state, String joinCode);
+&nbsp;    Optional&lt;Household&gt; findById(long id);
+&nbsp;    Optional&lt;Household&gt; findByJoinCode(String joinCode); // US-09: join by code, invalid code -&gt; empty
+&nbsp;
+&nbsp;    // US-33: rename a household
+&nbsp;    void renameHousehold(long householdId, String newName);
+&nbsp;    
+&nbsp;    // US-33: change the household join code
+&nbsp;    void updateJoinCode(long householdId, String newJoinCode);
+&nbsp;
+&nbsp;    // US-36: delete a household
+&nbsp;    void deleteHousehold(long householdId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

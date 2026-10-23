@@ -1,0 +1,259 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RecommendationsController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: RecommendationsController (com.ecotwin.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RecommendationsController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/57)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.controller;
+&nbsp;
+&nbsp;import com.ecotwin.AppContext;
+&nbsp;import com.ecotwin.model.Recommendation;
+&nbsp;import com.ecotwin.model.Recommendation.Domain;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;import com.ecotwin.service.IndicativeScoreCalculator;
+&nbsp;import com.ecotwin.service.RecommendationService;
+&nbsp;import javafx.fxml.FXML;
+&nbsp;import javafx.geometry.Pos;
+&nbsp;import javafx.scene.control.Button;
+&nbsp;import javafx.scene.control.Label;
+&nbsp;import javafx.scene.layout.HBox;
+&nbsp;import javafx.scene.layout.Priority;
+&nbsp;import javafx.scene.layout.VBox;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import com.ecotwin.service.RecommendationExplanationService;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * US-24: the household&#39;s recommendations, weakest domain first, filterable by domain.
+&nbsp; * Each card shows the points the total score would gain.
+&nbsp; */
+&nbsp;public class RecommendationsController {
+&nbsp;
+&nbsp;    private final AppContext ctx;
+<b class="nc">&nbsp;    private final RecommendationService recommendationService =</b>
+&nbsp;            new RecommendationService(new IndicativeScoreCalculator());
+&nbsp;
+<b class="nc">&nbsp;    private final RecommendationExplanationService explanationService =</b>
+&nbsp;            new RecommendationExplanationService();
+&nbsp;
+<b class="nc">&nbsp;    private List&lt;Recommendation&gt; recommendations = List.of();</b>
+&nbsp;    private Domain weakest;
+&nbsp;
+&nbsp;    @FXML private Label householdLabel;
+&nbsp;    @FXML private Label introLabel;
+&nbsp;    @FXML private HBox filterTabs;
+&nbsp;    @FXML private VBox recommendationList;
+&nbsp;
+<b class="nc">&nbsp;    public RecommendationsController(Navigator nav, AppContext ctx) {</b>
+<b class="nc">&nbsp;        this.ctx = ctx;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @FXML
+&nbsp;    private void initialize() {
+<b class="nc">&nbsp;        if (!ctx.session.hasActiveHousehold()) {</b>
+<b class="nc">&nbsp;            introLabel.setText(&quot;Join or create a household to get recommendations.&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        householdLabel.setText(ctx.session.getCurrentHousehold().getName());</b>
+&nbsp;
+<b class="nc">&nbsp;        Optional&lt;SustainabilityScenario&gt; values =</b>
+<b class="nc">&nbsp;                ctx.householdScoreService.currentValues(ctx.session.getCurrentHousehold());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (values.isEmpty()) {</b>
+<b class="nc">&nbsp;            introLabel.setText(&quot;Record energy, water, waste and transport information to get recommendations.&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        recommendations = recommendationService.forHousehold(values.get(),</b>
+<b class="nc">&nbsp;                ctx.session.getCurrentHousehold().getOccupants());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (recommendations.isEmpty()) {</b>
+<b class="nc">&nbsp;            introLabel.setText(&quot;Nothing to recommend: every domain is at or better than its benchmark.&quot;);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        weakest = recommendations.get(0).domain();</b>
+<b class="nc">&nbsp;        introLabel.setText(&quot;Based on your latest readings, starting with your weakest area.&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        buildTabs();</b>
+<b class="nc">&nbsp;        show(null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void buildTabs() {
+<b class="nc">&nbsp;        filterTabs.getChildren().add(tab(&quot;All&quot;, null));</b>
+<b class="nc">&nbsp;        for (Domain domain : Domain.values()) {</b>
+<b class="nc">&nbsp;            filterTabs.getChildren().add(tab(name(domain), domain));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Button tab(String text, Domain domain) {
+<b class="nc">&nbsp;        Button button = new Button(text);</b>
+<b class="nc">&nbsp;        button.getStyleClass().add(&quot;filter-tab&quot;);</b>
+<b class="nc">&nbsp;        button.setOnAction(e -&gt; show(domain));</b>
+<b class="nc">&nbsp;        return button;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** @param domain the domain to show, or null for all */
+&nbsp;    private void show(Domain domain) {
+<b class="nc">&nbsp;        for (int i = 0; i &lt; filterTabs.getChildren().size(); i++) {</b>
+<b class="nc">&nbsp;            Domain tabDomain = i == 0 ? null : Domain.values()[i - 1];</b>
+<b class="nc">&nbsp;            filterTabs.getChildren().get(i).getStyleClass().remove(&quot;filter-tab-active&quot;);</b>
+<b class="nc">&nbsp;            if (tabDomain == domain) {</b>
+<b class="nc">&nbsp;                filterTabs.getChildren().get(i).getStyleClass().add(&quot;filter-tab-active&quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        recommendationList.getChildren().clear();</b>
+<b class="nc">&nbsp;        recommendations.stream()</b>
+<b class="nc">&nbsp;                .filter(r -&gt; domain == null || r.domain() == domain)</b>
+<b class="nc">&nbsp;                .forEach(r -&gt; recommendationList.getChildren().add(card(r)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private HBox card(Recommendation recommendation) {
+<b class="nc">&nbsp;        Label domain = new Label(name(recommendation.domain()));</b>
+<b class="nc">&nbsp;        domain.getStyleClass().add(&quot;rec-domain&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        Label title = new Label(recommendation.title());</b>
+<b class="nc">&nbsp;        title.getStyleClass().add(&quot;rec-title&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        Label whyLabel = new Label(&quot;Why this recommendation?&quot;);</b>
+<b class="nc">&nbsp;        whyLabel.getStyleClass().add(&quot;rec-detail&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        Label explanation = new Label(explanationService.explain(recommendation));</b>
+<b class="nc">&nbsp;        explanation.getStyleClass().add(&quot;rec-detail&quot;);</b>
+<b class="nc">&nbsp;        explanation.setWrapText(true);</b>
+&nbsp;
+<b class="nc">&nbsp;        VBox text = new VBox(2, domain, title, whyLabel, explanation);</b>
+&nbsp;
+<b class="nc">&nbsp;        HBox.setHgrow(text, Priority.ALWAYS);</b>
+&nbsp;
+<b class="nc">&nbsp;        Label points = new Label(&quot;+&quot; + recommendation.points());</b>
+<b class="nc">&nbsp;        points.getStyleClass().add(&quot;rec-points&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        HBox card = new HBox(16, text, points);</b>
+<b class="nc">&nbsp;        card.setAlignment(Pos.CENTER_LEFT);</b>
+<b class="nc">&nbsp;        card.getStyleClass().add(&quot;domain-card&quot;);</b>
+<b class="nc">&nbsp;        if (recommendation.domain() == weakest) {</b>
+<b class="nc">&nbsp;            card.getStyleClass().add(&quot;rec-card-weakest&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return card;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static String name(Domain domain) {
+<b class="nc">&nbsp;        String lower = domain.name().toLowerCase();</b>
+<b class="nc">&nbsp;        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>
