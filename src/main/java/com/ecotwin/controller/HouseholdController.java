@@ -1,6 +1,7 @@
 package com.ecotwin.controller;
 
 import com.ecotwin.AppContext;
+import com.ecotwin.model.AppGuide;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.HouseholdMembership;
 import com.ecotwin.model.User;
@@ -21,6 +22,9 @@ public class HouseholdController {
 
     private final Navigator nav;
     private final AppContext ctx;
+
+    @FXML private Label guideIntroLabel;
+    @FXML private VBox guideTabsList;
 
     @FXML private VBox setupSection;
     @FXML private VBox summarySection;
@@ -64,8 +68,23 @@ public class HouseholdController {
     @FXML
     private void initialize() {
         stateCombo.getItems().addAll(AUSTRALIAN_STATES);
+        showGuide();
         refresh();
 
+    }
+
+    /** #94: fills the "About EcoTwin" card with the intro and one line per sidebar tab. */
+    private void showGuide() {
+        guideIntroLabel.setText(AppGuide.intro());
+        for (AppGuide.Tab tab : AppGuide.tabs()) {
+            Label name = new Label(tab.name());
+            name.getStyleClass().add("value-text");
+            name.setMinWidth(130);
+            Label description = new Label(tab.description());
+            description.getStyleClass().add("muted-text");
+            description.setWrapText(true);
+            guideTabsList.getChildren().add(new HBox(12, name, description));
+        }
     }
 
     @FXML
