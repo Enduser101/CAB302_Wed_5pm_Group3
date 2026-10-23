@@ -13,10 +13,22 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * SQLite implementation of {@link EnergyEntryDao}, backed by the {@code energy_entries} table.
+ *
+ * <p>The interface's methods document what each one does; this class only adds how. Every
+ * query uses a {@link PreparedStatement}, so values are never pasted into SQL (no SQL
+ * injection). Times are stored as UTC ISO-8601 text, e.g. {@code 2026-10-16T23:00:00Z}, and
+ * the UI converts them to local time. A database error is rethrown as an unchecked
+ * exception, so callers do not need {@code try/catch} for {@link SQLException}.
+ */
 public class SqliteEnergyEntryDao implements EnergyEntryDao {
 
     private final Connection connection;
 
+    /**
+     * @param connection the shared database connection (see {@link com.ecotwin.AppContext})
+     */
     public SqliteEnergyEntryDao(Connection connection) {
         this.connection = connection;
     }
@@ -116,6 +128,14 @@ public class SqliteEnergyEntryDao implements EnergyEntryDao {
 
     }
 
+    /**
+     * Turns the current row into an {@link EnergyEntry}. SQLite returns 0 for a NULL number,
+     * so {@code wasNull()} is checked to keep "no solar" as {@code null} rather than 0 kWh.
+     *
+     * @param rs a result set positioned on an {@code energy_entries} row
+     * @return the entry for that row
+     * @throws SQLException if a column cannot be read
+     */
     private EnergyEntry map(ResultSet rs) throws SQLException {
         double solar = rs.getDouble("solar_generation_kwh");
         Double solarValue = rs.wasNull() ? null : solar;
