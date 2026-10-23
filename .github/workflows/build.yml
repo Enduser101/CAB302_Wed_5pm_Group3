@@ -36,3 +36,26 @@ jobs:
           name: JUnit Tests
           path: target/surefire-reports/*.xml
           reporter: java-junit
+
+      - name: Show test coverage in the run summary
+        if: always() && hashFiles('target/site/jacoco/jacoco.csv') != ''
+        run: |
+          awk -F, 'NR > 1 { missed += $8; covered += $9 }
+            END { if (missed + covered > 0) printf "### Test coverage\n\nLine coverage: %.1f%% (%d of %d lines)\n", 100 * covered / (missed + covered), covered, missed + covered }' \
+            target/site/jacoco/jacoco.csv >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/
+
+      - name: Generate Javadoc
+        run: ./mvnw -B javadoc:javadoc
+
+      - name: Upload Javadoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadoc
+          path: target/reports/apidocs/

@@ -92,6 +92,42 @@
                 <version>3.2.5</version>
             </plugin>
 
+            <!-- Test coverage: the agent records which lines the tests run,
+                 and the report is written to target/site/jacoco after every test run. -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Javadoc HTML pages: ./mvnw javadoc:javadoc writes them to target/reports/apidocs. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <show>private</show>
+                    <doclint>all,-missing</doclint>
+                    <windowtitle>EcoTwin API</windowtitle>
+                    <doctitle>EcoTwin API</doctitle>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
