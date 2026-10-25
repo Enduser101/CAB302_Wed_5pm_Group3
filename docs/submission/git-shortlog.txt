@@ -1,0 +1,10 @@
+# Commits per author, all branches, merges excluded (git shortlog --summary --numbered --all --no-merges)
+# Generated 25/10/2026 19:19 from the final dev branch before merging into main
+
+    63	lifeisthing
+    53	mdavies
+    21	Tinom Bature
+    20	James
+    17	Frankie
+     2	Micheal D
+     1	Jam577
