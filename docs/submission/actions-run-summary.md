@@ -6,14 +6,14 @@ Exported 25/10/2026 from the "Build and Test" workflow (`.github/workflows/build
 
 | | |
 |---|---|
-| Total runs | 188 |
-| Passed | 184 (98%) |
+| Total runs | 192 |
+| Passed | 188 (98%) |
 | Failed | 4 |
 | First run | 19/09/2026 |
 | Latest run | 25/10/2026 |
-| Runs in the final sprint (from 05/10) | 159 |
-| Triggered by a push | 103 |
-| Triggered by a pull request | 85 |
+| Runs in the final sprint (from 05/10) | 163 |
+| Triggered by a push | 105 |
+| Triggered by a pull request | 87 |
 
 ## Runs per week
 
@@ -24,15 +24,15 @@ Exported 25/10/2026 from the "Build and Test" workflow (`.github/workflows/build
 | 28/09 | 2 | 2 | 0 | 2 |
 | 05/10 | 41 | 41 | 0 | 14 |
 | 12/10 | 42 | 41 | 1 | 10 |
-| 19/10 | 76 | 76 | 0 | 23 |
+| 19/10 | 80 | 80 | 0 | 24 |
 
 ## Runs by branch type
 
 | Branch | Runs |
 |---|---|
 | `feature/*` | 91 |
-| `dev` | 47 |
-| `docs/*` | 15 |
+| `dev` | 49 |
+| `docs/*` | 17 |
 | `fix/*` | 5 |
 | `chore/*` | 5 |
 | `lifeisthing-patch-2` | 4 |
