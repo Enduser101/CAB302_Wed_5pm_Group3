@@ -1,0 +1,93 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScenarioDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao</a>
+</div>
+
+<h1>Coverage Summary for Class: ScenarioDao (com.ecotwin.dao)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">ScenarioDao$MockitoMock$Y5EVGNms</td>
+  </tr>
+  <tr>
+    <td class="name">ScenarioDao$MockitoMock$Y5EVGNms$auxiliary$UQ8TpQuQ</td>
+  </tr>
+  <tr>
+    <td class="name">ScenarioDao$MockitoMock$Y5EVGNms$auxiliary$z8NRJNFm</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao;
+&nbsp;
+&nbsp;import com.ecotwin.model.SavedScenario;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface ScenarioDao {
+&nbsp;    // US-29: saved scenarios belong to the household, not to the member who saved them.
+&nbsp;    SavedScenario create(long householdId, Long createdByUserId, String name,
+&nbsp;                         SustainabilityScenario values, double baselineScore, double projectedScore);
+&nbsp;    // US-30
+&nbsp;    List&lt;SavedScenario&gt; findByHousehold(long householdId);
+&nbsp;    // US-31: only removes the scenario if it belongs to the given household.
+&nbsp;    void delete(long scenarioId, long householdId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

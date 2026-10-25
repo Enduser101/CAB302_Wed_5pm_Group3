@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthService (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72.2%
+  </span>
+  <span class="absValue">
+    (13/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.7%
+  </span>
+  <span class="absValue">
+    (22/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.dao.UserDao;
+&nbsp;import com.ecotwin.model.User;
+&nbsp;import org.mindrot.jbcrypt.BCrypt;
+&nbsp;
+&nbsp;public class AuthService {
+&nbsp;
+&nbsp;    private final UserDao userDao;
+&nbsp;
+<b class="fc">&nbsp;    public AuthService(UserDao userDao) {</b>
+<b class="fc">&nbsp;        this.userDao = userDao;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public User register(String username, String email, String password) {
+<b class="pc">&nbsp;        if (email == null || !email.matches(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;)) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Please enter a valid email address&quot;);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (username == null || username.isBlank()) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Username is required&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        validatePassword(password);</b>
+<b class="fc">&nbsp;        if (userDao.findByUsername(username).isPresent()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;That username is already taken&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String hash = BCrypt.hashpw(password, BCrypt.gensalt());</b>
+<b class="fc">&nbsp;        return userDao.create(username, email, hash, username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public User login(String username, String password) {
+<b class="fc">&nbsp;        User user = userDao.findByUsername(username)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid username or password&quot;));</b>
+<b class="fc">&nbsp;        if (!BCrypt.checkpw(password, user.getPasswordHash())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Invalid username or password&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public void changePassword(String username, String currentPassword, String newPassword) {
+<b class="fc">&nbsp;        User user = userDao.findByUsername(username)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid username or password&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!BCrypt.checkpw(currentPassword, user.getPasswordHash())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Current password is incorrect&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        validatePassword(newPassword);</b>
+&nbsp;
+<b class="fc">&nbsp;        userDao.updatePassword(user.getId(), BCrypt.hashpw(newPassword, BCrypt.gensalt()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void validatePassword(String password) {
+<b class="pc">&nbsp;        if (password == null || password.length() &lt; 8) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Password must be at least 8 characters&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

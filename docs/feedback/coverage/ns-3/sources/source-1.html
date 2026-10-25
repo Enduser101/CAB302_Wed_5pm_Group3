@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SqliteActivityLogDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.dao.sqlite</a>
+</div>
+
+<h1>Coverage Summary for Class: SqliteActivityLogDao (com.ecotwin.dao.sqlite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SqliteActivityLogDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53.3%
+  </span>
+  <span class="absValue">
+    (24/45)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.dao.sqlite;
+&nbsp;
+&nbsp;import com.ecotwin.dao.ActivityLogDao;
+&nbsp;import com.ecotwin.model.ActivityLogEntry;
+&nbsp;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Types;
+&nbsp;import java.time.Instant;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public class SqliteActivityLogDao implements ActivityLogDao {
+&nbsp;
+&nbsp;    private final Connection connection;
+&nbsp;
+<b class="fc">&nbsp;    public SqliteActivityLogDao(Connection connection) {</b>
+<b class="fc">&nbsp;        this.connection = connection;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void log(long householdId, Long actorUserId, String message) {
+<b class="fc">&nbsp;        String sql = &quot;INSERT INTO activity_log (household_id, actor_user_id, message, created_at) VALUES (?, ?, ?, ?)&quot;;</b>
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="pc">&nbsp;            if (actorUserId == null) {</b>
+<b class="nc">&nbsp;                statement.setNull(2, Types.INTEGER);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                statement.setLong(2, actorUserId);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            statement.setString(3, message);</b>
+<b class="fc">&nbsp;            statement.setString(4, Instant.now().toString());</b>
+<b class="fc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not write activity log entry&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // US-36: delete household activity history
+&nbsp;    @Override
+&nbsp;    public void deleteByHousehold(long householdId) {
+<b class="nc">&nbsp;        String sql = &quot;DELETE FROM activity_log WHERE household_id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setLong(1, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not delete household activity history&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;ActivityLogEntry&gt; findByHousehold(long householdId) {
+<b class="fc">&nbsp;        String sql = &quot;SELECT id, household_id, actor_user_id, message, created_at &quot;</b>
+&nbsp;                + &quot;FROM activity_log WHERE household_id = ? ORDER BY id DESC&quot;;
+<b class="fc">&nbsp;        List&lt;ActivityLogEntry&gt; history = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;            statement.setLong(1, householdId);</b>
+&nbsp;
+<b class="fc">&nbsp;            try (ResultSet rows = statement.executeQuery()) {</b>
+<b class="fc">&nbsp;                while (rows.next()) {</b>
+<b class="fc">&nbsp;                    long actor = rows.getLong(&quot;actor_user_id&quot;);</b>
+<b class="pc">&nbsp;                    Long actorUserId = rows.wasNull() ? null : actor;</b>
+&nbsp;
+<b class="fc">&nbsp;                    history.add(new ActivityLogEntry(</b>
+<b class="fc">&nbsp;                            rows.getLong(&quot;id&quot;),</b>
+<b class="fc">&nbsp;                            rows.getLong(&quot;household_id&quot;),</b>
+&nbsp;                            actorUserId,
+<b class="fc">&nbsp;                            rows.getString(&quot;message&quot;),</b>
+<b class="fc">&nbsp;                            rows.getString(&quot;created_at&quot;)));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not read activity log&quot;, e);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return history;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-34: update an activity history message
+&nbsp;    @Override
+&nbsp;    public void updateMessage(long entryId, long householdId, String message) {
+<b class="nc">&nbsp;        String sql = &quot;UPDATE activity_log SET message = ? WHERE id = ? AND household_id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setString(1, message);</b>
+<b class="nc">&nbsp;            statement.setLong(2, entryId);</b>
+<b class="nc">&nbsp;            statement.setLong(3, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not update activity history entry&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // US-34: delete an individual activity history entry
+&nbsp;    @Override
+&nbsp;    public void deleteEntry(long entryId, long householdId) {
+<b class="nc">&nbsp;        String sql = &quot;DELETE FROM activity_log WHERE id = ? AND household_id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try (PreparedStatement statement = connection.prepareStatement(sql)) {</b>
+<b class="nc">&nbsp;            statement.setLong(1, entryId);</b>
+<b class="nc">&nbsp;            statement.setLong(2, householdId);</b>
+<b class="nc">&nbsp;            statement.executeUpdate();</b>
+&nbsp;        } catch (SQLException e) {
+<b class="nc">&nbsp;            throw new IllegalStateException(&quot;Could not delete activity history entry&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

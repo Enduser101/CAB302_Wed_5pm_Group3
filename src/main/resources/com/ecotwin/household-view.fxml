@@ -19,6 +19,13 @@
         <VBox spacing="24">
             <padding><Insets top="32" right="32" bottom="32" left="32" /></padding>
 
+            <!-- #94: what EcoTwin is and what each tab does, filled in from AppGuide -->
+            <VBox styleClass="card" spacing="8">
+                <Label text="About EcoTwin" styleClass="section-title" />
+                <Label fx:id="guideIntroLabel" styleClass="value-text" wrapText="true" />
+                <VBox fx:id="guideTabsList" spacing="6" />
+            </VBox>
+
             <VBox fx:id="setupSection" spacing="20">
                 <Label text="Set up your household" styleClass="page-title" />
                 <Label text="Start a new household, or join one your housemates have already created."

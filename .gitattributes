@@ -1,0 +1,5 @@
+# Shell scripts need Unix line endings, or macOS/Linux can't run them
+mvnw  text eol=lf
+
+# Windows batch files need Windows line endings
+*.cmd text eol=crlf
