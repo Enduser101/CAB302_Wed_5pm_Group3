@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteActivityLogDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteActivityLogDao.java</span></div><h1>SqliteActivityLogDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.model.ActivityLogEntry;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SqliteActivityLogDao implements ActivityLogDao {
+
+    private final Connection connection;
+
+<span class="fc" id="L19">    public SqliteActivityLogDao(Connection connection) {</span>
+<span class="fc" id="L20">        this.connection = connection;</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public void log(long householdId, Long actorUserId, String message) {
+<span class="fc" id="L25">        String sql = &quot;INSERT INTO activity_log (household_id, actor_user_id, message, created_at) VALUES (?, ?, ?, ?)&quot;;</span>
+<span class="fc" id="L26">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L27">            statement.setLong(1, householdId);</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">            if (actorUserId == null) {</span>
+<span class="nc" id="L29">                statement.setNull(2, Types.INTEGER);</span>
+            } else {
+<span class="fc" id="L31">                statement.setLong(2, actorUserId);</span>
+            }
+<span class="fc" id="L33">            statement.setString(3, message);</span>
+<span class="fc" id="L34">            statement.setString(4, Instant.now().toString());</span>
+<span class="fc" id="L35">            statement.executeUpdate();</span>
+<span class="nc" id="L36">        } catch (SQLException e) {</span>
+<span class="nc" id="L37">            throw new IllegalStateException(&quot;Could not write activity log entry&quot;, e);</span>
+<span class="fc" id="L38">        }</span>
+<span class="fc" id="L39">    }</span>
+
+
+    // US-36: delete household activity history
+    @Override
+    public void deleteByHousehold(long householdId) {
+<span class="nc" id="L45">        String sql = &quot;DELETE FROM activity_log WHERE household_id = ?&quot;;</span>
+
+<span class="nc" id="L47">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L48">            statement.setLong(1, householdId);</span>
+<span class="nc" id="L49">            statement.executeUpdate();</span>
+<span class="nc" id="L50">        } catch (SQLException e) {</span>
+<span class="nc" id="L51">            throw new IllegalStateException(&quot;Could not delete household activity history&quot;, e);</span>
+<span class="nc" id="L52">        }</span>
+<span class="nc" id="L53">    }</span>
+
+    @Override
+    public List&lt;ActivityLogEntry&gt; findByHousehold(long householdId) {
+<span class="fc" id="L57">        String sql = &quot;SELECT id, household_id, actor_user_id, message, created_at &quot;</span>
+                + &quot;FROM activity_log WHERE household_id = ? ORDER BY id DESC&quot;;
+<span class="fc" id="L59">        List&lt;ActivityLogEntry&gt; history = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L61">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L62">            statement.setLong(1, householdId);</span>
+
+<span class="fc" id="L64">            try (ResultSet rows = statement.executeQuery()) {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                while (rows.next()) {</span>
+<span class="fc" id="L66">                    long actor = rows.getLong(&quot;actor_user_id&quot;);</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">                    Long actorUserId = rows.wasNull() ? null : actor;</span>
+
+<span class="fc" id="L69">                    history.add(new ActivityLogEntry(</span>
+<span class="fc" id="L70">                            rows.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L71">                            rows.getLong(&quot;household_id&quot;),</span>
+                            actorUserId,
+<span class="fc" id="L73">                            rows.getString(&quot;message&quot;),</span>
+<span class="fc" id="L74">                            rows.getString(&quot;created_at&quot;)));</span>
+<span class="fc" id="L75">                }</span>
+            }
+<span class="nc" id="L77">        } catch (SQLException e) {</span>
+<span class="nc" id="L78">            throw new IllegalStateException(&quot;Could not read activity log&quot;, e);</span>
+<span class="fc" id="L79">        }</span>
+
+<span class="fc" id="L81">        return history;</span>
+    }
+
+    // US-34: update an activity history message
+    @Override
+    public void updateMessage(long entryId, long householdId, String message) {
+<span class="nc" id="L87">        String sql = &quot;UPDATE activity_log SET message = ? WHERE id = ? AND household_id = ?&quot;;</span>
+
+<span class="nc" id="L89">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L90">            statement.setString(1, message);</span>
+<span class="nc" id="L91">            statement.setLong(2, entryId);</span>
+<span class="nc" id="L92">            statement.setLong(3, householdId);</span>
+<span class="nc" id="L93">            statement.executeUpdate();</span>
+<span class="nc" id="L94">        } catch (SQLException e) {</span>
+<span class="nc" id="L95">            throw new IllegalStateException(&quot;Could not update activity history entry&quot;, e);</span>
+<span class="nc" id="L96">        }</span>
+<span class="nc" id="L97">    }</span>
+
+    // US-34: delete an individual activity history entry
+    @Override
+    public void deleteEntry(long entryId, long householdId) {
+<span class="nc" id="L102">        String sql = &quot;DELETE FROM activity_log WHERE id = ? AND household_id = ?&quot;;</span>
+
+<span class="nc" id="L104">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L105">            statement.setLong(1, entryId);</span>
+<span class="nc" id="L106">            statement.setLong(2, householdId);</span>
+<span class="nc" id="L107">            statement.executeUpdate();</span>
+<span class="nc" id="L108">        } catch (SQLException e) {</span>
+<span class="nc" id="L109">            throw new IllegalStateException(&quot;Could not delete activity history entry&quot;, e);</span>
+<span class="nc" id="L110">        }</span>
+<span class="nc" id="L111">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

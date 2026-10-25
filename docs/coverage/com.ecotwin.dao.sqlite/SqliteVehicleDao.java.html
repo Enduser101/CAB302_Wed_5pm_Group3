@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteVehicleDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteVehicleDao.java</span></div><h1>SqliteVehicleDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.VehicleDao;
+import com.ecotwin.model.Vehicle;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SqliteVehicleDao implements VehicleDao {
+
+    private final Connection connection;
+
+<span class="fc" id="L18">    public SqliteVehicleDao(Connection connection) {</span>
+<span class="fc" id="L19">        this.connection = connection;</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    public Vehicle create(long householdId, String label, String fuelType, double kmPerWeek) {
+<span class="fc" id="L24">        String sql = &quot;INSERT INTO vehicles (household_id, label, fuel_type, km_per_week) VALUES (?, ?, ?, ?)&quot;;</span>
+<span class="fc" id="L25">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L26">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L27">            statement.setString(2, label);</span>
+<span class="fc" id="L28">            statement.setString(3, fuelType);</span>
+<span class="fc" id="L29">            statement.setDouble(4, kmPerWeek);</span>
+<span class="fc" id="L30">            statement.executeUpdate();</span>
+<span class="fc" id="L31">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L32">                keys.next();</span>
+<span class="fc" id="L33">                return new Vehicle(keys.getLong(1), householdId, label, fuelType, kmPerWeek);</span>
+            }
+<span class="nc" id="L35">        } catch (SQLException e) {</span>
+<span class="nc" id="L36">            throw new IllegalStateException(&quot;Could not add vehicle for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public List&lt;Vehicle&gt; findByHousehold(long householdId) {
+<span class="fc" id="L42">        String sql = &quot;SELECT * FROM vehicles WHERE household_id = ? ORDER BY id ASC&quot;;</span>
+<span class="fc" id="L43">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L44">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L45">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="fc" id="L46">                List&lt;Vehicle&gt; vehicles = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L48">                    vehicles.add(map(rs));</span>
+                }
+<span class="fc" id="L50">                return vehicles;</span>
+            }
+<span class="nc" id="L52">        } catch (SQLException e) {</span>
+<span class="nc" id="L53">            throw new IllegalStateException(&quot;Could not look up vehicles for household &quot; + householdId, e);</span>
+        }
+    }
+    @Override
+    public Vehicle update(long vehicleId, String label, String fuelType, double kmPerWeek) {
+
+<span class="fc" id="L59">        String sql = &quot;UPDATE vehicles SET label = ?, fuel_type = ?, km_per_week = ? WHERE id = ?&quot;;</span>
+
+<span class="fc" id="L61">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L62">            statement.setString(1, label);</span>
+<span class="fc" id="L63">            statement.setString(2, fuelType);</span>
+<span class="fc" id="L64">            statement.setDouble(3, kmPerWeek);</span>
+<span class="fc" id="L65">            statement.setLong(4, vehicleId);</span>
+
+<span class="fc" id="L67">            statement.executeUpdate();</span>
+<span class="nc" id="L68">        } catch (SQLException e) {</span>
+<span class="nc" id="L69">            throw new IllegalStateException(</span>
+                    &quot;Could not update vehicle &quot; + vehicleId, e
+            );
+<span class="fc" id="L72">        }</span>
+
+<span class="fc" id="L74">        String findSql = &quot;SELECT * FROM vehicles WHERE id = ?&quot;;</span>
+
+<span class="fc" id="L76">        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</span>
+<span class="fc" id="L77">            statement.setLong(1, vehicleId);</span>
+
+<span class="fc" id="L79">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">                if (rs.next()) {</span>
+<span class="fc" id="L81">                    return map(rs);</span>
+                }
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L85">            throw new IllegalStateException(</span>
+                    &quot;Could not find vehicle &quot; + vehicleId, e
+            );
+<span class="nc" id="L88">        }</span>
+
+<span class="nc" id="L90">        throw new IllegalArgumentException(&quot;Vehicle not found&quot;);</span>
+    }
+    private Vehicle map(ResultSet rs) throws SQLException {
+<span class="fc" id="L93">        return new Vehicle(</span>
+<span class="fc" id="L94">            rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L95">            rs.getLong(&quot;household_id&quot;),</span>
+<span class="fc" id="L96">            rs.getString(&quot;label&quot;),</span>
+<span class="fc" id="L97">            rs.getString(&quot;fuel_type&quot;),</span>
+<span class="fc" id="L98">            rs.getDouble(&quot;km_per_week&quot;)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

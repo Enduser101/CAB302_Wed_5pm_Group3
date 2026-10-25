@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteEnergyEntryDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteEnergyEntryDao.java</span></div><h1>SqliteEnergyEntryDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.EnergyEntryDao;
+import com.ecotwin.model.EnergyEntry;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * SQLite implementation of {@link EnergyEntryDao}, backed by the {@code energy_entries} table.
+ *
+ * &lt;p&gt;The interface's methods document what each one does; this class only adds how. Every
+ * query uses a {@link PreparedStatement}, so values are never pasted into SQL (no SQL
+ * injection). Times are stored as UTC ISO-8601 text, e.g. {@code 2026-10-16T23:00:00Z}, and
+ * the UI converts them to local time. A database error is rethrown as an unchecked
+ * exception, so callers do not need {@code try/catch} for {@link SQLException}.
+ */
+public class SqliteEnergyEntryDao implements EnergyEntryDao {
+
+    private final Connection connection;
+
+    /**
+     * @param connection the shared database connection (see {@link com.ecotwin.AppContext})
+     */
+<span class="fc" id="L32">    public SqliteEnergyEntryDao(Connection connection) {</span>
+<span class="fc" id="L33">        this.connection = connection;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public EnergyEntry create(long householdId, String period, double electricityKwh, Double solarGenerationKwh,
+                               String notes, Long updatedByUserId) {
+<span class="fc" id="L39">        String updatedAt = Instant.now().toString();</span>
+<span class="fc" id="L40">        String sql = &quot;INSERT INTO energy_entries &quot;</span>
+            + &quot;(household_id, period, electricity_kwh, solar_generation_kwh, notes, updated_by_user_id, updated_at) &quot;
+            + &quot;VALUES (?, ?, ?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L43">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L44">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L45">            statement.setString(2, period);</span>
+<span class="fc" id="L46">            statement.setDouble(3, electricityKwh);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if (solarGenerationKwh == null) {</span>
+<span class="fc" id="L48">                statement.setNull(4, Types.REAL);</span>
+            } else {
+<span class="nc" id="L50">                statement.setDouble(4, solarGenerationKwh);</span>
+            }
+<span class="fc" id="L52">            statement.setString(5, notes);</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            if (updatedByUserId == null) {</span>
+<span class="nc" id="L54">                statement.setNull(6, Types.INTEGER);</span>
+            } else {
+<span class="fc" id="L56">                statement.setLong(6, updatedByUserId);</span>
+            }
+<span class="fc" id="L58">            statement.setString(7, updatedAt);</span>
+<span class="fc" id="L59">            statement.executeUpdate();</span>
+<span class="fc" id="L60">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L61">                keys.next();</span>
+<span class="fc" id="L62">                return new EnergyEntry(keys.getLong(1), householdId, period, electricityKwh, solarGenerationKwh,</span>
+                    notes, updatedByUserId, updatedAt);
+            }
+<span class="nc" id="L65">        } catch (SQLException e) {</span>
+<span class="nc" id="L66">            throw new IllegalStateException(&quot;Could not record energy entry for household &quot; + householdId, e);</span>
+        }
+    }
+    @Override
+    public EnergyEntry update(long entryId, double electricityKwh, Double solarGenerationKwh,
+                              String notes, long updatedByUserId) {
+<span class="fc" id="L72">        String updatedAt = Instant.now().toString();</span>
+
+<span class="fc" id="L74">        String sql = &quot;UPDATE energy_entries SET electricity_kwh = ?, solar_generation_kwh = ?, &quot;</span>
+                + &quot;notes = ?, updated_by_user_id = ?, updated_at = ? WHERE id = ?&quot;;
+
+<span class="fc" id="L77">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L78">            statement.setDouble(1, electricityKwh);</span>
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            if (solarGenerationKwh == null) {</span>
+<span class="fc" id="L81">                statement.setNull(2, Types.REAL);</span>
+            } else {
+<span class="fc" id="L83">                statement.setDouble(2, solarGenerationKwh);</span>
+            }
+
+<span class="fc" id="L86">            statement.setString(3, notes);</span>
+<span class="fc" id="L87">            statement.setLong(4, updatedByUserId);</span>
+<span class="fc" id="L88">            statement.setString(5, updatedAt);</span>
+<span class="fc" id="L89">            statement.setLong(6, entryId);</span>
+
+<span class="fc" id="L91">            statement.executeUpdate();</span>
+<span class="nc" id="L92">        } catch (SQLException e) {</span>
+<span class="nc" id="L93">            throw new IllegalStateException(&quot;Could not update energy entry &quot; + entryId, e);</span>
+<span class="fc" id="L94">        }</span>
+
+<span class="fc" id="L96">        String findSql = &quot;SELECT * FROM energy_entries WHERE id = ?&quot;;</span>
+
+<span class="fc" id="L98">        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</span>
+<span class="fc" id="L99">            statement.setLong(1, entryId);</span>
+
+<span class="fc" id="L101">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                if (rs.next()) {</span>
+<span class="fc" id="L103">                    return map(rs);</span>
+                }
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L107">            throw new IllegalStateException(&quot;Could not find energy entry &quot; + entryId, e);</span>
+<span class="nc" id="L108">        }</span>
+
+<span class="nc" id="L110">        throw new IllegalArgumentException(&quot;Energy entry not found&quot;);</span>
+    }
+
+    @Override
+    public List&lt;EnergyEntry&gt; findByHousehold(long householdId) {
+<span class="fc" id="L115">        String sql = &quot;SELECT * FROM energy_entries WHERE household_id = ? ORDER BY id DESC&quot;;</span>
+<span class="fc" id="L116">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L117">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L118">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="fc" id="L119">                List&lt;EnergyEntry&gt; entries = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L121">                    entries.add(map(rs));</span>
+                }
+<span class="fc" id="L123">                return entries;</span>
+            }
+<span class="nc" id="L125">        } catch (SQLException e) {</span>
+<span class="nc" id="L126">            throw new IllegalArgumentException(&quot;Energy entry not found&quot;);</span>
+        }
+
+    }
+
+    /**
+     * Turns the current row into an {@link EnergyEntry}. SQLite returns 0 for a NULL number,
+     * so {@code wasNull()} is checked to keep &quot;no solar&quot; as {@code null} rather than 0 kWh.
+     *
+     * @param rs a result set positioned on an {@code energy_entries} row
+     * @return the entry for that row
+     * @throws SQLException if a column cannot be read
+     */
+    private EnergyEntry map(ResultSet rs) throws SQLException {
+<span class="fc" id="L140">        double solar = rs.getDouble(&quot;solar_generation_kwh&quot;);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        Double solarValue = rs.wasNull() ? null : solar;</span>
+<span class="fc" id="L142">        long updatedBy = rs.getLong(&quot;updated_by_user_id&quot;);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        Long updatedByValue = rs.wasNull() ? null : updatedBy;</span>
+<span class="fc" id="L144">        return new EnergyEntry(</span>
+<span class="fc" id="L145">            rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L146">            rs.getLong(&quot;household_id&quot;),</span>
+<span class="fc" id="L147">            rs.getString(&quot;period&quot;),</span>
+<span class="fc" id="L148">            rs.getDouble(&quot;electricity_kwh&quot;),</span>
+            solarValue,
+<span class="fc" id="L150">            rs.getString(&quot;notes&quot;),</span>
+            updatedByValue,
+<span class="fc" id="L152">            rs.getString(&quot;updated_at&quot;)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

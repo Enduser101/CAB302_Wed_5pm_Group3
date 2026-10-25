@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScenarioService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">ScenarioService.java</span></div><h1>ScenarioService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ScenarioDao;
+import com.ecotwin.model.EnergyEntry;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.SavedScenario;
+import com.ecotwin.model.ScenarioComparison;
+import com.ecotwin.model.SustainabilityScenario;
+import com.ecotwin.model.TransportEntry;
+import com.ecotwin.model.User;
+import com.ecotwin.model.WasteEntry;
+import com.ecotwin.model.WaterEntry;
+
+import java.util.List;
+
+/**
+ * Creates temporary sustainability scenarios from current household data.
+ *
+ * Scenario changes remain in memory and do not update the household's
+ * persisted resource records. Saving a scenario (US-29) stores it in its own
+ * table, again without touching the household's resource records or history.
+ */
+public class ScenarioService {
+
+    private final ScenarioDao scenarioDao;
+    private final ScoreCalculator scoreCalculator;
+
+<span class="fc" id="L28">    public ScenarioService(ScenarioDao scenarioDao, ScoreCalculator scoreCalculator) {</span>
+<span class="fc" id="L29">        this.scenarioDao = scenarioDao;</span>
+<span class="fc" id="L30">        this.scoreCalculator = scoreCalculator;</span>
+<span class="fc" id="L31">    }</span>
+
+    public SustainabilityScenario createScenario(EnergyEntry energy,
+                                                 WaterEntry water,
+                                                 WasteEntry waste,
+                                                 TransportEntry transport) {
+
+<span class="fc" id="L38">        return new SustainabilityScenario(</span>
+<span class="fc" id="L39">                energy.getElectricityKwh(),</span>
+<span class="fc" id="L40">                energy.getSolarGenerationKwh(),</span>
+<span class="fc" id="L41">                water.getLitres(),</span>
+<span class="fc" id="L42">                waste.getGeneralKg(),</span>
+<span class="fc" id="L43">                waste.getRecycledKg(),</span>
+<span class="fc" id="L44">                waste.getCompostKg(),</span>
+<span class="fc" id="L45">                transport.getPublicTransportTripsPerWeek(),</span>
+<span class="fc" id="L46">                transport.getFlightsPerYear()</span>
+        );
+    }
+
+    /** US-28: score the scenario and the current household data with the same calculation. */
+    public ScenarioComparison compareToCurrent(SustainabilityScenario current,
+                                               SustainabilityScenario scenario,
+                                               Household household) {
+<span class="fc" id="L54">        double currentScore = scoreCalculator.calculate(current, household.getOccupants());</span>
+<span class="fc" id="L55">        double scenarioScore = scoreCalculator.calculate(scenario, household.getOccupants());</span>
+<span class="fc" id="L56">        return new ScenarioComparison(currentScore, scenarioScore);</span>
+    }
+
+    /** US-29: save the scenario under a name, for every member of the household to see. */
+    public SavedScenario saveScenario(User actor, Household household, String name,
+                                      SustainabilityScenario current,
+                                      SustainabilityScenario scenario) {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (actor == null) {</span>
+<span class="fc" id="L64">            throw new IllegalStateException(&quot;Only registered users can save a scenario&quot;);</span>
+        }
+<span class="pc bpc" id="L66" title="1 of 4 branches missed.">        if (name == null || name.isBlank()) {</span>
+<span class="fc" id="L67">            throw new IllegalArgumentException(&quot;Scenario name cannot be empty&quot;);</span>
+        }
+
+<span class="fc" id="L70">        ScenarioComparison comparison = compareToCurrent(current, scenario, household);</span>
+<span class="fc" id="L71">        return scenarioDao.create(</span>
+<span class="fc" id="L72">                household.getId(),</span>
+<span class="fc" id="L73">                actor.getId(),</span>
+<span class="fc" id="L74">                name.trim(),</span>
+                scenario,
+<span class="fc" id="L76">                comparison.getCurrentScore(),</span>
+<span class="fc" id="L77">                comparison.getScenarioScore()</span>
+        );
+    }
+
+    /** US-30: every scenario saved by any member of the household. */
+    public List&lt;SavedScenario&gt; findSavedScenarios(Household household) {
+<span class="fc" id="L83">        return scenarioDao.findByHousehold(household.getId());</span>
+    }
+
+    /** US-31: permanently remove a saved scenario. Household resource data is not touched. */
+    public void deleteScenario(Household household, long scenarioId) {
+<span class="fc" id="L88">        scenarioDao.delete(scenarioId, household.getId());</span>
+<span class="fc" id="L89">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

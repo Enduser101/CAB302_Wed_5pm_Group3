@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteWaterEntryDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteWaterEntryDao.java</span></div><h1>SqliteWaterEntryDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.WaterEntryDao;
+import com.ecotwin.model.WaterEntry;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SqliteWaterEntryDao implements WaterEntryDao {
+
+    private final Connection connection;
+
+<span class="fc" id="L20">    public SqliteWaterEntryDao(Connection connection) {</span>
+<span class="fc" id="L21">        this.connection = connection;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public WaterEntry create(long householdId, String period, double litres, String notes, Long updatedByUserId) {
+<span class="fc" id="L26">        String updatedAt = Instant.now().toString();</span>
+<span class="fc" id="L27">        String sql = &quot;INSERT INTO water_entries (household_id, period, litres, notes, updated_by_user_id, updated_at) &quot;</span>
+            + &quot;VALUES (?, ?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L29">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L30">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L31">            statement.setString(2, period);</span>
+<span class="fc" id="L32">            statement.setDouble(3, litres);</span>
+<span class="fc" id="L33">            statement.setString(4, notes);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">            if (updatedByUserId == null) {</span>
+<span class="nc" id="L35">                statement.setNull(5, Types.INTEGER);</span>
+            } else {
+<span class="fc" id="L37">                statement.setLong(5, updatedByUserId);</span>
+            }
+<span class="fc" id="L39">            statement.setString(6, updatedAt);</span>
+<span class="fc" id="L40">            statement.executeUpdate();</span>
+<span class="fc" id="L41">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L42">                keys.next();</span>
+<span class="fc" id="L43">                return new WaterEntry(keys.getLong(1), householdId, period, litres, notes, updatedByUserId, updatedAt);</span>
+            }
+<span class="nc" id="L45">        } catch (SQLException e) {</span>
+<span class="nc" id="L46">            throw new IllegalStateException(&quot;Could not record water entry for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public List&lt;WaterEntry&gt; findByHousehold(long householdId) {
+<span class="fc" id="L52">        String sql = &quot;SELECT * FROM water_entries WHERE household_id = ? ORDER BY id DESC&quot;;</span>
+<span class="fc" id="L53">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L54">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L55">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="fc" id="L56">                List&lt;WaterEntry&gt; entries = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L58">                    entries.add(map(rs));</span>
+                }
+<span class="fc" id="L60">                return entries;</span>
+            }
+<span class="nc" id="L62">        } catch (SQLException e) {</span>
+<span class="nc" id="L63">            throw new IllegalStateException(&quot;Could not look up water entries for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public WaterEntry update(long entryId, double litres, String notes,
+                             long updatedByUserId) {
+<span class="fc" id="L70">        String updatedAt = Instant.now().toString();</span>
+
+<span class="fc" id="L72">        String sql = &quot;UPDATE water_entries SET litres = ?, notes = ?, &quot;</span>
+                + &quot;updated_by_user_id = ?, updated_at = ? WHERE id = ?&quot;;
+
+<span class="fc" id="L75">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L76">            statement.setDouble(1, litres);</span>
+<span class="fc" id="L77">            statement.setString(2, notes);</span>
+<span class="fc" id="L78">            statement.setLong(3, updatedByUserId);</span>
+<span class="fc" id="L79">            statement.setString(4, updatedAt);</span>
+<span class="fc" id="L80">            statement.setLong(5, entryId);</span>
+
+<span class="fc" id="L82">            statement.executeUpdate();</span>
+<span class="nc" id="L83">        } catch (SQLException e) {</span>
+<span class="nc" id="L84">            throw new IllegalStateException(&quot;Could not update water entry &quot; + entryId, e);</span>
+<span class="fc" id="L85">        }</span>
+
+<span class="fc" id="L87">        String findSql = &quot;SELECT * FROM water_entries WHERE id = ?&quot;;</span>
+
+<span class="fc" id="L89">        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</span>
+<span class="fc" id="L90">            statement.setLong(1, entryId);</span>
+
+<span class="fc" id="L92">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                if (rs.next()) {</span>
+<span class="fc" id="L94">                    return map(rs);</span>
+                }
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L98">            throw new IllegalStateException(&quot;Could not find water entry &quot; + entryId, e);</span>
+<span class="nc" id="L99">        }</span>
+
+<span class="nc" id="L101">        throw new IllegalArgumentException(&quot;Water entry not found&quot;);</span>
+    }
+
+    private WaterEntry map(ResultSet rs) throws SQLException {
+<span class="fc" id="L105">        long updatedBy = rs.getLong(&quot;updated_by_user_id&quot;);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        Long updatedByValue = rs.wasNull() ? null : updatedBy;</span>
+
+<span class="fc" id="L108">        return new WaterEntry(</span>
+<span class="fc" id="L109">                rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L110">                rs.getLong(&quot;household_id&quot;),</span>
+<span class="fc" id="L111">                rs.getString(&quot;period&quot;),</span>
+<span class="fc" id="L112">                rs.getDouble(&quot;litres&quot;),</span>
+<span class="fc" id="L113">                rs.getString(&quot;notes&quot;),</span>
+                updatedByValue,
+<span class="fc" id="L115">                rs.getString(&quot;updated_at&quot;)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

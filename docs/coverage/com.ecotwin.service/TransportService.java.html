@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransportService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">TransportService.java</span></div><h1>TransportService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.TransportEntryDao;
+import com.ecotwin.dao.VehicleDao;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.TransportEntry;
+import com.ecotwin.model.User;
+import com.ecotwin.model.Vehicle;
+
+import java.time.YearMonth;
+import java.util.List;
+
+/**
+ * Household transport: monthly public transport and flight figures, plus the household's
+ * vehicles (US-18, US-19, US-14).
+ *
+ * &lt;p&gt;Every change is written to the household's activity history and triggers a score
+ * recalculation. Edits record the previous and new values.
+ */
+public class TransportService {
+
+    private final VehicleDao vehicleDao;
+    private final TransportEntryDao transportEntryDao;
+    private final ActivityLogDao activityLogDao;
+    private final ScoreService scoreService;
+
+    /**
+     * @param vehicleDao        where the household's vehicles are stored
+     * @param transportEntryDao where monthly transport readings are stored
+     * @param activityLogDao    where history messages are written
+     * @param scoreService      told to recalculate after every change
+     */
+    public TransportService(VehicleDao vehicleDao, TransportEntryDao transportEntryDao,
+<span class="fc" id="L35">                             ActivityLogDao activityLogDao, ScoreService scoreService) {</span>
+<span class="fc" id="L36">        this.vehicleDao = vehicleDao;</span>
+<span class="fc" id="L37">        this.transportEntryDao = transportEntryDao;</span>
+<span class="fc" id="L38">        this.activityLogDao = activityLogDao;</span>
+<span class="fc" id="L39">        this.scoreService = scoreService;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * US-18: record the household's transport information for the current period.
+     * Transport has one reading per month, so recording again in the same month replaces
+     * that month's figures rather than adding a second entry.
+     *
+     * @param actor                       the user recording the figures
+     * @param household                   the household they belong to
+     * @param publicTransportTripsPerWeek average public transport trips per week
+     * @param flightsPerYear              flights taken per year
+     * @return the saved entry for the current month ({@code YYYY-MM})
+     * @throws IllegalArgumentException if either figure is negative
+     */
+    public TransportEntry recordEntry(User actor, Household household, double publicTransportTripsPerWeek,
+                                       double flightsPerYear) {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (publicTransportTripsPerWeek &lt; 0) {</span>
+<span class="fc" id="L57">            throw new IllegalArgumentException(&quot;Public transport trips cannot be negative&quot;);</span>
+        }
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (flightsPerYear &lt; 0) {</span>
+<span class="fc" id="L60">            throw new IllegalArgumentException(&quot;Flights per year cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L63">        String period = YearMonth.now().toString();</span>
+<span class="fc" id="L64">        TransportEntry entry = transportEntryDao.upsertForPeriod(household.getId(), period,</span>
+<span class="fc" id="L65">            publicTransportTripsPerWeek, flightsPerYear, actor.getId());</span>
+<span class="fc" id="L66">        activityLogDao.log(household.getId(), actor.getId(),</span>
+<span class="fc" id="L67">            displayName(actor) + &quot; updated transport information for &quot; + period);</span>
+<span class="fc" id="L68">        scoreService.recalculate(household.getId());</span>
+<span class="fc" id="L69">        return entry;</span>
+    }
+
+    /**
+     * US-19: update an existing transport entry.
+     *
+     * &lt;p&gt;US-14: the history message shows the old and new trips and flights.
+     *
+     * @param actor                       the user making the edit
+     * @param household                   the household the entry belongs to
+     * @param entryId                     the entry to change
+     * @param publicTransportTripsPerWeek the corrected trips per week
+     * @param flightsPerYear              the corrected flights per year
+     * @return the updated entry
+     * @throws IllegalArgumentException if either figure is negative
+     */
+    public TransportEntry updateEntry(User actor,
+                                      Household household,
+                                      long entryId,
+                                      double publicTransportTripsPerWeek,
+                                      double flightsPerYear) {
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (publicTransportTripsPerWeek &lt; 0) {</span>
+<span class="fc" id="L92">            throw new IllegalArgumentException(</span>
+                    &quot;Public transport trips cannot be negative&quot;
+            );
+        }
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (flightsPerYear &lt; 0) {</span>
+<span class="fc" id="L98">            throw new IllegalArgumentException(</span>
+                    &quot;Flights per year cannot be negative&quot;
+            );
+        }
+
+<span class="fc" id="L103">        TransportEntry oldEntry = null;</span>
+
+        for (TransportEntry entry :
+<span class="fc bfc" id="L106" title="All 2 branches covered.">                transportEntryDao.findByHousehold(household.getId())) {</span>
+
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">            if (entry.getId() == entryId) {</span>
+<span class="fc" id="L109">                oldEntry = entry;</span>
+<span class="fc" id="L110">                break;</span>
+            }
+<span class="nc" id="L112">        }</span>
+
+<span class="fc" id="L114">        TransportEntry updatedEntry = transportEntryDao.update(</span>
+                entryId,
+                publicTransportTripsPerWeek,
+                flightsPerYear,
+<span class="fc" id="L118">                actor.getId()</span>
+        );
+
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (oldEntry != null) {</span>
+<span class="fc" id="L122">            activityLogDao.log(</span>
+<span class="fc" id="L123">                    household.getId(),</span>
+<span class="fc" id="L124">                    actor.getId(),</span>
+<span class="fc" id="L125">                    displayName(actor)</span>
+                            + &quot; changed transport from &quot;
+<span class="fc" id="L127">                            + oldEntry.getPublicTransportTripsPerWeek()</span>
+                            + &quot; PT trips/week and &quot;
+<span class="fc" id="L129">                            + oldEntry.getFlightsPerYear()</span>
+                            + &quot; flights/year to &quot;
+                            + publicTransportTripsPerWeek
+                            + &quot; PT trips/week and &quot;
+                            + flightsPerYear
+                            + &quot; flights/year&quot;
+            );
+        } else {
+<span class="fc" id="L137">            activityLogDao.log(</span>
+<span class="fc" id="L138">                    household.getId(),</span>
+<span class="fc" id="L139">                    actor.getId(),</span>
+<span class="fc" id="L140">                    displayName(actor)</span>
+                            + &quot; updated transport information for &quot;
+<span class="fc" id="L142">                            + updatedEntry.getPeriod()</span>
+            );
+        }
+
+<span class="fc" id="L146">        scoreService.recalculate(household.getId());</span>
+
+<span class="fc" id="L148">        return updatedEntry;</span>
+    }
+
+    /**
+     * US-18: add a vehicle to the household. Vehicles are listed on the Transport tab; the
+     * transport score itself is currently based on trips and flights only.
+     *
+     * @param actor     the user adding the vehicle
+     * @param household the household it belongs to
+     * @param label     a name for the vehicle, e.g. &quot;Family car&quot;
+     * @param fuelType  e.g. &quot;Petrol&quot;, &quot;Diesel&quot;, &quot;Electric&quot;
+     * @param kmPerWeek average distance driven per week, in km
+     * @return the saved vehicle
+     * @throws IllegalArgumentException if the label or fuel type is blank, or the distance is negative
+     */
+    public Vehicle addVehicle(User actor, Household household, String label, String fuelType, double kmPerWeek) {
+<span class="pc bpc" id="L164" title="1 of 4 branches missed.">        if (label == null || label.isBlank()) {</span>
+<span class="fc" id="L165">            throw new IllegalArgumentException(&quot;Vehicle label is required&quot;);</span>
+        }
+<span class="pc bpc" id="L167" title="2 of 4 branches missed.">        if (fuelType == null || fuelType.isBlank()) {</span>
+<span class="nc" id="L168">            throw new IllegalArgumentException(&quot;Fuel type is required&quot;);</span>
+        }
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (kmPerWeek &lt; 0) {</span>
+<span class="fc" id="L171">            throw new IllegalArgumentException(&quot;Kilometres per week cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L174">        Vehicle vehicle = vehicleDao.create(household.getId(), label, fuelType, kmPerWeek);</span>
+<span class="fc" id="L175">        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; added vehicle &quot; + label);</span>
+<span class="fc" id="L176">        scoreService.recalculate(household.getId());</span>
+<span class="fc" id="L177">        return vehicle;</span>
+    }
+
+    /**
+     * US-19: update an existing household vehicle. The history message shows the old and
+     * new label, fuel type and distance.
+     *
+     * @param actor     the user making the edit
+     * @param household the household the vehicle belongs to
+     * @param vehicleId the vehicle to change
+     * @param label     the new name
+     * @param fuelType  the new fuel type
+     * @param kmPerWeek the new distance per week, in km
+     * @return the updated vehicle
+     * @throws IllegalArgumentException if the label or fuel type is blank, or the distance is negative
+     */
+    public Vehicle updateVehicle(User actor,
+                                 Household household,
+                                 long vehicleId,
+                                 String label,
+                                 String fuelType,
+                                 double kmPerWeek) {
+
+<span class="pc bpc" id="L200" title="2 of 4 branches missed.">        if (label == null || label.isBlank()) {</span>
+<span class="nc" id="L201">            throw new IllegalArgumentException(&quot;Vehicle label is required&quot;);</span>
+        }
+
+<span class="pc bpc" id="L204" title="2 of 4 branches missed.">        if (fuelType == null || fuelType.isBlank()) {</span>
+<span class="nc" id="L205">            throw new IllegalArgumentException(&quot;Fuel type is required&quot;);</span>
+        }
+
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (kmPerWeek &lt; 0) {</span>
+<span class="fc" id="L209">            throw new IllegalArgumentException(</span>
+                    &quot;Kilometres per week cannot be negative&quot;
+            );
+        }
+
+<span class="fc" id="L214">        Vehicle oldVehicle = null;</span>
+
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        for (Vehicle vehicle : vehicleDao.findByHousehold(household.getId())) {</span>
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">            if (vehicle.getId() == vehicleId) {</span>
+<span class="fc" id="L218">                oldVehicle = vehicle;</span>
+<span class="fc" id="L219">                break;</span>
+            }
+<span class="nc" id="L221">        }</span>
+
+<span class="fc" id="L223">        Vehicle updatedVehicle = vehicleDao.update(</span>
+                vehicleId,
+                label,
+                fuelType,
+                kmPerWeek
+        );
+
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        if (oldVehicle != null) {</span>
+<span class="fc" id="L231">            activityLogDao.log(</span>
+<span class="fc" id="L232">                    household.getId(),</span>
+<span class="fc" id="L233">                    actor.getId(),</span>
+<span class="fc" id="L234">                    displayName(actor)</span>
+                            + &quot; changed vehicle &quot;
+<span class="fc" id="L236">                            + oldVehicle.getLabel()</span>
+<span class="fc" id="L237">                            + &quot; (&quot; + oldVehicle.getFuelType()</span>
+<span class="fc" id="L238">                            + &quot;, &quot; + oldVehicle.getKmPerWeek()</span>
+                            + &quot; km/week) to &quot;
+                            + label
+                            + &quot; (&quot; + fuelType
+                            + &quot;, &quot; + kmPerWeek
+                            + &quot; km/week)&quot;
+            );
+        } else {
+<span class="fc" id="L246">            activityLogDao.log(</span>
+<span class="fc" id="L247">                    household.getId(),</span>
+<span class="fc" id="L248">                    actor.getId(),</span>
+<span class="fc" id="L249">                    displayName(actor) + &quot; updated vehicle &quot; + label</span>
+            );
+        }
+
+<span class="fc" id="L253">        scoreService.recalculate(household.getId());</span>
+
+<span class="fc" id="L255">        return updatedVehicle;</span>
+    }
+
+    /**
+     * @param household the household to look up
+     * @return the household's vehicles
+     */
+    public List&lt;Vehicle&gt; findVehiclesForHousehold(Household household) {
+<span class="nc" id="L263">        return vehicleDao.findByHousehold(household.getId());</span>
+    }
+
+    /**
+     * @param household the household to look up
+     * @return all of the household's monthly transport readings
+     */
+    public List&lt;TransportEntry&gt; findEntriesForHousehold(Household household) {
+<span class="fc" id="L271">        return transportEntryDao.findByHousehold(household.getId());</span>
+    }
+
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
+    private String displayName(User user) {
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

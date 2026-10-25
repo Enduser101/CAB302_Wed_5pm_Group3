@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.controller</a> &gt; <span class="el_source">LoginController.java</span></div><h1>LoginController.java</h1><pre class="source lang-java linenums">package com.ecotwin.controller;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.HouseholdMembership;
+import com.ecotwin.model.User;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+
+import java.util.Optional;
+
+public class LoginController {
+
+    private final Navigator nav;
+    private final AppContext ctx;
+
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label messageLabel;
+    @FXML private Hyperlink registerLink;
+    @FXML private Button guestButton;
+    @FXML private TextField visiblePasswordField;
+    @FXML private Button togglePasswordButton;
+
+<span class="nc" id="L29">    public LoginController(Navigator nav, AppContext ctx) {</span>
+<span class="nc" id="L30">        this.nav = nav;</span>
+<span class="nc" id="L31">        this.ctx = ctx;</span>
+<span class="nc" id="L32">    }</span>
+
+    @FXML
+    private void handleLogin() {
+<span class="nc" id="L36">        String username = usernameField.getText();</span>
+<span class="nc" id="L37">        String password = passwordField.getText();</span>
+
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        if (username.isEmpty() || password.isEmpty()) {</span>
+<span class="nc" id="L40">            messageLabel.setText(&quot;Please enter username and password&quot;);</span>
+<span class="nc" id="L41">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L45">            User user = ctx.authService.login(username, password);</span>
+<span class="nc" id="L46">            ctx.session.login(user);</span>
+<span class="nc" id="L47">            attachHouseholdIfAny(user);</span>
+<span class="nc" id="L48">            nav.showShell();</span>
+<span class="nc" id="L49">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L50">            messageLabel.setText(e.getMessage());</span>
+<span class="nc" id="L51">        }</span>
+<span class="nc" id="L52">    }</span>
+
+    @FXML
+    private void handleRegisterLink() {
+<span class="nc" id="L56">        nav.showRegister();</span>
+<span class="nc" id="L57">    }</span>
+
+    @FXML
+    private void handleGuest() {
+<span class="nc" id="L61">        ctx.session.startGuestSession();</span>
+<span class="nc" id="L62">        nav.showShell();</span>
+<span class="nc" id="L63">    }</span>
+
+    private void attachHouseholdIfAny(User user) {
+<span class="nc" id="L66">        Optional&lt;Household&gt; household = ctx.householdService.findActiveHouseholdForUser(user);</span>
+<span class="nc" id="L67">        household.ifPresent(h -&gt; {</span>
+<span class="nc" id="L68">            HouseholdMembership membership = ctx.householdService.findActiveMembership(user, h).orElseThrow();</span>
+<span class="nc" id="L69">            ctx.session.enterHousehold(h, membership);</span>
+<span class="nc" id="L70">        });</span>
+<span class="nc" id="L71">    }</span>
+
+    @FXML
+    private void handleTogglePassword() {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        boolean showPassword = !visiblePasswordField.isVisible();</span>
+
+<span class="nc" id="L77">        visiblePasswordField.setVisible(showPassword);</span>
+<span class="nc" id="L78">        visiblePasswordField.setManaged(showPassword);</span>
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        passwordField.setVisible(!showPassword);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        passwordField.setManaged(!showPassword);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        togglePasswordButton.setText(showPassword ? &quot;◉&quot; : &quot;◎&quot;);</span>
+<span class="nc" id="L84">    }</span>
+
+    @FXML
+    private void initialize() {
+<span class="nc" id="L88">        visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());</span>
+<span class="nc" id="L89">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

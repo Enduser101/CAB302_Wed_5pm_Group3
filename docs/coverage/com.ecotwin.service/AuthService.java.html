@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.UserDao;
+import com.ecotwin.model.User;
+import org.mindrot.jbcrypt.BCrypt;
+
+/**
+ * Account registration, login and password changes (US-01, US-02, US-06).
+ *
+ * &lt;p&gt;Passwords are never stored: only a BCrypt hash, which includes its own random salt.
+ * Login gives the same &quot;Invalid username or password&quot; message whichever part is wrong, so
+ * the app does not reveal which usernames exist.
+ */
+public class AuthService {
+
+    private final UserDao userDao;
+
+    /**
+     * @param userDao where user accounts are stored
+     */
+<span class="fc" id="L21">    public AuthService(UserDao userDao) {</span>
+<span class="fc" id="L22">        this.userDao = userDao;</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * Creates a new account. The username is also used as the starting display name.
+     *
+     * @param username a unique, non-blank username
+     * @param email    a valid email address
+     * @param password at least 8 characters; stored only as a BCrypt hash
+     * @return the newly created user
+     * @throws IllegalArgumentException if the email is invalid, the username is blank or
+     *                                  already taken, or the password is too short
+     */
+    public User register(String username, String email, String password) {
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">        if (email == null || !email.matches(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;)) {</span>
+<span class="fc" id="L37">            throw new IllegalArgumentException(&quot;Please enter a valid email address&quot;);</span>
+        }
+<span class="pc bpc" id="L39" title="2 of 4 branches missed.">        if (username == null || username.isBlank()) {</span>
+<span class="nc" id="L40">            throw new IllegalArgumentException(&quot;Username is required&quot;);</span>
+        }
+<span class="fc" id="L42">        validatePassword(password);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (userDao.findByUsername(username).isPresent()) {</span>
+<span class="fc" id="L44">            throw new IllegalArgumentException(&quot;That username is already taken&quot;);</span>
+        }
+<span class="fc" id="L46">        String hash = BCrypt.hashpw(password, BCrypt.gensalt());</span>
+<span class="fc" id="L47">        return userDao.create(username, email, hash, username);</span>
+    }
+
+    /**
+     * Checks a username and password against the stored hash.
+     *
+     * @param username the account's username
+     * @param password the password as typed
+     * @return the signed-in user
+     * @throws IllegalArgumentException with the same message whether the username or the
+     *                                  password is wrong
+     */
+    public User login(String username, String password) {
+<span class="fc" id="L60">        User user = userDao.findByUsername(username)</span>
+<span class="fc" id="L61">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid username or password&quot;));</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (!BCrypt.checkpw(password, user.getPasswordHash())) {</span>
+<span class="fc" id="L63">            throw new IllegalArgumentException(&quot;Invalid username or password&quot;);</span>
+        }
+<span class="fc" id="L65">        return user;</span>
+    }
+
+    /**
+     * Changes a signed-in user's password after confirming their current one.
+     *
+     * @param username        the signed-in user's username
+     * @param currentPassword their existing password, as a check that it is really them
+     * @param newPassword     the new password, at least 8 characters
+     * @throws IllegalArgumentException if the current password is wrong or the new one is
+     *                                  too short
+     */
+    public void changePassword(String username, String currentPassword, String newPassword) {
+<span class="fc" id="L78">        User user = userDao.findByUsername(username)</span>
+<span class="pc" id="L79">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid username or password&quot;));</span>
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (!BCrypt.checkpw(currentPassword, user.getPasswordHash())) {</span>
+<span class="fc" id="L82">            throw new IllegalArgumentException(&quot;Current password is incorrect&quot;);</span>
+        }
+<span class="fc" id="L84">        validatePassword(newPassword);</span>
+
+<span class="fc" id="L86">        userDao.updatePassword(user.getId(), BCrypt.hashpw(newPassword, BCrypt.gensalt()));</span>
+<span class="fc" id="L87">    }</span>
+
+    /**
+     * The one place the password rule lives, shared by registration and password changes.
+     *
+     * @param password the password to check
+     * @throws IllegalArgumentException if it is missing or shorter than 8 characters
+     */
+    private void validatePassword(String password) {
+<span class="pc bpc" id="L96" title="1 of 4 branches missed.">        if (password == null || password.length() &lt; 8) {</span>
+<span class="fc" id="L97">            throw new IllegalArgumentException(&quot;Password must be at least 8 characters&quot;);</span>
+        }
+<span class="fc" id="L99">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
