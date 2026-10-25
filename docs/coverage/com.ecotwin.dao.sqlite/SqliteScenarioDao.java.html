@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteScenarioDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteScenarioDao.java</span></div><h1>SqliteScenarioDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.ScenarioDao;
+import com.ecotwin.model.SavedScenario;
+import com.ecotwin.model.SustainabilityScenario;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class SqliteScenarioDao implements ScenarioDao {
+
+    // The scenario screen edits all four domains at once, so there is no single source domain.
+    private static final String ALL_DOMAINS = &quot;ALL&quot;;
+
+    private final Connection connection;
+
+<span class="fc" id="L26">    public SqliteScenarioDao(Connection connection) {</span>
+<span class="fc" id="L27">        this.connection = connection;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Override
+    public SavedScenario create(long householdId, Long createdByUserId, String name,
+                                SustainabilityScenario values, double baselineScore, double projectedScore) {
+<span class="fc" id="L33">        String createdAt = Instant.now().toString();</span>
+<span class="fc" id="L34">        String sql = &quot;INSERT INTO scenarios (household_id, created_by_user_id, name, domain, changes_json, &quot;</span>
+            + &quot;baseline_score, projected_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L36">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L37">            statement.setLong(1, householdId);</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">            if (createdByUserId == null) {</span>
+<span class="nc" id="L39">                statement.setNull(2, Types.INTEGER);</span>
+            } else {
+<span class="fc" id="L41">                statement.setLong(2, createdByUserId);</span>
+            }
+<span class="fc" id="L43">            statement.setString(3, name);</span>
+<span class="fc" id="L44">            statement.setString(4, ALL_DOMAINS);</span>
+<span class="fc" id="L45">            statement.setString(5, toJson(values));</span>
+<span class="fc" id="L46">            statement.setDouble(6, baselineScore);</span>
+<span class="fc" id="L47">            statement.setDouble(7, projectedScore);</span>
+<span class="fc" id="L48">            statement.setString(8, createdAt);</span>
+<span class="fc" id="L49">            statement.executeUpdate();</span>
+<span class="fc" id="L50">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L51">                keys.next();</span>
+<span class="fc" id="L52">                return new SavedScenario(keys.getLong(1), householdId, createdByUserId, name,</span>
+<span class="fc" id="L53">                    values.copy(), baselineScore, projectedScore, createdAt);</span>
+            }
+<span class="nc" id="L55">        } catch (SQLException e) {</span>
+<span class="nc" id="L56">            throw new IllegalStateException(&quot;Could not save scenario for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public List&lt;SavedScenario&gt; findByHousehold(long householdId) {
+<span class="fc" id="L62">        String sql = &quot;SELECT * FROM scenarios WHERE household_id = ? ORDER BY id DESC&quot;;</span>
+<span class="fc" id="L63">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L64">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L65">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="fc" id="L66">                List&lt;SavedScenario&gt; scenarios = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L68">                    scenarios.add(map(rs));</span>
+                }
+<span class="fc" id="L70">                return scenarios;</span>
+            }
+<span class="nc" id="L72">        } catch (SQLException e) {</span>
+<span class="nc" id="L73">            throw new IllegalStateException(&quot;Could not look up scenarios for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public void delete(long scenarioId, long householdId) {
+<span class="fc" id="L79">        String sql = &quot;DELETE FROM scenarios WHERE id = ? AND household_id = ?&quot;;</span>
+<span class="fc" id="L80">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L81">            statement.setLong(1, scenarioId);</span>
+<span class="fc" id="L82">            statement.setLong(2, householdId);</span>
+<span class="fc" id="L83">            statement.executeUpdate();</span>
+<span class="nc" id="L84">        } catch (SQLException e) {</span>
+<span class="nc" id="L85">            throw new IllegalStateException(&quot;Could not delete scenario &quot; + scenarioId, e);</span>
+<span class="fc" id="L86">        }</span>
+<span class="fc" id="L87">    }</span>
+
+    private SavedScenario map(ResultSet rs) throws SQLException {
+<span class="fc" id="L90">        long createdBy = rs.getLong(&quot;created_by_user_id&quot;);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        Long createdByValue = rs.wasNull() ? null : createdBy;</span>
+
+<span class="fc" id="L93">        return new SavedScenario(</span>
+<span class="fc" id="L94">                rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L95">                rs.getLong(&quot;household_id&quot;),</span>
+                createdByValue,
+<span class="fc" id="L97">                rs.getString(&quot;name&quot;),</span>
+<span class="fc" id="L98">                fromJson(rs.getString(&quot;changes_json&quot;)),</span>
+<span class="fc" id="L99">                rs.getDouble(&quot;baseline_score&quot;),</span>
+<span class="fc" id="L100">                rs.getDouble(&quot;projected_score&quot;),</span>
+<span class="fc" id="L101">                rs.getString(&quot;created_at&quot;)</span>
+        );
+    }
+
+    // changes_json is a flat object of numbers, so it is written and read by hand
+    // rather than adding a JSON library to the build.
+    private static String toJson(SustainabilityScenario values) {
+<span class="fc" id="L108">        return &quot;{&quot;</span>
+<span class="fc" id="L109">            + &quot;\&quot;energyKwh\&quot;:&quot; + values.getEnergyKwh()</span>
+<span class="fc" id="L110">            + &quot;,\&quot;solarGenerationKwh\&quot;:&quot; + values.getSolarGenerationKwh()</span>
+<span class="fc" id="L111">            + &quot;,\&quot;waterLitres\&quot;:&quot; + values.getWaterLitres()</span>
+<span class="fc" id="L112">            + &quot;,\&quot;generalWasteKg\&quot;:&quot; + values.getGeneralWasteKg()</span>
+<span class="fc" id="L113">            + &quot;,\&quot;recycledWasteKg\&quot;:&quot; + values.getRecycledWasteKg()</span>
+<span class="fc" id="L114">            + &quot;,\&quot;compostKg\&quot;:&quot; + values.getCompostKg()</span>
+<span class="fc" id="L115">            + &quot;,\&quot;publicTransportTripsPerWeek\&quot;:&quot; + values.getPublicTransportTripsPerWeek()</span>
+<span class="fc" id="L116">            + &quot;,\&quot;flightsPerYear\&quot;:&quot; + values.getFlightsPerYear()</span>
+            + &quot;}&quot;;
+    }
+
+    private static SustainabilityScenario fromJson(String json) {
+<span class="fc" id="L121">        return new SustainabilityScenario(</span>
+<span class="fc" id="L122">                number(json, &quot;energyKwh&quot;),</span>
+<span class="fc" id="L123">                number(json, &quot;solarGenerationKwh&quot;),</span>
+<span class="fc" id="L124">                number(json, &quot;waterLitres&quot;),</span>
+<span class="fc" id="L125">                number(json, &quot;generalWasteKg&quot;),</span>
+<span class="fc" id="L126">                number(json, &quot;recycledWasteKg&quot;),</span>
+<span class="fc" id="L127">                number(json, &quot;compostKg&quot;),</span>
+<span class="fc" id="L128">                number(json, &quot;publicTransportTripsPerWeek&quot;),</span>
+<span class="fc" id="L129">                number(json, &quot;flightsPerYear&quot;)</span>
+        );
+    }
+
+    private static Double number(String json, String key) {
+<span class="fc" id="L134">        Matcher matcher = Pattern.compile(&quot;\&quot;&quot; + key + &quot;\&quot;\\s*:\\s*([^,}\\s]+)&quot;).matcher(json);</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (!matcher.find()) {</span>
+<span class="nc" id="L136">            throw new IllegalStateException(&quot;Saved scenario is missing &quot; + key + &quot;: &quot; + json);</span>
+        }
+<span class="fc" id="L138">        String value = matcher.group(1);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        return value.equals(&quot;null&quot;) ? null : Double.valueOf(value);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

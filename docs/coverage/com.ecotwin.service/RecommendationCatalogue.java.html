@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecommendationCatalogue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">RecommendationCatalogue.java</span></div><h1>RecommendationCatalogue.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.model.Recommendation.Domain;
+import com.ecotwin.model.SustainabilityScenario;
+
+import java.util.List;
+
+/** US-24: the rules, each judged against the benchmarks the scorers use. */
+final class RecommendationRules {
+
+    private RecommendationRules() {
+    }
+
+    static List&lt;RecommendationRule&gt; all() {
+<span class="fc" id="L15">        return List.of(new AddSolar(), new CutElectricity(), new CutWater(),</span>
+                new CompostScraps(), new RecycleMore(), new FlyLess(), new UsePublicTransport());
+    }
+
+    private static double solar(SustainabilityScenario v) {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        return v.getSolarGenerationKwh() == null ? 0 : v.getSolarGenerationKwh();</span>
+    }
+
+    private static String whole(double value) {
+<span class="fc" id="L24">        return String.format(&quot;%,d&quot;, Math.round(value));</span>
+    }
+
+<span class="fc" id="L27">    static final class AddSolar implements RecommendationRule {</span>
+<span class="fc" id="L28">        public Domain domain() { return Domain.ENERGY; }</span>
+<span class="pc bpc" id="L29" title="1 of 4 branches missed.">        public boolean applies(SustainabilityScenario v, int people) { return solar(v) == 0 &amp;&amp; v.getEnergyKwh() &gt; 0; }</span>
+<span class="fc" id="L30">        public void apply(SustainabilityScenario c, int people) { c.setSolarGenerationKwh(c.getEnergyKwh() * 0.5); }</span>
+<span class="fc" id="L31">        public String title() { return &quot;Add rooftop solar&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L33">            return &quot;You generate no solar. A system covering half your &quot; + whole(v.getEnergyKwh())</span>
+                    + &quot; kWh a month would offset a large share of your electricity.&quot;;
+        }
+    }
+
+<span class="fc" id="L38">    static final class CutElectricity implements RecommendationRule {</span>
+<span class="fc" id="L39">        public Domain domain() { return Domain.ENERGY; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            return (v.getEnergyKwh() - solar(v)) / people &gt; EnergyScorer.KWH_BENCHMARK;</span>
+        }
+<span class="fc" id="L43">        public void apply(SustainabilityScenario c, int people) { c.setEnergyKwh(c.getEnergyKwh() * 0.85); }</span>
+<span class="fc" id="L44">        public String title() { return &quot;Cut electricity use by 15%&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L46">            return &quot;You use &quot; + whole((v.getEnergyKwh() - solar(v)) / people) + &quot; kWh per person a month against a &quot;</span>
+<span class="fc" id="L47">                    + whole(EnergyScorer.KWH_BENCHMARK) + &quot; kWh benchmark.&quot;;</span>
+        }
+    }
+
+<span class="fc" id="L51">    static final class CutWater implements RecommendationRule {</span>
+<span class="fc" id="L52">        public Domain domain() { return Domain.WATER; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            return v.getWaterLitres() / people &gt; WaterScorer.LITRES_BENCHMARK;</span>
+        }
+<span class="fc" id="L56">        public void apply(SustainabilityScenario c, int people) { c.setWaterLitres(c.getWaterLitres() * 0.8); }</span>
+<span class="fc" id="L57">        public String title() { return &quot;Install low-flow shower heads&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L59">            return &quot;You use &quot; + whole(v.getWaterLitres()) + &quot; L a month, &quot; + whole(v.getWaterLitres() / people)</span>
+<span class="fc" id="L60">                    + &quot; L per person against a &quot; + whole(WaterScorer.LITRES_BENCHMARK) + &quot; L benchmark.&quot;;</span>
+        }
+    }
+
+<span class="fc" id="L64">    static final class CompostScraps implements RecommendationRule {</span>
+<span class="fc" id="L65">        public Domain domain() { return Domain.WASTE; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            return v.getGeneralWasteKg() / people &gt; WasteScorer.LANDFILL_KG_BENCHMARK / 2;</span>
+        }
+        public void apply(SustainabilityScenario c, int people) {
+<span class="fc" id="L70">            double moved = c.getGeneralWasteKg() * 0.3;</span>
+<span class="fc" id="L71">            c.setGeneralWasteKg(c.getGeneralWasteKg() - moved);</span>
+<span class="fc" id="L72">            c.setCompostKg(c.getCompostKg() + moved);</span>
+<span class="fc" id="L73">        }</span>
+<span class="fc" id="L74">        public String title() { return &quot;Compost food scraps&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L76">            return whole(v.getGeneralWasteKg()) + &quot; kg a month goes to landfill. Food scraps are usually about a third of that.&quot;;</span>
+        }
+    }
+
+<span class="fc" id="L80">    static final class RecycleMore implements RecommendationRule {</span>
+<span class="fc" id="L81">        public Domain domain() { return Domain.WASTE; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="fc" id="L83">            double total = v.getGeneralWasteKg() + v.getRecycledWasteKg() + v.getCompostKg();</span>
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">            return total &gt; 0 &amp;&amp; v.getRecycledWasteKg() / total &lt; 0.4;</span>
+        }
+        public void apply(SustainabilityScenario c, int people) {
+<span class="fc" id="L87">            double moved = c.getGeneralWasteKg() * 0.2;</span>
+<span class="fc" id="L88">            c.setGeneralWasteKg(c.getGeneralWasteKg() - moved);</span>
+<span class="fc" id="L89">            c.setRecycledWasteKg(c.getRecycledWasteKg() + moved);</span>
+<span class="fc" id="L90">        }</span>
+<span class="fc" id="L91">        public String title() { return &quot;Recycle more of your general waste&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L93">            double total = v.getGeneralWasteKg() + v.getRecycledWasteKg() + v.getCompostKg();</span>
+<span class="fc" id="L94">            return &quot;Only &quot; + whole(100 * v.getRecycledWasteKg() / total) + &quot;% of your waste is recycled.&quot;;</span>
+        }
+    }
+
+<span class="fc" id="L98">    static final class FlyLess implements RecommendationRule {</span>
+<span class="fc" id="L99">        public Domain domain() { return Domain.TRANSPORT; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            return v.getFlightsPerYear() / people &gt; TransportScorer.FLIGHTS_PER_YEAR_BENCHMARK;</span>
+        }
+<span class="fc" id="L103">        public void apply(SustainabilityScenario c, int people) { c.setFlightsPerYear(c.getFlightsPerYear() - people); }</span>
+<span class="fc" id="L104">        public String title() { return &quot;Take one fewer flight each per year&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L106">            return &quot;Your household takes &quot; + whole(v.getFlightsPerYear()) + &quot; flights a year, &quot;</span>
+<span class="fc" id="L107">                    + whole(v.getFlightsPerYear() / people) + &quot; per person against a benchmark of &quot;</span>
+<span class="fc" id="L108">                    + whole(TransportScorer.FLIGHTS_PER_YEAR_BENCHMARK) + &quot;.&quot;;</span>
+        }
+    }
+
+<span class="fc" id="L112">    static final class UsePublicTransport implements RecommendationRule {</span>
+<span class="fc" id="L113">        public Domain domain() { return Domain.TRANSPORT; }</span>
+        public boolean applies(SustainabilityScenario v, int people) {
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">            return v.getPublicTransportTripsPerWeek() / people &lt; TransportScorer.PUBLIC_TRANSPORT_TRIPS_PER_WEEK_TARGET;</span>
+        }
+        public void apply(SustainabilityScenario c, int people) {
+<span class="fc" id="L118">            c.setPublicTransportTripsPerWeek(c.getPublicTransportTripsPerWeek() + 2.0 * people);</span>
+<span class="fc" id="L119">        }</span>
+<span class="fc" id="L120">        public String title() { return &quot;Replace one weekly commute with public transport&quot;; }</span>
+        public String detail(SustainabilityScenario v, int people) {
+<span class="fc" id="L122">            return &quot;Your household makes &quot; + whole(v.getPublicTransportTripsPerWeek())</span>
+                    + &quot; public transport trips a week. One return commute each adds &quot; + (2 * people) + &quot;.&quot;;
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

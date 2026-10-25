@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HouseholdController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.controller</a> &gt; <span class="el_source">HouseholdController.java</span></div><h1>HouseholdController.java</h1><pre class="source lang-java linenums">package com.ecotwin.controller;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.model.AppGuide;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.HouseholdMembership;
+import com.ecotwin.model.User;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import com.ecotwin.model.ActivityLogEntry;
+
+import java.util.Optional;
+
+/** US-08 (create a household), US-09 (join a household) and US-10 (delete a household) - plus a minimal read of the
+ *  resulting household once the user has one. Member management (US-11+) is out of scope here. */
+public class HouseholdController {
+
+<span class="nc" id="L20">    private static final java.util.List&lt;String&gt; AUSTRALIAN_STATES =</span>
+<span class="nc" id="L21">        java.util.List.of(&quot;ACT&quot;, &quot;NSW&quot;, &quot;NT&quot;, &quot;QLD&quot;, &quot;SA&quot;, &quot;TAS&quot;, &quot;VIC&quot;, &quot;WA&quot;);</span>
+
+    private final Navigator nav;
+    private final AppContext ctx;
+
+    @FXML private Label guideIntroLabel;
+    @FXML private VBox guideTabsList;
+
+    @FXML private VBox setupSection;
+    @FXML private VBox summarySection;
+
+    @FXML private TextField householdNameField;
+    @FXML private TextField occupantsField;
+    @FXML private ComboBox&lt;String&gt; stateCombo;
+    @FXML private Label createErrorLabel;
+
+    @FXML private TextField joinCodeField;
+    @FXML private Label joinErrorLabel;
+
+    @FXML private Label summaryNameLabel;
+    @FXML private Label summaryRoleLabel;
+    @FXML private Label summaryJoinCodeLabel;
+
+    // US-10: leave a household
+    @FXML private Label leaveErrorLabel;
+    @FXML private Button leaveButton;
+
+    // US-11: view current household members
+    @FXML private VBox membersListView;
+
+    // US-32: error message when removing a member
+    @FXML
+    private Label removeMemberErrorLabel;
+
+    // US-32: household administrator actions
+    @FXML
+    private VBox householdAdminButtons;
+
+    // US-33: error message when renaming a household
+    @FXML
+    private Label renameHouseholdErrorLabel;
+
+<span class="nc" id="L63">    public HouseholdController(Navigator nav, AppContext ctx) {</span>
+<span class="nc" id="L64">        this.nav = nav;</span>
+<span class="nc" id="L65">        this.ctx = ctx;</span>
+<span class="nc" id="L66">    }</span>
+
+    @FXML
+    private void initialize() {
+<span class="nc" id="L70">        stateCombo.getItems().addAll(AUSTRALIAN_STATES);</span>
+<span class="nc" id="L71">        showGuide();</span>
+<span class="nc" id="L72">        refresh();</span>
+
+<span class="nc" id="L74">    }</span>
+
+    /** #94: fills the &quot;About EcoTwin&quot; card with the intro and one line per sidebar tab. */
+    private void showGuide() {
+<span class="nc" id="L78">        guideIntroLabel.setText(AppGuide.intro());</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        for (AppGuide.Tab tab : AppGuide.tabs()) {</span>
+<span class="nc" id="L80">            Label name = new Label(tab.name());</span>
+<span class="nc" id="L81">            name.getStyleClass().add(&quot;value-text&quot;);</span>
+<span class="nc" id="L82">            name.setMinWidth(130);</span>
+<span class="nc" id="L83">            Label description = new Label(tab.description());</span>
+<span class="nc" id="L84">            description.getStyleClass().add(&quot;muted-text&quot;);</span>
+<span class="nc" id="L85">            description.setWrapText(true);</span>
+<span class="nc" id="L86">            guideTabsList.getChildren().add(new HBox(12, name, description));</span>
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">    }</span>
+
+    @FXML
+    private void handleCreateHousehold() {
+        try {
+<span class="nc" id="L93">            int occupants = Integer.parseInt(occupantsField.getText().trim());</span>
+<span class="nc" id="L94">            Household household = ctx.householdService.createHousehold(</span>
+<span class="nc" id="L95">                ctx.session.getCurrentUser(), householdNameField.getText(), occupants, null, stateCombo.getValue());</span>
+<span class="nc" id="L96">            enterHousehold(ctx.session.getCurrentUser(), household);</span>
+<span class="nc" id="L97">            hideError(createErrorLabel);</span>
+<span class="nc" id="L98">            refresh();</span>
+<span class="nc" id="L99">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L100">            showError(createErrorLabel, &quot;Number of occupants must be a number&quot;);</span>
+<span class="nc" id="L101">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L102">            showError(createErrorLabel, e.getMessage());</span>
+<span class="nc" id="L103">        }</span>
+<span class="nc" id="L104">    }</span>
+
+    @FXML
+    private void handleJoinHousehold() {
+        try {
+<span class="nc" id="L109">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L110">            Household household = ctx.householdService.joinHousehold(user, joinCodeField.getText());</span>
+<span class="nc" id="L111">            enterHousehold(user, household);</span>
+<span class="nc" id="L112">            hideError(joinErrorLabel);</span>
+<span class="nc" id="L113">            refresh();</span>
+<span class="nc" id="L114">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L115">            showError(joinErrorLabel, e.getMessage());</span>
+<span class="nc" id="L116">        }</span>
+<span class="nc" id="L117">    }</span>
+
+    private void enterHousehold(User user, Household household) {
+<span class="nc" id="L120">        HouseholdMembership membership = ctx.householdService.findActiveMembership(user, household).orElseThrow();</span>
+<span class="nc" id="L121">        ctx.session.enterHousehold(household, membership);</span>
+<span class="nc" id="L122">    }</span>
+
+    private void refresh() {
+<span class="nc" id="L125">        boolean hasHousehold = ctx.session.hasActiveHousehold();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        setupSection.setVisible(!hasHousehold);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        setupSection.setManaged(!hasHousehold);</span>
+<span class="nc" id="L128">        summarySection.setVisible(hasHousehold);</span>
+<span class="nc" id="L129">        summarySection.setManaged(hasHousehold);</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (hasHousehold) {</span>
+<span class="nc" id="L132">            Household household = ctx.session.getCurrentHousehold();</span>
+<span class="nc" id="L133">            boolean admin = ctx.session.isAdmin();</span>
+
+            // US-10: only members can leave the household
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            leaveButton.setVisible(!admin);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            leaveButton.setManaged(!admin);</span>
+
+<span class="nc" id="L139">            summaryNameLabel.setText(household.getName());</span>
+<span class="nc" id="L140">            summaryJoinCodeLabel.setText(&quot;Join code: &quot; + household.getJoinCode());</span>
+<span class="nc" id="L141">            summaryJoinCodeLabel.setVisible(admin);</span>
+<span class="nc" id="L142">            summaryJoinCodeLabel.setManaged(admin);</span>
+
+            // US-11: display current household members
+<span class="nc" id="L145">            membersListView.getChildren().clear();</span>
+
+<span class="nc" id="L147">            java.util.List&lt;User&gt; members = ctx.householdService.findActiveMembers(household);</span>
+
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            for (int i = 0; i &lt; members.size(); i++) {</span>
+<span class="nc" id="L150">                User member = members.get(i);</span>
+
+<span class="nc" id="L152">                javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(16);</span>
+
+                // US-32: keep all member rows the same height
+<span class="nc" id="L155">                row.setMinHeight(45);</span>
+<span class="nc" id="L156">                row.setPrefHeight(45);</span>
+<span class="nc" id="L157">                row.setMaxHeight(45);</span>
+
+<span class="nc" id="L159">                row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);</span>
+<span class="nc" id="L160">                row.setStyle(</span>
+                        &quot;-fx-background-color: transparent;&quot; +
+                                &quot;-fx-border-color: #28543d;&quot; +
+                                &quot;-fx-border-radius: 8;&quot; +
+                                &quot;-fx-background-radius: 8;&quot; +
+                                &quot;-fx-padding: 12 20 12 20;&quot;
+                );
+
+<span class="nc" id="L168">                javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                        member.getDisplayName() != null ? member.getDisplayName() : member.getUsername()</span>
+                );
+<span class="nc" id="L171">                nameLabel.setStyle(&quot;-fx-font-size: 20px;&quot;);</span>
+
+<span class="nc" id="L173">                row.getChildren().add(nameLabel);</span>
+
+                // US-11: show administrator beside the first member
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                if (i == 0) {</span>
+<span class="nc" id="L177">                    javafx.scene.control.Label adminLabel =</span>
+                            new javafx.scene.control.Label(&quot;Administrator&quot;);
+<span class="nc" id="L179">                    adminLabel.setStyle(&quot;-fx-font-size: 16px;&quot;);</span>
+<span class="nc" id="L180">                    row.getChildren().add(adminLabel);</span>
+                }
+
+                // US-11: show which member is the current user
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (member.getId() == ctx.session.getCurrentUser().getId()) {</span>
+<span class="nc" id="L185">                    javafx.scene.control.Label youLabel =</span>
+                            new javafx.scene.control.Label(&quot;(you)&quot;);
+<span class="nc" id="L187">                    youLabel.setStyle(&quot;-fx-font-size: 16px;&quot;);</span>
+<span class="nc" id="L188">                    row.getChildren().add(youLabel);</span>
+                }
+
+                // US-32: show remove button for the administrator
+<span class="nc bnc" id="L192" title="All 4 branches missed.">                if (admin &amp;&amp; i != 0) {</span>
+<span class="nc" id="L193">                    javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();</span>
+<span class="nc" id="L194">                    javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);</span>
+<span class="nc" id="L195">                    row.getChildren().add(spacer);</span>
+
+<span class="nc" id="L197">                    javafx.scene.control.Button removeButton =</span>
+                            new javafx.scene.control.Button(&quot;Remove&quot;);
+<span class="nc" id="L199">                    removeButton.getStyleClass().add(&quot;btn-danger&quot;);</span>
+<span class="nc" id="L200">                    removeButton.setOnAction(event -&gt; handleRemoveMember(member));</span>
+<span class="nc" id="L201">                    row.getChildren().add(removeButton);</span>
+                }
+
+<span class="nc" id="L204">                membersListView.getChildren().add(row);</span>
+            }
+
+            // US-32: household administrator actions
+<span class="nc" id="L208">            householdAdminButtons.getChildren().clear();</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            if (admin) {</span>
+                // US-36: arrange administrator buttons into separate rows
+<span class="nc" id="L212">                HBox adminButtonRow = new HBox(10);</span>
+
+<span class="nc" id="L214">                Button activityButton = new Button(&quot;Activity History&quot;);</span>
+<span class="nc" id="L215">                activityButton.getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="nc" id="L216">                activityButton.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L217">                activityButton.setOnAction(event -&gt; handleShowActivityHistory());</span>
+
+                // US-33: rename a household
+<span class="nc" id="L220">                Button renameButton = new Button(&quot;Rename Household&quot;);</span>
+<span class="nc" id="L221">                renameButton.getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="nc" id="L222">                renameButton.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L223">                renameButton.setOnAction(event -&gt; handleRenameHousehold());</span>
+
+                // US-35: transfer administrator rights
+<span class="nc" id="L226">                Button transferButton = new Button(&quot;Transfer Admin&quot;);</span>
+<span class="nc" id="L227">                transferButton.getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="nc" id="L228">                transferButton.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L229">                transferButton.setOnAction(event -&gt; handleTransferAdmin());</span>
+
+                // US-33: change the household join code
+<span class="nc" id="L232">                Button joinCodeButton = new Button(&quot;Generate New Join Code&quot;);</span>
+<span class="nc" id="L233">                joinCodeButton.getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="nc" id="L234">                joinCodeButton.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L235">                joinCodeButton.setOnAction(event -&gt; handleChangeJoinCode());</span>
+
+<span class="nc" id="L237">                adminButtonRow.getChildren().addAll(</span>
+                        activityButton,
+                        renameButton,
+                        transferButton,
+                        joinCodeButton
+                );
+
+
+                // US-36: delete a household
+<span class="nc" id="L246">                Button deleteHouseholdButton = new Button(&quot;Delete Household&quot;);</span>
+<span class="nc" id="L247">                deleteHouseholdButton.getStyleClass().add(&quot;btn-danger&quot;);</span>
+<span class="nc" id="L248">                deleteHouseholdButton.setOnAction(event -&gt; handleDeleteHousehold());</span>
+
+<span class="nc" id="L250">                HBox deleteButtonRow = new HBox(10);</span>
+<span class="nc" id="L251">                deleteButtonRow.getChildren().add(deleteHouseholdButton);</span>
+
+<span class="nc" id="L253">                householdAdminButtons.getChildren().addAll(</span>
+                        adminButtonRow,
+                        deleteButtonRow
+                );
+            }
+        }
+<span class="nc" id="L259">    }</span>
+
+    private void showError(Label label, String message) {
+<span class="nc" id="L262">        label.setText(message);</span>
+<span class="nc" id="L263">        label.setVisible(true);</span>
+<span class="nc" id="L264">        label.setManaged(true);</span>
+<span class="nc" id="L265">    }</span>
+
+    private void hideError(Label label) {
+<span class="nc" id="L268">        label.setVisible(false);</span>
+<span class="nc" id="L269">        label.setManaged(false);</span>
+<span class="nc" id="L270">    }</span>
+
+    // US-10: leave a household
+    @FXML
+    private void handleLeaveHousehold() {
+        try {
+<span class="nc" id="L276">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L277">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L279">            ctx.householdService.leaveHousehold(user, household);</span>
+<span class="nc" id="L280">            ctx.session.leaveHousehold();</span>
+<span class="nc" id="L281">            hideError(leaveErrorLabel);</span>
+<span class="nc" id="L282">            refresh();</span>
+<span class="nc" id="L283">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L284">            showError(leaveErrorLabel, e.getMessage());</span>
+<span class="nc" id="L285">        }</span>
+<span class="nc" id="L286">    }</span>
+
+    // US-32: remove a household member
+    private void handleRemoveMember(User member) {
+        try {
+<span class="nc" id="L291">            User admin = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L292">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L294">            ctx.householdService.removeMember(admin, household, member);</span>
+
+<span class="nc" id="L296">            hideError(removeMemberErrorLabel);</span>
+<span class="nc" id="L297">            refresh();</span>
+<span class="nc" id="L298">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L299">            showError(removeMemberErrorLabel, e.getMessage());</span>
+<span class="nc" id="L300">        }</span>
+<span class="nc" id="L301">    }</span>
+
+    // US-12: view household activity history, newest first
+    // US-34: admins can edit and delete activity history entries
+    private void handleShowActivityHistory() {
+<span class="nc" id="L306">        Household household = ctx.session.getCurrentHousehold();</span>
+<span class="nc" id="L307">        User user = ctx.session.getCurrentUser();</span>
+
+        // US-34: only show editing controls to the administrator
+<span class="nc" id="L310">        boolean isAdmin = ctx.householdService.findActiveMembership(user, household)</span>
+<span class="nc" id="L311">                .map(membership -&gt;</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">                        membership.getRole() == HouseholdMembership.Role.ADMIN)</span>
+<span class="nc" id="L313">                .orElse(false);</span>
+
+<span class="nc" id="L315">        VBox list = new VBox(8);</span>
+<span class="nc" id="L316">        list.setPadding(new javafx.geometry.Insets(12));</span>
+
+<span class="nc" id="L318">        ScrollPane scroll = new ScrollPane(list);</span>
+<span class="nc" id="L319">        scroll.setFitToWidth(true);</span>
+<span class="nc" id="L320">        scroll.setPrefSize(560, 360);</span>
+
+<span class="nc" id="L322">        Dialog&lt;Void&gt; dialog = new Dialog&lt;&gt;();</span>
+<span class="nc" id="L323">        dialog.setTitle(household.getName() + &quot;: Activity History&quot;);</span>
+<span class="nc" id="L324">        dialog.setHeaderText(&quot;Newest first&quot;);</span>
+<span class="nc" id="L325">        dialog.getDialogPane().setContent(scroll);</span>
+<span class="nc" id="L326">        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);</span>
+
+        // US-34: populate the history when the dialog opens
+<span class="nc" id="L329">        populateActivityHistory(list, household, user, isAdmin);</span>
+
+<span class="nc" id="L331">        dialog.showAndWait();</span>
+<span class="nc" id="L332">    }</span>
+
+    // US-34: refresh the existing activity history list
+    private void populateActivityHistory(
+            VBox list, Household household, User user, boolean isAdmin) {
+
+<span class="nc" id="L338">        list.getChildren().clear();</span>
+
+        // Get the latest history after every edit or deletion
+<span class="nc" id="L341">        java.util.List&lt;ActivityLogEntry&gt; history =</span>
+<span class="nc" id="L342">                ctx.householdService.getHistory(household);</span>
+
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        if (history.isEmpty()) {</span>
+<span class="nc" id="L345">            list.getChildren().add(new Label(&quot;No activity yet.&quot;));</span>
+        }
+
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        for (ActivityLogEntry entry : history) {</span>
+<span class="nc" id="L349">            Label line = new Label(</span>
+<span class="nc" id="L350">                    formatTime(entry.getCreatedAt()) + &quot;   &quot; + entry.getMessage());</span>
+<span class="nc" id="L351">            line.setWrapText(true);</span>
+<span class="nc" id="L352">            line.setPrefWidth(350);</span>
+<span class="nc" id="L353">            line.setMinWidth(350);</span>
+<span class="nc" id="L354">            line.setMaxWidth(350);</span>
+
+            // US-34: prevent changing entries that have already been modified or deleted
+<span class="nc" id="L357">            boolean isAuditEntry =</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                    entry.getMessage().contains(&quot; edited activity entry #&quot;)</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                            || entry.getMessage().contains(&quot; deleted activity entry #&quot;);</span>
+
+<span class="nc" id="L361">            boolean alreadyChanged = history.stream().anyMatch(item -&gt;</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">                    item.getMessage().contains(&quot;edited activity entry #&quot; + entry.getId() + &quot;.&quot;)</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                            || item.getMessage().contains(&quot;deleted activity entry #&quot; + entry.getId() + &quot;.&quot;));</span>
+
+<span class="nc bnc" id="L365" title="All 4 branches missed.">            boolean canModify = !isAuditEntry &amp;&amp; !alreadyChanged;</span>
+
+<span class="nc bnc" id="L367" title="All 4 branches missed.">            if (isAdmin &amp;&amp; canModify) {</span>
+                // US-34: edit an activity history entry
+<span class="nc" id="L369">                Button editButton = new Button(&quot;Edit&quot;);</span>
+<span class="nc" id="L370">                editButton.setPrefSize(75, 30);</span>
+<span class="nc" id="L371">                editButton.setMinSize(75, 30);</span>
+<span class="nc" id="L372">                editButton.setMaxSize(75, 30);</span>
+<span class="nc" id="L373">                editButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L374">                    javafx.scene.control.TextInputDialog editDialog =</span>
+<span class="nc" id="L375">                            new javafx.scene.control.TextInputDialog(entry.getMessage());</span>
+
+<span class="nc" id="L377">                    editDialog.setTitle(&quot;Edit Activity&quot;);</span>
+<span class="nc" id="L378">                    editDialog.setHeaderText(&quot;Correct activity history&quot;);</span>
+<span class="nc" id="L379">                    editDialog.setContentText(&quot;Activity message:&quot;);</span>
+
+<span class="nc" id="L381">                    editDialog.showAndWait().ifPresent(newMessage -&gt; {</span>
+                        try {
+<span class="nc" id="L383">                            ctx.householdService.editHistoryEntry(</span>
+<span class="nc" id="L384">                                    user, household, entry.getId(), newMessage);</span>
+
+                            // US-34: refresh the same dialog's list
+<span class="nc" id="L387">                            populateActivityHistory(list, household, user, isAdmin);</span>
+<span class="nc" id="L388">                        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L389">                            showHistoryError(e.getMessage());</span>
+<span class="nc" id="L390">                        }</span>
+<span class="nc" id="L391">                    });</span>
+<span class="nc" id="L392">                });</span>
+
+                // US-34: delete an activity history entry
+<span class="nc" id="L395">                Button deleteButton = new Button(&quot;Delete&quot;);</span>
+<span class="nc" id="L396">                deleteButton.getStyleClass().add(&quot;btn-danger&quot;);</span>
+<span class="nc" id="L397">                deleteButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L398">                    javafx.scene.control.Alert confirmation =</span>
+                            new javafx.scene.control.Alert(
+                                    javafx.scene.control.Alert.AlertType.CONFIRMATION);
+
+<span class="nc" id="L402">                    confirmation.setTitle(&quot;Delete Activity&quot;);</span>
+<span class="nc" id="L403">                    confirmation.setHeaderText(&quot;Delete this activity entry?&quot;);</span>
+<span class="nc" id="L404">                    confirmation.setContentText(</span>
+                            &quot;The original message will be recorded in the activity history.&quot;);
+
+<span class="nc" id="L407">                    confirmation.showAndWait().ifPresent(result -&gt; {</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">                        if (result == ButtonType.OK) {</span>
+                            try {
+<span class="nc" id="L410">                                ctx.householdService.deleteHistoryEntry(</span>
+<span class="nc" id="L411">                                        user, household, entry.getId());</span>
+
+                                // US-34: refresh the same dialog's list
+<span class="nc" id="L414">                                populateActivityHistory(list, household, user, isAdmin);</span>
+<span class="nc" id="L415">                            } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L416">                                showHistoryError(e.getMessage());</span>
+<span class="nc" id="L417">                            }</span>
+                        }
+<span class="nc" id="L419">                    });</span>
+<span class="nc" id="L420">                });</span>
+
+<span class="nc" id="L422">                HBox entryRow = new HBox(8, line, editButton, deleteButton);</span>
+<span class="nc" id="L423">                entryRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);</span>
+<span class="nc" id="L424">                HBox.setHgrow(line, javafx.scene.layout.Priority.ALWAYS);</span>
+<span class="nc" id="L425">                list.getChildren().add(entryRow);</span>
+<span class="nc" id="L426">            } else {</span>
+<span class="nc" id="L427">                list.getChildren().add(line);</span>
+            }
+<span class="nc" id="L429">        }</span>
+<span class="nc" id="L430">    }</span>
+
+    // US-34: display activity history errors
+    private void showHistoryError(String message) {
+<span class="nc" id="L434">        javafx.scene.control.Alert error =</span>
+                new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.ERROR);
+
+<span class="nc" id="L438">        error.setTitle(&quot;Activity History&quot;);</span>
+<span class="nc" id="L439">        error.setHeaderText(&quot;Could not update activity history&quot;);</span>
+<span class="nc" id="L440">        error.setContentText(message);</span>
+<span class="nc" id="L441">        error.showAndWait();</span>
+<span class="nc" id="L442">    }</span>
+
+
+    // US 12: show times in the computer's own time zone
+    private static String formatTime(String createdAt) {
+        try {
+<span class="nc" id="L448">            return java.time.Instant.parse(createdAt)</span>
+<span class="nc" id="L449">                    .atZone(java.time.ZoneId.systemDefault())</span>
+<span class="nc" id="L450">                    .format(java.time.format.DateTimeFormatter.ofPattern(&quot;d MMM yyyy, h:mm a&quot;));</span>
+<span class="nc" id="L451">        } catch (java.time.format.DateTimeParseException e) {</span>
+<span class="nc" id="L452">            return createdAt;</span>
+        }
+    }
+    // US-33: rename a household
+    private void handleRenameHousehold() {
+<span class="nc" id="L457">        TextInputDialog dialog = new TextInputDialog(</span>
+<span class="nc" id="L458">                ctx.session.getCurrentHousehold().getName()</span>
+        );
+
+<span class="nc" id="L461">        dialog.setTitle(&quot;Rename Household&quot;);</span>
+<span class="nc" id="L462">        dialog.setHeaderText(&quot;Rename your household&quot;);</span>
+<span class="nc" id="L463">        dialog.setContentText(&quot;New household name:&quot;);</span>
+
+<span class="nc" id="L465">        dialog.showAndWait().ifPresent(newName -&gt; {</span>
+            try {
+<span class="nc" id="L467">                User admin = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L468">                Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L470">                ctx.householdService.renameHousehold(admin, household, newName);</span>
+
+<span class="nc" id="L472">                hideError(renameHouseholdErrorLabel);</span>
+
+<span class="nc" id="L474">                ctx.householdService.findActiveHouseholdForUser(admin)</span>
+<span class="nc" id="L475">                        .ifPresent(updatedHousehold -&gt;</span>
+<span class="nc" id="L476">                                ctx.session.enterHousehold(</span>
+                                        updatedHousehold,
+<span class="nc" id="L478">                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()</span>
+                                )
+                        );
+
+<span class="nc" id="L482">                refresh();</span>
+<span class="nc" id="L483">            } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L484">                showError(renameHouseholdErrorLabel, e.getMessage());</span>
+<span class="nc" id="L485">            }</span>
+<span class="nc" id="L486">        });</span>
+<span class="nc" id="L487">    }</span>
+
+    // US-35: transfer administrator rights
+    private void handleTransferAdmin() {
+<span class="nc" id="L491">        User admin = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L492">        Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L494">        java.util.List&lt;User&gt; members = ctx.householdService.findActiveMembers(household)</span>
+<span class="nc" id="L495">                .stream()</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">                .filter(member -&gt; member.getId() != admin.getId())</span>
+<span class="nc" id="L497">                .toList();</span>
+
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        if (members.isEmpty()) {</span>
+<span class="nc" id="L500">            showError(renameHouseholdErrorLabel, &quot;There are no other active members to transfer administrator rights to&quot;);</span>
+<span class="nc" id="L501">            return;</span>
+        }
+
+<span class="nc" id="L504">        java.util.List&lt;String&gt; memberNames = members.stream()</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">                .map(member -&gt; member.getDisplayName() != null</span>
+<span class="nc" id="L506">                        ? member.getDisplayName()</span>
+<span class="nc" id="L507">                        : member.getUsername())</span>
+<span class="nc" id="L508">                .toList();</span>
+
+<span class="nc" id="L510">        ChoiceDialog&lt;String&gt; dialog = new ChoiceDialog&lt;&gt;(memberNames.get(0), memberNames);</span>
+
+<span class="nc" id="L512">        dialog.setTitle(&quot;Transfer Admin&quot;);</span>
+<span class="nc" id="L513">        dialog.setHeaderText(&quot;Transfer administrator rights&quot;);</span>
+<span class="nc" id="L514">        dialog.setContentText(&quot;Choose a member:&quot;);</span>
+
+<span class="nc" id="L516">        dialog.showAndWait().ifPresent(selectedName -&gt; {</span>
+<span class="nc" id="L517">            User newAdmin = members.stream()</span>
+<span class="nc" id="L518">                    .filter(member -&gt; {</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">                        String name = member.getDisplayName() != null</span>
+<span class="nc" id="L520">                                ? member.getDisplayName()</span>
+<span class="nc" id="L521">                                : member.getUsername();</span>
+<span class="nc" id="L522">                        return name.equals(selectedName);</span>
+                    })
+<span class="nc" id="L524">                    .findFirst()</span>
+<span class="nc" id="L525">                    .orElseThrow();</span>
+
+            try {
+<span class="nc" id="L528">                ctx.householdService.transferAdmin(admin, household, newAdmin);</span>
+
+                // Refresh the household membership so the current user is now a member
+<span class="nc" id="L531">                ctx.householdService.findActiveHouseholdForUser(admin)</span>
+<span class="nc" id="L532">                        .ifPresent(updatedHousehold -&gt;</span>
+<span class="nc" id="L533">                                ctx.session.enterHousehold(</span>
+                                        updatedHousehold,
+<span class="nc" id="L535">                                        ctx.householdService.findActiveMembership(admin, updatedHousehold).orElseThrow()</span>
+                                )
+                        );
+
+<span class="nc" id="L539">                refresh();</span>
+<span class="nc" id="L540">            } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L541">                showError(renameHouseholdErrorLabel, e.getMessage());</span>
+<span class="nc" id="L542">            }</span>
+<span class="nc" id="L543">        });</span>
+<span class="nc" id="L544">    }</span>
+
+    // US-33: change the household join code
+    private void handleChangeJoinCode() {
+<span class="nc" id="L548">        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);</span>
+
+<span class="nc" id="L550">        confirmation.setTitle(&quot;Generate New Join Code&quot;);</span>
+<span class="nc" id="L551">        confirmation.setHeaderText(&quot;Generate a new household join code?&quot;);</span>
+<span class="nc" id="L552">        confirmation.setContentText(</span>
+                &quot;The old join code will no longer work.&quot;
+        );
+
+<span class="nc" id="L556">        confirmation.showAndWait().ifPresent(response -&gt; {</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">            if (response == ButtonType.OK) {</span>
+                try {
+<span class="nc" id="L559">                    User admin = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L560">                    Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L562">                    ctx.householdService.changeJoinCode(admin, household);</span>
+
+                    // Refresh the household so the new join code is displayed
+<span class="nc" id="L565">                    ctx.householdService.findActiveHouseholdForUser(admin)</span>
+<span class="nc" id="L566">                            .ifPresent(updatedHousehold -&gt;</span>
+<span class="nc" id="L567">                                    ctx.session.enterHousehold(</span>
+                                            updatedHousehold,
+<span class="nc" id="L569">                                            ctx.householdService.findActiveMembership(</span>
+                                                    admin,
+                                                    updatedHousehold
+<span class="nc" id="L572">                                            ).orElseThrow()</span>
+                                    )
+                            );
+
+<span class="nc" id="L576">                    refresh();</span>
+<span class="nc" id="L577">                } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L578">                    showError(renameHouseholdErrorLabel, e.getMessage());</span>
+<span class="nc" id="L579">                }</span>
+            }
+<span class="nc" id="L581">        });</span>
+<span class="nc" id="L582">    }</span>
+
+    // US-36: delete a household
+    @FXML
+    private void handleDeleteHousehold() {
+<span class="nc" id="L587">        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);</span>
+<span class="nc" id="L588">        confirmation.setTitle(&quot;Delete Household&quot;);</span>
+<span class="nc" id="L589">        confirmation.setHeaderText(&quot;Permanently delete this household?&quot;);</span>
+<span class="nc" id="L590">        confirmation.setContentText(</span>
+                &quot;All household memberships and activity history will be deleted. This cannot be undone.&quot;);
+
+<span class="nc" id="L593">        Optional&lt;ButtonType&gt; result = confirmation.showAndWait();</span>
+
+<span class="nc bnc" id="L595" title="All 4 branches missed.">        if (result.isPresent() &amp;&amp; result.get() == ButtonType.OK) {</span>
+            try {
+<span class="nc" id="L597">                User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L598">                Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L600">                ctx.householdService.deleteHousehold(user, household);</span>
+<span class="nc" id="L601">                ctx.session.leaveHousehold();</span>
+<span class="nc" id="L602">                refresh();</span>
+<span class="nc" id="L603">            } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L604">                Alert error = new Alert(Alert.AlertType.ERROR);</span>
+<span class="nc" id="L605">                error.setTitle(&quot;Delete Household&quot;);</span>
+<span class="nc" id="L606">                error.setHeaderText(&quot;Could not delete household&quot;);</span>
+<span class="nc" id="L607">                error.setContentText(e.getMessage());</span>
+<span class="nc" id="L608">                error.showAndWait();</span>
+<span class="nc" id="L609">            }</span>
+        }
+<span class="nc" id="L611">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

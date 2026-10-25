@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransportEntry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.model</a> &gt; <span class="el_source">TransportEntry.java</span></div><h1>TransportEntry.java</h1><pre class="source lang-java linenums">package com.ecotwin.model;
+
+public class TransportEntry {
+
+    private final long id;
+    private final long householdId;
+    private final String period;
+    private final double publicTransportTripsPerWeek;
+    private final double flightsPerYear;
+    private final Long updatedByUserId;
+    private final String updatedAt;
+
+    public TransportEntry(long id, long householdId, String period, double publicTransportTripsPerWeek,
+<span class="fc" id="L14">                           double flightsPerYear, Long updatedByUserId, String updatedAt) {</span>
+<span class="fc" id="L15">        this.id = id;</span>
+<span class="fc" id="L16">        this.householdId = householdId;</span>
+<span class="fc" id="L17">        this.period = period;</span>
+<span class="fc" id="L18">        this.publicTransportTripsPerWeek = publicTransportTripsPerWeek;</span>
+<span class="fc" id="L19">        this.flightsPerYear = flightsPerYear;</span>
+<span class="fc" id="L20">        this.updatedByUserId = updatedByUserId;</span>
+<span class="fc" id="L21">        this.updatedAt = updatedAt;</span>
+<span class="fc" id="L22">    }</span>
+
+    public long getId() {
+<span class="fc" id="L25">        return id;</span>
+    }
+
+    public long getHouseholdId() {
+<span class="nc" id="L29">        return householdId;</span>
+    }
+
+    public String getPeriod() {
+<span class="fc" id="L33">        return period;</span>
+    }
+
+    public double getPublicTransportTripsPerWeek() {
+<span class="fc" id="L37">        return publicTransportTripsPerWeek;</span>
+    }
+
+    public double getFlightsPerYear() {
+<span class="fc" id="L41">        return flightsPerYear;</span>
+    }
+
+    public Long getUpdatedByUserId() {
+<span class="nc" id="L45">        return updatedByUserId;</span>
+    }
+
+    public String getUpdatedAt() {
+<span class="nc" id="L49">        return updatedAt;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

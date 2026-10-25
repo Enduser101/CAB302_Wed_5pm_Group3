@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResourcesController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.controller</a> &gt; <span class="el_source">ResourcesController.java</span></div><h1>ResourcesController.java</h1><pre class="source lang-java linenums">package com.ecotwin.controller;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.model.EnergyEntry;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.Recommendation.Domain;
+import com.ecotwin.model.ScenarioComparison;
+import com.ecotwin.model.ScoreChange;
+import com.ecotwin.model.TransportEntry;
+import com.ecotwin.model.User;
+import com.ecotwin.model.WasteEntry;
+import com.ecotwin.model.WaterEntry;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
+
+import java.util.List;
+import java.util.Optional;
+
+/** US-15..18: record energy, water, waste and transport information for the current household. */
+public class ResourcesController {
+    private Long editingEnergyEntryId;
+    private Long editingWaterEntryId;
+    private Long editingWasteEntryId;
+    private Long editingTransportEntryId;
+    private Long editingVehicleId;
+
+    private final Navigator nav;
+    private final AppContext ctx;
+
+    @FXML private VBox noHouseholdSection;
+    @FXML private TabPane resourcesTabPane;
+
+    @FXML private TextField electricityKwhField;
+    @FXML private TextField solarGenerationKwhField;
+    @FXML private TextField energyNotesField;
+    @FXML private Label energyErrorLabel;
+    @FXML private VBox energyEntriesList;
+
+    @FXML private TextField litresField;
+    @FXML private TextField waterNotesField;
+    @FXML private Label waterErrorLabel;
+    @FXML private VBox waterEntriesList;
+
+    @FXML private TextField generalKgField;
+    @FXML private TextField recycledKgField;
+    @FXML private TextField compostKgField;
+    @FXML private Label wasteErrorLabel;
+    @FXML private VBox wasteEntriesList;
+
+    @FXML private TextField vehicleLabelField;
+    @FXML private ComboBox&lt;String&gt; vehicleFuelTypeCombo;
+    @FXML private TextField vehicleKmPerWeekField;
+    @FXML private Label vehicleErrorLabel;
+    @FXML private VBox vehiclesList;
+
+    @FXML private TextField publicTransportTripsField;
+    @FXML private TextField flightsPerYearField;
+    @FXML private Label transportErrorLabel;
+    @FXML private VBox transportEntriesList;
+
+    @FXML private VBox scoreChangeCard;
+    @FXML private Label overallChangeLabel;
+    @FXML private Label domainChangeLabel;
+
+
+
+<span class="nc" id="L73">    public ResourcesController(Navigator nav, AppContext ctx) {</span>
+<span class="nc" id="L74">        this.nav = nav;</span>
+<span class="nc" id="L75">        this.ctx = ctx;</span>
+<span class="nc" id="L76">    }</span>
+
+    @FXML
+    private void initialize() {
+<span class="nc" id="L80">        vehicleFuelTypeCombo.getItems().addAll(&quot;Petrol&quot;, &quot;Diesel&quot;, &quot;Hybrid&quot;, &quot;EV&quot;);</span>
+<span class="nc" id="L81">        refresh();</span>
+<span class="nc" id="L82">    }</span>
+
+    private void refresh() {
+<span class="nc" id="L85">        boolean hasHousehold = ctx.session.hasActiveHousehold();</span>
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        boolean showTabs = hasHousehold || ctx.session.isGuest(); //let guests type and look but they can't save.</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        noHouseholdSection.setVisible(!showTabs);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        noHouseholdSection.setManaged(!showTabs);</span>
+<span class="nc" id="L89">        resourcesTabPane.setVisible(showTabs);</span>
+<span class="nc" id="L90">        resourcesTabPane.setManaged(showTabs);</span>
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (!hasHousehold) {</span>
+<span class="nc" id="L93">            return;</span>
+        }
+
+<span class="nc" id="L96">        Household household = ctx.session.getCurrentHousehold();</span>
+<span class="nc" id="L97">        refreshEnergyList(household);</span>
+<span class="nc" id="L98">        refreshWaterList(household);</span>
+<span class="nc" id="L99">        refreshWasteList(household);</span>
+<span class="nc" id="L100">        refreshVehiclesList(household);</span>
+<span class="nc" id="L101">        refreshTransportList(household);</span>
+<span class="nc" id="L102">    }</span>
+
+
+    // US-15: record energy information
+
+    @FXML
+    private void handleSaveEnergy() {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (blockedFromSaving(energyErrorLabel)) return;</span>
+        try {
+<span class="nc" id="L111">            double electricityKwh = Double.parseDouble(electricityKwhField.getText().trim());</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            Double solarGenerationKwh = solarGenerationKwhField.getText().isBlank()</span>
+<span class="nc" id="L113">                ? null : Double.parseDouble(solarGenerationKwhField.getText().trim());</span>
+<span class="nc" id="L114">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L115">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L117">            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.ENERGY, () -&gt; {</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                if (editingEnergyEntryId == null) {</span>
+<span class="nc" id="L119">                    ctx.energyService.recordEntry(</span>
+                            user, household, electricityKwh,
+<span class="nc" id="L121">                            solarGenerationKwh, energyNotesField.getText()</span>
+                    );
+                } else {
+<span class="nc" id="L124">                    ctx.energyService.updateEntry(</span>
+<span class="nc" id="L125">                            user, household, editingEnergyEntryId,</span>
+<span class="nc" id="L126">                            electricityKwh, solarGenerationKwh, energyNotesField.getText()</span>
+                    );
+<span class="nc" id="L128">                    editingEnergyEntryId = null;</span>
+                }
+<span class="nc" id="L130">            }));</span>
+<span class="nc" id="L131">            hideError(energyErrorLabel);</span>
+<span class="nc" id="L132">            electricityKwhField.clear();</span>
+<span class="nc" id="L133">            solarGenerationKwhField.clear();</span>
+<span class="nc" id="L134">            energyNotesField.clear();</span>
+<span class="nc" id="L135">            refreshEnergyList(household);</span>
+<span class="nc" id="L136">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L137">            showError(energyErrorLabel, &quot;Enter a valid number&quot;);</span>
+<span class="nc" id="L138">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L139">            showError(energyErrorLabel, e.getMessage());</span>
+<span class="nc" id="L140">        }</span>
+<span class="nc" id="L141">    }</span>
+
+    private void refreshEnergyList(Household household) {
+<span class="nc" id="L144">        List&lt;EnergyEntry&gt; entries = ctx.energyService.findEntriesForHousehold(household);</span>
+<span class="nc" id="L145">        energyEntriesList.getChildren().clear();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (entries.isEmpty()) {</span>
+<span class="nc" id="L147">            energyEntriesList.getChildren().add(mutedLabel(&quot;No energy readings yet&quot;));</span>
+<span class="nc" id="L148">            return;</span>
+        }
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        for (EnergyEntry entry : entries) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            String solar = entry.getSolarGenerationKwh() != null</span>
+<span class="nc" id="L152">                    ? &quot;, &quot; + entry.getSolarGenerationKwh() + &quot; kWh solar&quot;</span>
+<span class="nc" id="L153">                    : &quot;&quot;;</span>
+
+<span class="nc" id="L155">            Label entryLabel = mutedLabel(</span>
+<span class="nc" id="L156">                    entry.getPeriod() + &quot; — &quot; + entry.getElectricityKwh() + &quot; kWh&quot; + solar</span>
+            );
+<span class="nc" id="L158">            Button editButton = new Button(&quot;✎\u00A0\u00A0Edit&quot;);</span>
+<span class="nc" id="L159">            editButton.getStyleClass().add(&quot;edit-button&quot;);</span>
+
+<span class="nc" id="L161">            editButton.setOnAction(event-&gt; {</span>
+<span class="nc" id="L162">                editingEnergyEntryId = entry.getId();</span>
+
+<span class="nc" id="L164">                electricityKwhField.setText(String.valueOf(entry.getElectricityKwh()));</span>
+
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                if (entry.getSolarGenerationKwh() != null) {</span>
+<span class="nc" id="L167">                    solarGenerationKwhField.setText(</span>
+<span class="nc" id="L168">                            String.valueOf(entry.getSolarGenerationKwh())</span>
+                    );
+                } else {
+<span class="nc" id="L171">                    solarGenerationKwhField.clear();</span>
+                }
+
+<span class="nc" id="L174">                energyNotesField.setText(</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                        entry.getNotes() != null ? entry.getNotes() : &quot;&quot;</span>
+                );
+<span class="nc" id="L177">            });</span>
+
+<span class="nc" id="L179">            HBox row = new HBox(10);</span>
+<span class="nc" id="L180">            row.getStyleClass().add(&quot;history-row&quot;);</span>
+<span class="nc" id="L181">            row.getChildren().addAll(entryLabel, editButton);</span>
+
+<span class="nc" id="L183">            entryLabel.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L184">            HBox.setHgrow(entryLabel, javafx.scene.layout.Priority.ALWAYS);</span>
+
+<span class="nc" id="L186">            energyEntriesList.getChildren().add(row);</span>
+<span class="nc" id="L187">        }</span>
+<span class="nc" id="L188">    }</span>
+    // US-16: record water information
+
+    @FXML
+    private void handleSaveWater() {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (blockedFromSaving(waterErrorLabel)) return;</span>
+        try {
+<span class="nc" id="L195">            double litres = Double.parseDouble(litresField.getText().trim());</span>
+<span class="nc" id="L196">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L197">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L199">            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WATER, () -&gt; {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">                if (editingWaterEntryId == null) {</span>
+<span class="nc" id="L201">                    ctx.waterService.recordEntry(</span>
+<span class="nc" id="L202">                            user, household, litres, waterNotesField.getText()</span>
+                    );
+                } else {
+<span class="nc" id="L205">                    ctx.waterService.updateEntry(</span>
+<span class="nc" id="L206">                            user, household, editingWaterEntryId,</span>
+<span class="nc" id="L207">                            litres, waterNotesField.getText()</span>
+                    );
+<span class="nc" id="L209">                    editingWaterEntryId = null;</span>
+                }
+<span class="nc" id="L211">            }));</span>
+
+<span class="nc" id="L213">            hideError(waterErrorLabel);</span>
+<span class="nc" id="L214">            litresField.clear();</span>
+<span class="nc" id="L215">            waterNotesField.clear();</span>
+<span class="nc" id="L216">            refreshWaterList(household);</span>
+
+<span class="nc" id="L218">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L219">            showError(waterErrorLabel, &quot;Enter a valid number&quot;);</span>
+<span class="nc" id="L220">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L221">            showError(waterErrorLabel, e.getMessage());</span>
+<span class="nc" id="L222">        }</span>
+<span class="nc" id="L223">    }</span>
+    private void refreshWaterList(Household household) {
+<span class="nc" id="L225">        List&lt;WaterEntry&gt; entries = ctx.waterService.findEntriesForHousehold(household);</span>
+<span class="nc" id="L226">        waterEntriesList.getChildren().clear();</span>
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (entries.isEmpty()) {</span>
+<span class="nc" id="L229">            waterEntriesList.getChildren().add(</span>
+<span class="nc" id="L230">                    mutedLabel(&quot;No water readings yet&quot;)</span>
+            );
+<span class="nc" id="L232">            return;</span>
+        }
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        for (WaterEntry entry : entries) {</span>
+
+<span class="nc" id="L237">            Label entryLabel = mutedLabel(</span>
+<span class="nc" id="L238">                    entry.getPeriod() + &quot; — &quot; + entry.getLitres() + &quot; L&quot;</span>
+            );
+
+<span class="nc" id="L241">            Button editButton = new Button(&quot;✎\u00A0\u00A0Edit&quot;);</span>
+<span class="nc" id="L242">            editButton.getStyleClass().add(&quot;edit-button&quot;);</span>
+
+<span class="nc" id="L244">            editButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L245">                editingWaterEntryId = entry.getId();</span>
+
+<span class="nc" id="L247">                litresField.setText(</span>
+<span class="nc" id="L248">                        String.valueOf(entry.getLitres())</span>
+                );
+
+<span class="nc" id="L251">                waterNotesField.setText(</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                        entry.getNotes() != null ? entry.getNotes() : &quot;&quot;</span>
+                );
+<span class="nc" id="L254">            });</span>
+
+<span class="nc" id="L256">            HBox row = new HBox(10);</span>
+<span class="nc" id="L257">            row.getStyleClass().add(&quot;history-row&quot;);</span>
+
+<span class="nc" id="L259">            entryLabel.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L260">            HBox.setHgrow(</span>
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+<span class="nc" id="L265">            row.getChildren().addAll(entryLabel, editButton);</span>
+<span class="nc" id="L266">            waterEntriesList.getChildren().add(row);</span>
+<span class="nc" id="L267">        }</span>
+<span class="nc" id="L268">    }</span>
+
+
+    // US-17: record waste information
+
+    @FXML
+    private void handleSaveWaste() {
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (blockedFromSaving(wasteErrorLabel)) return;</span>
+        try {
+<span class="nc" id="L277">            double generalKg = Double.parseDouble(generalKgField.getText().trim());</span>
+<span class="nc" id="L278">            double recycledKg = Double.parseDouble(recycledKgField.getText().trim());</span>
+<span class="nc" id="L279">            double compostKg = Double.parseDouble(compostKgField.getText().trim());</span>
+
+<span class="nc" id="L281">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L282">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L284">            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WASTE, () -&gt; {</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                if (editingWasteEntryId == null) {</span>
+<span class="nc" id="L286">                    ctx.wasteService.recordEntry(</span>
+                            user,
+                            household,
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
+                } else {
+<span class="nc" id="L294">                    ctx.wasteService.updateEntry(</span>
+                            user,
+                            household,
+<span class="nc" id="L297">                            editingWasteEntryId,</span>
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
+
+<span class="nc" id="L303">                    editingWasteEntryId = null;</span>
+                }
+<span class="nc" id="L305">            }));</span>
+
+<span class="nc" id="L307">            hideError(wasteErrorLabel);</span>
+
+<span class="nc" id="L309">            generalKgField.clear();</span>
+<span class="nc" id="L310">            recycledKgField.clear();</span>
+<span class="nc" id="L311">            compostKgField.clear();</span>
+
+<span class="nc" id="L313">            refreshWasteList(household);</span>
+
+<span class="nc" id="L315">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L316">            showError(wasteErrorLabel, &quot;Enter valid numbers&quot;);</span>
+<span class="nc" id="L317">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L318">            showError(wasteErrorLabel, e.getMessage());</span>
+<span class="nc" id="L319">        }</span>
+<span class="nc" id="L320">    }</span>
+    private void refreshWasteList(Household household) {
+<span class="nc" id="L322">        List&lt;WasteEntry&gt; entries =</span>
+<span class="nc" id="L323">                ctx.wasteService.findEntriesForHousehold(household);</span>
+
+<span class="nc" id="L325">        wasteEntriesList.getChildren().clear();</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">        if (entries.isEmpty()) {</span>
+<span class="nc" id="L328">            wasteEntriesList.getChildren().add(</span>
+<span class="nc" id="L329">                    mutedLabel(&quot;No waste readings yet&quot;)</span>
+            );
+<span class="nc" id="L331">            return;</span>
+        }
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (WasteEntry entry : entries) {</span>
+
+<span class="nc" id="L336">            Label entryLabel = mutedLabel(</span>
+<span class="nc" id="L337">                    entry.getPeriod()</span>
+<span class="nc" id="L338">                            + &quot; — General: &quot; + entry.getGeneralKg() + &quot; kg&quot;</span>
+<span class="nc" id="L339">                            + &quot; | Recycled: &quot; + entry.getRecycledKg() + &quot; kg&quot;</span>
+<span class="nc" id="L340">                            + &quot; | Compost: &quot; + entry.getCompostKg() + &quot; kg&quot;</span>
+            );
+
+<span class="nc" id="L343">            Button editButton = new Button(&quot;✎\u00A0\u00A0Edit&quot;);</span>
+<span class="nc" id="L344">            editButton.getStyleClass().add(&quot;edit-button&quot;);</span>
+
+<span class="nc" id="L346">            editButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L347">                editingWasteEntryId = entry.getId();</span>
+
+<span class="nc" id="L349">                generalKgField.setText(</span>
+<span class="nc" id="L350">                        String.valueOf(entry.getGeneralKg())</span>
+                );
+
+<span class="nc" id="L353">                recycledKgField.setText(</span>
+<span class="nc" id="L354">                        String.valueOf(entry.getRecycledKg())</span>
+                );
+
+<span class="nc" id="L357">                compostKgField.setText(</span>
+<span class="nc" id="L358">                        String.valueOf(entry.getCompostKg())</span>
+                );
+<span class="nc" id="L360">            });</span>
+
+<span class="nc" id="L362">            HBox row = new HBox(10);</span>
+<span class="nc" id="L363">            row.getStyleClass().add(&quot;history-row&quot;);</span>
+
+<span class="nc" id="L365">            entryLabel.setMaxWidth(Double.MAX_VALUE);</span>
+
+<span class="nc" id="L367">            HBox.setHgrow(</span>
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+<span class="nc" id="L372">            row.getChildren().addAll(entryLabel, editButton);</span>
+
+<span class="nc" id="L374">            wasteEntriesList.getChildren().add(row);</span>
+<span class="nc" id="L375">        }</span>
+<span class="nc" id="L376">    }</span>
+
+
+
+    // US-18: record transport information
+
+    @FXML
+    private void handleAddVehicle() {
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (blockedFromSaving(vehicleErrorLabel)) return;</span>
+        try {
+<span class="nc" id="L386">            String label = vehicleLabelField.getText();</span>
+<span class="nc" id="L387">            String fuelType = vehicleFuelTypeCombo.getValue();</span>
+<span class="nc" id="L388">            double kmPerWeek =</span>
+<span class="nc" id="L389">                    Double.parseDouble(vehicleKmPerWeekField.getText().trim());</span>
+
+<span class="nc" id="L391">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L392">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc bnc" id="L394" title="All 2 branches missed.">            if (editingVehicleId == null) {</span>
+<span class="nc" id="L395">                ctx.transportService.addVehicle(</span>
+                        user,
+                        household,
+                        label,
+                        fuelType,
+                        kmPerWeek
+                );
+            } else {
+<span class="nc" id="L403">                ctx.transportService.updateVehicle(</span>
+                        user,
+                        household,
+<span class="nc" id="L406">                        editingVehicleId,</span>
+                        label,
+                        fuelType,
+                        kmPerWeek
+                );
+
+<span class="nc" id="L412">                editingVehicleId = null;</span>
+            }
+
+<span class="nc" id="L415">            hideError(vehicleErrorLabel);</span>
+
+<span class="nc" id="L417">            vehicleLabelField.clear();</span>
+<span class="nc" id="L418">            vehicleFuelTypeCombo.setValue(null);</span>
+<span class="nc" id="L419">            vehicleKmPerWeekField.clear();</span>
+
+<span class="nc" id="L421">            refreshVehiclesList(household);</span>
+
+<span class="nc" id="L423">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L424">            showError(vehicleErrorLabel, &quot;Enter a valid number&quot;);</span>
+<span class="nc" id="L425">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L426">            showError(vehicleErrorLabel, e.getMessage());</span>
+<span class="nc" id="L427">        }</span>
+<span class="nc" id="L428">    }</span>
+
+    private void refreshVehiclesList(Household household) {
+<span class="nc" id="L431">        vehiclesList.getChildren().clear();</span>
+
+<span class="nc" id="L433">        var vehicles =</span>
+<span class="nc" id="L434">                ctx.transportService.findVehiclesForHousehold(household);</span>
+
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        if (vehicles.isEmpty()) {</span>
+<span class="nc" id="L437">            vehiclesList.getChildren().add(</span>
+<span class="nc" id="L438">                    mutedLabel(&quot;No vehicles added yet&quot;)</span>
+            );
+<span class="nc" id="L440">            return;</span>
+        }
+
+<span class="nc bnc" id="L443" title="All 2 branches missed.">        for (var vehicle : vehicles) {</span>
+
+<span class="nc" id="L445">            Label vehicleLabel = mutedLabel(</span>
+<span class="nc" id="L446">                    vehicle.getLabel()</span>
+<span class="nc" id="L447">                            + &quot; (&quot; + vehicle.getFuelType() + &quot;) — &quot;</span>
+<span class="nc" id="L448">                            + vehicle.getKmPerWeek()</span>
+                            + &quot; km/week&quot;
+            );
+
+<span class="nc" id="L452">            Button editButton = new Button(&quot;✎\u00A0\u00A0Edit&quot;);</span>
+<span class="nc" id="L453">            editButton.getStyleClass().add(&quot;edit-button&quot;);</span>
+
+<span class="nc" id="L455">            editButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L456">                editingVehicleId = vehicle.getId();</span>
+
+<span class="nc" id="L458">                vehicleLabelField.setText(</span>
+<span class="nc" id="L459">                        vehicle.getLabel()</span>
+                );
+
+<span class="nc" id="L462">                vehicleFuelTypeCombo.setValue(</span>
+<span class="nc" id="L463">                        vehicle.getFuelType()</span>
+                );
+
+<span class="nc" id="L466">                vehicleKmPerWeekField.setText(</span>
+<span class="nc" id="L467">                        String.valueOf(vehicle.getKmPerWeek())</span>
+                );
+<span class="nc" id="L469">            });</span>
+
+<span class="nc" id="L471">            HBox row = new HBox(10);</span>
+<span class="nc" id="L472">            row.getStyleClass().add(&quot;history-row&quot;);</span>
+
+<span class="nc" id="L474">            vehicleLabel.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L475">            HBox.setHgrow(</span>
+                    vehicleLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+<span class="nc" id="L480">            row.getChildren().addAll(vehicleLabel, editButton);</span>
+<span class="nc" id="L481">            vehiclesList.getChildren().add(row);</span>
+<span class="nc" id="L482">        }</span>
+<span class="nc" id="L483">    }</span>
+    @FXML
+    private void handleSaveTransport() {
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (blockedFromSaving(transportErrorLabel)) return;</span>
+        try {
+<span class="nc" id="L488">            double publicTransportTripsPerWeek =</span>
+<span class="nc" id="L489">                    Double.parseDouble(publicTransportTripsField.getText().trim());</span>
+
+<span class="nc" id="L491">            double flightsPerYear =</span>
+<span class="nc" id="L492">                    Double.parseDouble(flightsPerYearField.getText().trim());</span>
+
+<span class="nc" id="L494">            User user = ctx.session.getCurrentUser();</span>
+<span class="nc" id="L495">            Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L497">            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.TRANSPORT, () -&gt; {</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">                if (editingTransportEntryId == null) {</span>
+<span class="nc" id="L499">                    ctx.transportService.recordEntry(</span>
+                            user,
+                            household,
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
+                } else {
+<span class="nc" id="L506">                    ctx.transportService.updateEntry(</span>
+                            user,
+                            household,
+<span class="nc" id="L509">                            editingTransportEntryId,</span>
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
+
+<span class="nc" id="L514">                    editingTransportEntryId = null;</span>
+                }
+<span class="nc" id="L516">            }));</span>
+
+<span class="nc" id="L518">            hideError(transportErrorLabel);</span>
+<span class="nc" id="L519">            publicTransportTripsField.clear();</span>
+<span class="nc" id="L520">            flightsPerYearField.clear();</span>
+
+<span class="nc" id="L522">            refreshTransportList(household);</span>
+
+<span class="nc" id="L524">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L525">            showError(transportErrorLabel, &quot;Enter valid numbers&quot;);</span>
+<span class="nc" id="L526">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L527">            showError(transportErrorLabel, e.getMessage());</span>
+<span class="nc" id="L528">        }</span>
+<span class="nc" id="L529">    }</span>
+
+    private void refreshTransportList(Household household) {
+<span class="nc" id="L532">        List&lt;TransportEntry&gt; entries =</span>
+<span class="nc" id="L533">                ctx.transportService.findEntriesForHousehold(household);</span>
+
+<span class="nc" id="L535">        transportEntriesList.getChildren().clear();</span>
+
+<span class="nc bnc" id="L537" title="All 2 branches missed.">        if (entries.isEmpty()) {</span>
+<span class="nc" id="L538">            transportEntriesList.getChildren().add(</span>
+<span class="nc" id="L539">                    mutedLabel(&quot;No transport information recorded yet&quot;)</span>
+            );
+<span class="nc" id="L541">            return;</span>
+        }
+
+<span class="nc bnc" id="L544" title="All 2 branches missed.">        for (TransportEntry entry : entries) {</span>
+
+<span class="nc" id="L546">            Label entryLabel = mutedLabel(</span>
+<span class="nc" id="L547">                    entry.getPeriod()</span>
+                            + &quot; — &quot;
+<span class="nc" id="L549">                            + entry.getPublicTransportTripsPerWeek()</span>
+                            + &quot; PT trips/week, &quot;
+<span class="nc" id="L551">                            + entry.getFlightsPerYear()</span>
+                            + &quot; flights/year&quot;
+            );
+
+<span class="nc" id="L555">            Button editButton = new Button(&quot;✎\u00A0\u00A0Edit&quot;);</span>
+<span class="nc" id="L556">            editButton.getStyleClass().add(&quot;edit-button&quot;);</span>
+
+<span class="nc" id="L558">            editButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L559">                editingTransportEntryId = entry.getId();</span>
+
+<span class="nc" id="L561">                publicTransportTripsField.setText(</span>
+<span class="nc" id="L562">                        String.valueOf(entry.getPublicTransportTripsPerWeek())</span>
+                );
+
+<span class="nc" id="L565">                flightsPerYearField.setText(</span>
+<span class="nc" id="L566">                        String.valueOf(entry.getFlightsPerYear())</span>
+                );
+<span class="nc" id="L568">            });</span>
+
+<span class="nc" id="L570">            HBox row = new HBox(10);</span>
+<span class="nc" id="L571">            row.getStyleClass().add(&quot;history-row&quot;);</span>
+
+<span class="nc" id="L573">            entryLabel.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L574">            HBox.setHgrow(</span>
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+<span class="nc" id="L579">            row.getChildren().addAll(entryLabel, editButton);</span>
+<span class="nc" id="L580">            transportEntriesList.getChildren().add(row);</span>
+<span class="nc" id="L581">        }</span>
+<span class="nc" id="L582">    }</span>
+    // US-23: show how the update changed the score
+
+    private void showScoreChange(Optional&lt;ScoreChange&gt; change) {
+<span class="nc" id="L586">        scoreChangeCard.setVisible(change.isPresent());</span>
+<span class="nc" id="L587">        scoreChangeCard.setManaged(change.isPresent());</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">        if (change.isEmpty()) {</span>
+<span class="nc" id="L589">            return;</span>
+        }
+
+<span class="nc" id="L592">        ScoreChange scores = change.get();</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        boolean showDomain = !scores.isFirstScore();</span>
+<span class="nc" id="L594">        domainChangeLabel.setVisible(showDomain);</span>
+<span class="nc" id="L595">        domainChangeLabel.setManaged(showDomain);</span>
+
+<span class="nc bnc" id="L597" title="All 2 branches missed.">        if (scores.isFirstScore()) {</span>
+<span class="nc" id="L598">            overallChangeLabel.setText(&quot;Your household's first overall score is &quot;</span>
+<span class="nc" id="L599">                    + formatScore(scores.overall().getScenarioScore()));</span>
+<span class="nc" id="L600">            setDirectionStyle(overallChangeLabel, scores.overall());</span>
+<span class="nc" id="L601">            return;</span>
+        }
+
+<span class="nc" id="L604">        showChangeLine(overallChangeLabel, &quot;Overall score&quot;, scores.overall());</span>
+<span class="nc" id="L605">        showChangeLine(domainChangeLabel, domainName(scores.domain()) + &quot; score&quot;, scores.domainChange());</span>
+<span class="nc" id="L606">    }</span>
+
+    private void showChangeLine(Label label, String title, ScenarioComparison comparison) {
+<span class="nc" id="L609">        label.setText(title + &quot;: &quot; + formatScore(comparison.getCurrentScore())</span>
+<span class="nc" id="L610">                + &quot; → &quot; + formatScore(comparison.getScenarioScore())</span>
+<span class="nc" id="L611">                + &quot;  (&quot; + describeDifference(comparison) + &quot;)&quot;);</span>
+<span class="nc" id="L612">        setDirectionStyle(label, comparison);</span>
+<span class="nc" id="L613">    }</span>
+
+    private void setDirectionStyle(Label label, ScenarioComparison comparison) {
+<span class="nc" id="L616">        label.getStyleClass().removeAll(&quot;success-text&quot;, &quot;error-text&quot;, &quot;muted-text&quot;);</span>
+<span class="nc bnc" id="L617" title="All 3 branches missed.">        label.getStyleClass().add(switch (comparison.getDirection()) {</span>
+<span class="nc" id="L618">            case IMPROVED -&gt; &quot;success-text&quot;;</span>
+<span class="nc" id="L619">            case WORSENED -&gt; &quot;error-text&quot;;</span>
+<span class="nc" id="L620">            case UNCHANGED -&gt; &quot;muted-text&quot;;</span>
+        });
+<span class="nc" id="L622">    }</span>
+
+    private String describeDifference(ScenarioComparison comparison) {
+<span class="nc bnc" id="L625" title="All 3 branches missed.">        return switch (comparison.getDirection()) {</span>
+<span class="nc" id="L626">            case IMPROVED -&gt; comparison.signedPoints() + &quot;, better&quot;;</span>
+<span class="nc" id="L627">            case WORSENED -&gt; comparison.signedPoints() + &quot;, worse&quot;;</span>
+<span class="nc" id="L628">            case UNCHANGED -&gt; &quot;no change&quot;;</span>
+        };
+    }
+
+    private String domainName(Domain domain) {
+<span class="nc" id="L633">        String name = domain.name().toLowerCase();</span>
+<span class="nc" id="L634">        return Character.toUpperCase(name.charAt(0)) + name.substring(1);</span>
+    }
+
+    private String formatScore(double score) {
+<span class="nc" id="L638">        return String.format(&quot;%.1f&quot;, score);</span>
+    }
+
+    private Label mutedLabel(String text) {
+<span class="nc" id="L642">        Label label = new Label(text);</span>
+<span class="nc" id="L643">        label.getStyleClass().add(&quot;muted-text&quot;);</span>
+<span class="nc" id="L644">        return label;</span>
+    }
+
+    private void showError(Label label, String message) {
+<span class="nc" id="L648">        label.setText(message);</span>
+<span class="nc" id="L649">        label.setVisible(true);</span>
+<span class="nc" id="L650">        label.setManaged(true);</span>
+<span class="nc" id="L651">    }</span>
+
+    /** US-03 / #85: guests and users without a household see a message instead of saving. */
+    private boolean blockedFromSaving(Label errorLabel) {
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        if (ctx.session.canRecordEntries()) return false;</span>
+<span class="nc" id="L656">        showError(errorLabel, &quot;Sign in and join a household to save readings&quot;);</span>
+<span class="nc" id="L657">        return true;</span>
+    }
+
+    private void hideError(Label label) {
+<span class="nc" id="L661">        label.setVisible(false);</span>
+<span class="nc" id="L662">        label.setManaged(false);</span>
+<span class="nc" id="L663">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

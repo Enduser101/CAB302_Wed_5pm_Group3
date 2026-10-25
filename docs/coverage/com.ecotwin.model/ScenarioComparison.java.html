@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScenarioComparison.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.model</a> &gt; <span class="el_source">ScenarioComparison.java</span></div><h1>ScenarioComparison.java</h1><pre class="source lang-java linenums">package com.ecotwin.model;
+
+/**
+ * US-28: a scenario's score next to the household's current score.
+ *
+ * Scores are rounded to one decimal place, as displayed, so the difference always
+ * matches the two scores shown beside it.
+ */
+public class ScenarioComparison {
+
+<span class="fc" id="L11">    public enum Direction { IMPROVED, WORSENED, UNCHANGED }</span>
+
+    private final double currentScore;
+    private final double scenarioScore;
+    private final double difference;
+
+<span class="fc" id="L17">    public ScenarioComparison(double currentScore, double scenarioScore) {</span>
+<span class="fc" id="L18">        this.currentScore = round(currentScore);</span>
+<span class="fc" id="L19">        this.scenarioScore = round(scenarioScore);</span>
+<span class="fc" id="L20">        this.difference = round(this.scenarioScore - this.currentScore);</span>
+<span class="fc" id="L21">    }</span>
+
+    public double getCurrentScore() {
+<span class="fc" id="L24">        return currentScore;</span>
+    }
+
+    public double getScenarioScore() {
+<span class="fc" id="L28">        return scenarioScore;</span>
+    }
+
+    /** Scenario score minus current score: positive means the scenario is better. */
+    public double getDifference() {
+<span class="fc" id="L33">        return difference;</span>
+    }
+
+    public Direction getDirection() {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (difference &gt; 0) {</span>
+<span class="fc" id="L38">            return Direction.IMPROVED;</span>
+        }
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (difference &lt; 0) {</span>
+<span class="fc" id="L41">            return Direction.WORSENED;</span>
+        }
+<span class="fc" id="L43">        return Direction.UNCHANGED;</span>
+    }
+
+    /** The difference as displayed, e.g. &quot;+7.5 points&quot; or &quot;-0.5 points&quot;. */
+    public String signedPoints() {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        String sign = difference &lt; 0 ? &quot;-&quot; : &quot;+&quot;;</span>
+<span class="fc" id="L49">        return sign + String.format(&quot;%.1f&quot;, Math.abs(difference)) + &quot; points&quot;;</span>
+    }
+
+    private static double round(double value) {
+<span class="fc" id="L53">        return Math.round(value * 10) / 10.0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

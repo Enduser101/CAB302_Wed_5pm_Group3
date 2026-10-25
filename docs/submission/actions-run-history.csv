@@ -1,0 +1,189 @@
+Run ID,Started (Brisbane),Result,Trigger,Branch,Commit / PR title,URL
+35419412587,2026-09-19 13:44,success,push,feature/us-15-18-resource-tracking,"feat: record household energy, water, waste and transport information…",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35419412587
+35419827424,2026-09-19 13:53,success,pull_request,feature/us-15-18-resource-tracking,Household resource tracking (US-15–18) + CI test gate,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35419827424
+35427339450,2026-09-19 16:42,success,push,dev,Merge pull request #82 from Enduser101/feature/us-15-18-resource-trac…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35427339450
+35484307302,2026-09-20 12:33,failure,push,feature/us-03-04-session,Merge branch 'dev' into feature/us-03-04-session,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35484307302
+35484391352,2026-09-20 12:35,failure,pull_request,feature/us-03-04-session,Feature/us 03 04 session,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35484391352
+35484978923,2026-09-20 12:49,success,push,feature/us-03-guest,"sorry about the branch, pulled in old tests that didn't push due to v…",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35484978923
+35485335256,2026-09-20 12:57,success,push,feature/us-03-guest,fixed unable to login as guest us3,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35485335256
+35485364768,2026-09-20 12:58,success,pull_request,feature/us-03-guest,Feature/us 03 guest,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35485364768
+35492653745,2026-09-20 15:49,success,push,dev,Merge pull request #84 from Enduser101/feature/us-03-guest,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35492653745
+35497225698,2026-09-20 17:34,success,push,feature/account-change-password,Merge branch 'dev' into feature/account-change-password,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35497225698
+35497859329,2026-09-20 17:48,success,pull_request,feature/account-change-password,"Account details and change password (US-05, US-06, US-07)",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35497859329
+35498056747,2026-09-20 17:52,success,push,dev,Merge pull request #86 from Enduser101/feature/account-change-password,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35498056747
+35503820177,2026-09-20 20:00,success,pull_request,documentation/github_projects,Documentation/GitHub projects,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35503820177
+35503903913,2026-09-20 20:01,success,push,dev,Merge pull request #87 from Enduser101/documentation/github_projects,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35503903913
+35504081525,2026-09-20 20:05,success,pull_request,dev,Dev to Main,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35504081525
+35504934513,2026-09-20 20:23,success,pull_request,housekeeping,reorg of some files in the folder structure,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35504934513
+35505026282,2026-09-20 20:25,success,push,dev,Merge pull request #89 from Enduser101/housekeeping,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35505026282
+35505028815,2026-09-20 20:25,success,pull_request,dev,Dev to Main,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35505028815
+35505246081,2026-09-20 20:30,success,push,main,Merge pull request #88 from Enduser101/dev,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35505246081
+35714020052,2026-09-22 20:05,success,pull_request,lifeisthing-patch-2,Create 22.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35714020052
+35725407106,2026-09-22 22:08,failure,pull_request,fix/guest-mode-bugs-85,Fix/guest mode bugs 85,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35725407106
+35725717107,2026-09-22 22:11,success,pull_request,fix/guest-mode-bugs-85,Fix/guest mode bugs 85,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35725717107
+35786149087,2026-09-23 07:21,success,pull_request,fix/guest-mode-bugs-85,Fix/guest mode bugs 85,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35786149087
+35868752758,2026-09-23 23:40,success,push,feature/us-19-edit-resources,Complete resource information editing for US-19,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35868752758
+35868774896,2026-09-23 23:41,success,pull_request,feature/us-19-edit-resources,US-19: Edit household sustainability information,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35868774896
+35869185201,2026-09-23 23:44,success,push,dev,Merge pull request #92 from Enduser101/feature/us-19-edit-resources,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35869185201
+35966476786,2026-09-24 16:50,success,push,feature/Epic-9,Feature: US 32,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/35966476786
+36824494450,2026-10-01 16:23,success,push,feature/Epic-9,Feature: US 33,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/36824494450
+37131226015,2026-10-04 00:52,success,push,feature/us-22-score-meaning,Add sustainability score explanation for US-22,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37131226015
+37266357020,2026-10-05 15:07,success,push,feature/Epic-9,Feature: US 35,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37266357020
+37267888086,2026-10-05 15:27,success,push,feature/Epic-9,Updated User Stories for EPIC 9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37267888086
+37271584608,2026-10-05 16:16,success,push,feature/Epic-9,Feature: US 33,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37271584608
+37442010800,2026-10-06 19:18,success,push,feature/us-26-recommendation-reason,Add recommendation explanations for US-26,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37442010800
+37556623358,2026-10-07 11:20,success,push,feature/us-13-membership-history,US-13: log when a member leaves a household,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37556623358
+37566811050,2026-10-07 13:27,success,push,feature/Epic-9,"Test cases for US 32, 33, 35",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37566811050
+37567099869,2026-10-07 13:30,success,pull_request,feature/us-13-membership-history,Feature/us 13 membership history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37567099869
+37567309243,2026-10-07 13:33,success,push,main,Merge pull request #95 from Enduser101/feature/us-13-membership-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37567309243
+37567765276,2026-10-07 13:39,success,pull_request,revert-95-feature/us-13-membership-history,"Revert ""Feature/us 13 membership history""",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37567765276
+37567821880,2026-10-07 13:40,success,push,main,Merge pull request #96 from Enduser101/revert-95-feature/us-13-member…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37567821880
+37568684187,2026-10-07 13:51,success,pull_request,feature/Epic-9,Feature/us-32-33-35,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37568684187
+37570472709,2026-10-07 14:14,success,push,feature/us-27-create-scenario,Add temporary sustainability scenarios for US-27,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37570472709
+37570654886,2026-10-07 14:16,success,pull_request,feature/us-27-create-scenario,US-27 Create sustainability scenario,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37570654886
+37570774413,2026-10-07 14:17,success,push,dev,Merge pull request #98 from Enduser101/feature/us-27-create-scenario,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37570774413
+37582625759,2026-10-07 16:38,success,push,feature/Epic-9,Merge branch 'dev' into feature/Epic-9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37582625759
+37582628783,2026-10-07 16:38,success,pull_request,feature/Epic-9,Feature/us-32-33-35,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37582628783
+37582791740,2026-10-07 16:40,success,push,dev,Merge pull request #97 from Enduser101/feature/Epic-9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37582791740
+37583368763,2026-10-07 16:46,success,pull_request,fix/guest-mode-bugs-85,Fix/guest mode bugs 85,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37583368763
+37583599403,2026-10-07 16:48,success,push,dev,Merge pull request #91 from Enduser101/fix/guest-mode-bugs-85,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37583599403
+37584178509,2026-10-07 16:54,success,push,feature/us-13-membership-history,Merge branch 'dev' into feature/us-13-membership-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37584178509
+37584184477,2026-10-07 16:55,success,pull_request,feature/us-13-membership-history,Feature/us 13 membership history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37584184477
+37584283002,2026-10-07 16:56,success,push,dev,Merge pull request #99 from Enduser101/feature/us-13-membership-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37584283002
+37584792569,2026-10-07 17:01,success,push,feature/us-36-37-38-39,Merge pull request #99 from Enduser101/feature/us-13-membership-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37584792569
+37589159310,2026-10-07 17:44,success,push,feature/us-28-31-scenarios,Merge pull request #99 from Enduser101/feature/us-13-membership-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37589159310
+37595364386,2026-10-07 18:40,success,push,feature/us-28-31-scenarios,features US-28 - US-31,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37595364386
+37595985093,2026-10-07 18:46,success,pull_request,feature/us-28-31-scenarios,features US-28 - US-31,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37595985093
+37600843665,2026-10-07 19:28,success,push,dev,Merge pull request #100 from Enduser101/feature/us-28-31-scenarios,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37600843665
+37601097653,2026-10-07 19:30,success,push,feature/us-28-31-scenarios,features US-28 - US-31,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37601097653
+37714218637,2026-10-08 11:41,success,push,feature/us-12-activity-history,US-12: Activity History button shows household history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/37714218637
+38009920326,2026-10-10 10:38,success,pull_request,lifeisthing-patch-1,4.10.2026 Meeting,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38009920326
+38009979169,2026-10-10 10:39,success,pull_request,lifeisthing-patch-1,4.10.2026 Meeting,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38009979169
+38010111703,2026-10-10 10:41,success,push,dev,4.10.2026 Meeting,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38010111703
+38010441667,2026-10-10 10:45,success,pull_request,lifeisthing-patch-2,Meeting 22.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38010441667
+38010451018,2026-10-10 10:46,success,pull_request,lifeisthing-patch-2,Meeting 22.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38010451018
+38010643791,2026-10-10 10:48,success,pull_request,lifeisthing-patch-2,Meeting 22.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38010643791
+38010734094,2026-10-10 10:50,success,push,dev,Meeting 22.09.2026 (#104),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38010734094
+38016828866,2026-10-10 12:24,success,push,feature/us-12-activity-history,Merge branch 'dev' into feature/us-12-activity-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38016828866
+38016830803,2026-10-10 12:24,success,pull_request,feature/us-12-activity-history,Feature/us 12 activity history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38016830803
+38017005994,2026-10-10 12:27,success,pull_request,US-21-domain-scores,Us 21 domain scores ,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38017005994
+38021007788,2026-10-10 13:33,success,push,dev,Merge pull request #102 from Enduser101/feature/us-12-activity-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38021007788
+38033345394,2026-10-10 17:07,success,pull_request,US-21-domain-scores,Us 21 domain scores ,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38033345394
+38361260403,2026-10-13 17:12,success,push,feature/Epic-9,Feature: US 36,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38361260403
+38361751927,2026-10-13 17:17,success,push,feature/score-over-time,"US-21: domain cards match the design, plus dashboard buttons and a sc…",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38361751927
+38365817005,2026-10-13 17:55,success,push,feature/Epic-9,Merge branch 'dev' into feature/Epic-9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38365817005
+38529958501,2026-10-14 17:41,failure,push,feature/us-23-score-chart,US-23: tests for household score history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38529958501
+38531471683,2026-10-14 17:54,success,push,feature/us-23-score-chart,US-23: score history from each periods readings,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38531471683
+38537425031,2026-10-14 18:45,success,push,feature/us-23-score-chart,US-23: show score over time on the dashboard,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38537425031
+38537520675,2026-10-14 18:46,success,push,feature/us-23-score-chart,US-23: show score over time on the dashboard,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38537520675
+38537984389,2026-10-14 18:50,success,pull_request,feature/us-23-score-chart,Feature/us 23 score chart,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38537984389
+38675799632,2026-10-15 13:21,success,push,feature/Epic-9,Feature: US 34,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38675799632
+38677075574,2026-10-15 13:35,success,pull_request,feature/Epic-9,US-34 and US-36,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38677075574
+38730317734,2026-10-15 21:51,success,push,feature/us-23-score-chart,Merge branch 'dev' into feature/us-23-score-chart,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38730317734
+38730320085,2026-10-15 21:51,success,pull_request,feature/us-23-score-chart,Feature/us 23 score chart,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38730320085
+38730418830,2026-10-15 21:52,success,push,dev,Merge pull request #108 from Enduser101/feature/us-23-score-chart,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38730418830
+38881366198,2026-10-16 19:34,success,push,feature/us-24-recommendations,"US-24: recommendations derived from household values, scored by re-ru…",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38881366198
+38881694135,2026-10-16 19:37,success,pull_request,feature/us-24-recommendations,Feature/us 24 recommendations,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/38881694135
+39004431673,2026-10-17 14:56,success,push,feature/us-22-score-meaning,Integrate US-22 score explanation into dashboard,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39004431673
+39004467965,2026-10-17 14:57,success,pull_request,feature/us-22-score-meaning,US-22: Explain sustainability score meaning,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39004467965
+39004583618,2026-10-17 14:59,success,push,dev,Merge pull request #112 from Enduser101/feature/us-22-score-meaning,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39004583618
+39005027392,2026-10-17 15:06,success,push,feature/us-24-recommendations,Merge branch 'dev' into feature/us-24-recommendations,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39005027392
+39005029458,2026-10-17 15:06,success,pull_request,feature/us-24-recommendations,Feature/us 24 recommendations,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39005029458
+39005066089,2026-10-17 15:06,success,push,dev,Merge pull request #111 from Enduser101/feature/us-24-recommendations,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39005066089
+39006048798,2026-10-17 15:22,success,push,feature/us-14-change-history-gaps,fix: energy edit history records solar generation changes (#US-14),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39006048798
+39006051211,2026-10-17 15:22,success,push,feature/us-23-score-change,refactor: share score difference wording between scenarios and resour…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39006051211
+39006383006,2026-10-17 15:28,success,pull_request,feature/us-23-score-change,Feature/us 23 score change,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39006383006
+39006442027,2026-10-17 15:29,success,push,dev,Merge pull request #113 from Enduser101/feature/us-23-score-change,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39006442027
+39006779507,2026-10-17 15:34,success,push,feature/us-14-change-history-gaps,fix: energy edit history records solar generation changes (#US-14),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39006779507
+39007023075,2026-10-17 15:38,success,pull_request,feature/us-14-change-history-gaps,Feature/us 14 change history gaps,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39007023075
+39007044049,2026-10-17 15:39,success,push,feature/us-14-change-history-gaps,Merge branch 'dev' into feature/us-14-change-history-gaps,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39007044049
+39007045373,2026-10-17 15:39,success,pull_request,feature/us-14-change-history-gaps,Feature/us 14 change history gaps,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39007045373
+39009063799,2026-10-17 16:12,success,push,dev,Merge pull request #114 from Enduser101/feature/us-14-change-history-…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39009063799
+39010272873,2026-10-17 16:32,success,push,feature/demo-account,feat: create the Cab 302 demo account on startup if it is missing (#115),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39010272873
+39011121808,2026-10-17 16:45,success,pull_request,feature/demo-account,Feature/demo account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39011121808
+39011575653,2026-10-17 16:53,success,push,feature/Epic-9,Merge branch 'dev' into feature/Epic-9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39011575653
+39011577180,2026-10-17 16:53,success,pull_request,feature/Epic-9,US-34 and US-36,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39011577180
+39011615917,2026-10-17 16:54,success,push,dev,Merge pull request #109 from Enduser101/feature/Epic-9,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39011615917
+39019299487,2026-10-17 18:57,success,push,feature/us-26-recommendation-reason,Integrate US-26 recommendation explanations,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39019299487
+39019309316,2026-10-17 18:57,success,pull_request,feature/us-26-recommendation-reason,US-26: Explain why recommendations are made,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39019309316
+39038073403,2026-10-17 23:48,success,push,feature/us-26-recommendation-reason,Merge latest dev into US-26,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39038073403
+39038076064,2026-10-17 23:48,success,pull_request,feature/us-26-recommendation-reason,US-26: Explain why recommendations are made,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39038076064
+39040509797,2026-10-18 00:23,success,push,dev,Merge pull request #117 from Enduser101/feature/us-26-recommendation-…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39040509797
+39086336737,2026-10-18 11:23,success,push,feature/demo-account,Merge branch 'dev' into feature/demo-account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39086336737
+39086337325,2026-10-18 11:23,success,pull_request,feature/demo-account,Feature/demo account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39086337325
+39230736103,2026-10-19 19:31,success,pull_request,refactor/energy-validation-tests,Refactor energy validation and tests,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39230736103
+39230953958,2026-10-19 19:33,success,push,dev,Merge pull request #118 from Enduser101/refactor/energy-validation-tests,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39230953958
+39234302983,2026-10-19 20:00,success,pull_request,lifeisthing-patch-1,Add files via upload,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39234302983
+39234444777,2026-10-19 20:01,success,pull_request,lifeisthing-patch-3,Create 18.10.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39234444777
+39251760515,2026-10-19 22:24,success,pull_request,docs/favour-weekly-log,Add Favour individual weekly log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39251760515
+39251960359,2026-10-19 22:25,success,push,dev,Merge pull request #121 from Enduser101/docs/favour-weekly-log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39251960359
+39361060934,2026-10-20 12:50,success,pull_request,docs/frankie-contribution-log,Add Frankie individual weekly log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39361060934
+39365740766,2026-10-20 13:42,success,push,dev,Merge pull request #122 from Enduser101/docs/frankie-contribution-log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39365740766
+39384458413,2026-10-20 17:07,success,pull_request,docs/James_Individual_Logbook,Add James Logbook to group repository,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39384458413
+39401217735,2026-10-20 19:30,success,push,dev,Merge pull request #123 from Enduser101/docs/James_Individual_Logbook,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39401217735
+39401651585,2026-10-20 19:34,success,pull_request,lifeisthing-patch-1,Add files via upload,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39401651585
+39402192327,2026-10-20 19:38,success,push,dev,Merge pull request #119 from Enduser101/lifeisthing-patch-1,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39402192327
+39402292843,2026-10-20 19:39,success,push,feature/demo-account,Merge branch 'dev' into feature/demo-account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39402292843
+39402299110,2026-10-20 19:39,success,pull_request,feature/demo-account,Feature/demo account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39402299110
+39402613678,2026-10-20 19:42,success,pull_request,lifeisthing-patch-3,Create 18.10.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39402613678
+39402729954,2026-10-20 19:43,success,push,dev,Merge pull request #120 from Enduser101/lifeisthing-patch-3,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39402729954
+39410998746,2026-10-20 20:52,success,pull_request,lifeisthing-patch-4,Meeting log 20.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39410998746
+39495859435,2026-10-21 06:53,success,push,feature/email-validation,refactor: reuse validatePassword in register,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39495859435
+39496877477,2026-10-21 07:00,success,pull_request,feature/email-validation,Validate email format on registration refactor ,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39496877477
+39727405105,2026-10-22 15:19,success,pull_request,James-patch,User testing patch,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39727405105
+39727758865,2026-10-22 15:23,success,push,dev,Merge pull request #126 from Enduser101/feature/email-validation,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39727758865
+39727793802,2026-10-22 15:23,success,pull_request,James-patch,User testing patch,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39727793802
+39760882834,2026-10-22 20:08,success,push,dev,Merge pull request #127 from Enduser101/James-patch,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39760882834
+39761022840,2026-10-22 20:09,success,push,feature/demo-account,Merge branch 'dev' into feature/demo-account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39761022840
+39761028324,2026-10-22 20:09,success,pull_request,feature/demo-account,Feature/demo account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39761028324
+39761308907,2026-10-22 20:12,success,push,dev,Merge pull request #116 from Enduser101/feature/demo-account,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39761308907
+39762069816,2026-10-22 20:18,success,push,feature/ci-javadoc-coverage,ci: publish Javadoc and test coverage reports from every build,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39762069816
+39764911885,2026-10-22 20:40,success,push,feature/email-validation,test: add email validation tests missed from #126 (#125),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39764911885
+39765083365,2026-10-22 20:42,success,pull_request,feature/email-validation,test: add email validation tests missed from #126 (#125),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39765083365
+39765095513,2026-10-22 20:42,success,push,feature/email-validation,Merge branch 'dev' into feature/email-validation,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39765095513
+39765100025,2026-10-22 20:42,success,pull_request,feature/email-validation,test: add email validation tests missed from #126 (#125),https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39765100025
+39766857443,2026-10-22 20:56,success,push,dev,Merge pull request #128 from Enduser101/feature/email-validation,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39766857443
+39768412438,2026-10-22 21:09,success,pull_request,fix/intellij-test-opens,Fix/intellij test opens,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39768412438
+39769239689,2026-10-22 21:15,success,push,dev,Merge pull request #130 from Enduser101/fix/intellij-test-opens,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39769239689
+39777036063,2026-10-22 22:16,success,pull_request,feature/ci-javadoc-coverage,CI: generate Javadoc and test coverage reports,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39777036063
+39777058525,2026-10-22 22:16,success,pull_request,docs/javadoc-micheal,"Docs: Javadoc for services, DAOs and core classes",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39777058525
+39886849714,2026-10-23 11:56,success,pull_request,refactor/scenario-construction,Refactor/scenario construction,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39886849714
+39911128608,2026-10-23 16:22,success,pull_request,docs/javadoc-micheal,"Docs: Javadoc for services, DAOs and core classes",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39911128608
+39911376507,2026-10-23 16:25,success,push,dev,Merge pull request #133 from Enduser101/refactor/scenario-construction,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39911376507
+39911806157,2026-10-23 16:29,success,pull_request,lifeisthing-patch-4,Meeting log 20.09.2026,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39911806157
+39911923620,2026-10-23 16:30,success,push,dev,Merge pull request #124 from Enduser101/lifeisthing-patch-4,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39911923620
+39916689107,2026-10-23 17:16,success,pull_request,docs/James_Individual_Logbook,Week 13 entries,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39916689107
+39919974249,2026-10-23 17:45,success,push,feature/94-app-guide,feat: About EcoTwin card on the Household page explains the app and e…,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39919974249
+39919995198,2026-10-23 17:46,success,pull_request,feature/94-app-guide,#94: About EcoTwin guide on the Household page,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39919995198
+39920527600,2026-10-23 17:50,success,pull_request,docs/James_Individual_Logbook,Week 13 entries,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39920527600
+39920647561,2026-10-23 17:52,success,push,dev,Merge pull request #134 from Enduser101/docs/James_Individual_Logbook,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39920647561
+39920927074,2026-10-23 17:54,success,pull_request,docs/micheal-weekly-log,"Docs: Micheal's weekly log, 07/10 to 23/10",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39920927074
+39921346485,2026-10-23 17:58,success,pull_request,docs/micheal-weekly-log,"Docs: Micheal's weekly log, 07/10 to 23/10",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39921346485
+39922087288,2026-10-23 18:04,success,push,dev,Merge pull request #136 from Enduser101/docs/micheal-weekly-log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39922087288
+39922650126,2026-10-23 18:09,success,pull_request,docs/feedback-evidence,Docs/feedback evidence,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39922650126
+39922806015,2026-10-23 18:10,success,push,dev,Merge pull request #137 from Enduser101/docs/feedback-evidence,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39922806015
+39923228230,2026-10-23 18:14,success,pull_request,chore/cleanup-readme,Clean-up: README and remove untitled/ sample project,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39923228230
+39923969799,2026-10-23 18:20,success,pull_request,chore/cleanup-readme,Clean-up: README and remove untitled/ sample project,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39923969799
+39925149939,2026-10-23 18:30,success,pull_request,chore/cleanup-readme,Clean-up: README and remove untitled/ sample project,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39925149939
+39925595910,2026-10-23 18:34,success,pull_request,docs/javadoc-micheal,"Docs: Javadoc for services, DAOs and core classes",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39925595910
+39925595202,2026-10-23 18:34,success,push,feature/ci-javadoc-coverage,Merge branch 'dev' into feature/ci-javadoc-coverage,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39925595202
+39925597491,2026-10-23 18:34,success,pull_request,feature/ci-javadoc-coverage,CI: generate Javadoc and test coverage reports,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39925597491
+39927189594,2026-10-23 18:47,success,push,dev,Merge pull request #132 from Enduser101/docs/javadoc-micheal,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39927189594
+39938960375,2026-10-23 20:25,success,push,feature/ci-javadoc-coverage,Merge branch 'dev' into feature/ci-javadoc-coverage,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39938960375
+39938966039,2026-10-23 20:25,success,pull_request,feature/ci-javadoc-coverage,CI: generate Javadoc and test coverage reports,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39938966039
+39939065936,2026-10-23 20:26,success,push,dev,Merge pull request #131 from Enduser101/feature/ci-javadoc-coverage,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939065936
+39939394662,2026-10-23 20:28,success,push,feature/94-app-guide,Merge branch 'dev' into feature/94-app-guide,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939394662
+39939398515,2026-10-23 20:28,success,pull_request,feature/94-app-guide,#94: About EcoTwin guide on the Household page,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939398515
+39939534070,2026-10-23 20:30,success,push,dev,Merge pull request #135 from Enduser101/feature/94-app-guide,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939534070
+39939627757,2026-10-23 20:30,success,pull_request,chore/cleanup-readme,Clean-up: README and remove untitled/ sample project,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939627757
+39939794606,2026-10-23 20:32,success,push,dev,Merge pull request #138 from Enduser101/chore/cleanup-readme,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/39939794606
+40168001680,2026-10-25 16:07,success,pull_request,docs/frankie-log-final,docs: update weekly log through 25/10,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40168001680
+40168071532,2026-10-25 16:08,success,push,dev,Merge pull request #139 from Enduser101/docs/frankie-log-final,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40168071532
+40174106556,2026-10-25 17:47,success,pull_request,docs/James_Individual_Logbook,Logbook - Final adjustments,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40174106556
+40174245114,2026-10-25 17:49,success,pull_request,docs/James_Individual_Logbook,Logbook - Final adjustments,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40174245114
+40174330472,2026-10-25 17:50,success,push,dev,Merge pull request #140 from Enduser101/docs/James_Individual_Logbook,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40174330472
+40175287950,2026-10-25 18:05,success,pull_request,logs-upload,12367991,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175287950
+40175370756,2026-10-25 18:07,success,push,dev,Merge pull request #141 from Enduser101/logs-upload,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175370756
+40175761417,2026-10-25 18:13,success,pull_request,docs/favour-final-log,docs: update Favour individual log for final assessment,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175761417
+40175804123,2026-10-25 18:13,success,push,dev,Merge pull request #142 from Enduser101/docs/favour-final-log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175804123
+40178004255,2026-10-25 18:47,success,pull_request,chore/sync-main-history,Sync main's history into dev so dev can merge into main cleanly,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40178004255

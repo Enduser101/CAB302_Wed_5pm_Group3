@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.ecotwin.model;
+
+public class User {
+
+    private final long id;
+    private final String username;
+    private final String email;
+    private final String passwordHash;
+    private final String displayName;
+    private final String createdAt;
+
+<span class="fc" id="L12">    public User(long id, String username, String email, String passwordHash, String displayName, String createdAt) {</span>
+<span class="fc" id="L13">        this.id = id;</span>
+<span class="fc" id="L14">        this.username = username;</span>
+<span class="fc" id="L15">        this.email = email;</span>
+<span class="fc" id="L16">        this.passwordHash = passwordHash;</span>
+<span class="fc" id="L17">        this.displayName = displayName;</span>
+<span class="fc" id="L18">        this.createdAt = createdAt;</span>
+<span class="fc" id="L19">    }</span>
+
+    public long getId() {
+<span class="fc" id="L22">        return id;</span>
+    }
+
+    public String getUsername() {
+<span class="fc" id="L26">        return username;</span>
+    }
+
+    public String getEmail() {
+<span class="nc" id="L30">        return email;</span>
+    }
+
+    public String getPasswordHash() {
+<span class="fc" id="L34">        return passwordHash;</span>
+    }
+
+    public String getDisplayName() {
+<span class="fc" id="L38">        return displayName;</span>
+    }
+
+    public String getCreatedAt() {
+<span class="nc" id="L42">        return createdAt;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

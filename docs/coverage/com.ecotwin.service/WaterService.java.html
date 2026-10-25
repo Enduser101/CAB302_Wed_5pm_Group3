@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaterService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">WaterService.java</span></div><h1>WaterService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.WaterEntryDao;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.User;
+import com.ecotwin.model.WaterEntry;
+
+import java.time.YearMonth;
+import java.util.List;
+
+/**
+ * Monthly household water readings, in litres (US-16, US-19, US-14).
+ *
+ * &lt;p&gt;Every change is written to the household's activity history and triggers a score
+ * recalculation. Edits record the previous and new amount.
+ */
+public class WaterService {
+
+    private final WaterEntryDao waterEntryDao;
+    private final ActivityLogDao activityLogDao;
+    private final ScoreService scoreService;
+
+    /**
+     * @param waterEntryDao  where water readings are stored
+     * @param activityLogDao where history messages are written
+     * @param scoreService   told to recalculate after every change
+     */
+<span class="fc" id="L29">    public WaterService(WaterEntryDao waterEntryDao, ActivityLogDao activityLogDao, ScoreService scoreService) {</span>
+<span class="fc" id="L30">        this.waterEntryDao = waterEntryDao;</span>
+<span class="fc" id="L31">        this.activityLogDao = activityLogDao;</span>
+<span class="fc" id="L32">        this.scoreService = scoreService;</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * US-16: record the household's water usage for the current period.
+     *
+     * @param actor     the user recording the reading
+     * @param household the household it belongs to
+     * @param litres    water used this month, in litres; zero is a valid reading
+     * @param notes     optional free-text notes
+     * @return the saved entry, dated to the current month ({@code YYYY-MM})
+     * @throws IllegalArgumentException if litres is negative
+     */
+    public WaterEntry recordEntry(User actor, Household household, double litres, String notes) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (litres &lt; 0) {</span>
+<span class="fc" id="L47">            throw new IllegalArgumentException(&quot;Water usage cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L50">        String period = YearMonth.now().toString();</span>
+<span class="fc" id="L51">        WaterEntry entry = waterEntryDao.create(household.getId(), period, litres, notes, actor.getId());</span>
+<span class="fc" id="L52">        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; recorded water usage for &quot; + period);</span>
+<span class="fc" id="L53">        scoreService.recalculate(household.getId());</span>
+<span class="fc" id="L54">        return entry;</span>
+    }
+
+    /**
+     * US-19: update an existing water entry.
+     *
+     * &lt;p&gt;US-14: the history message shows the old and new amount, e.g. &quot;changed water
+     * usage from 10400.0 L to 9500.0 L&quot;.
+     *
+     * @param actor     the user making the edit
+     * @param household the household the entry belongs to
+     * @param entryId   the entry to change
+     * @param litres    the corrected amount, in litres
+     * @param notes     optional free-text notes
+     * @return the updated entry
+     * @throws IllegalArgumentException if litres is negative
+     */
+    public WaterEntry updateEntry(User actor, Household household, long entryId,
+                                  double litres, String notes) {
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (litres &lt; 0) {</span>
+<span class="fc" id="L74">            throw new IllegalArgumentException(&quot;Water usage cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L77">        WaterEntry oldEntry = null;</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        for (WaterEntry entry : waterEntryDao.findByHousehold(household.getId())) {</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            if (entry.getId() == entryId) {</span>
+<span class="fc" id="L81">                oldEntry = entry;</span>
+<span class="fc" id="L82">                break;</span>
+            }
+<span class="nc" id="L84">        }</span>
+
+<span class="fc" id="L86">        WaterEntry updatedEntry = waterEntryDao.update(</span>
+                entryId,
+                litres,
+                notes,
+<span class="fc" id="L90">                actor.getId()</span>
+        );
+
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (oldEntry != null) {</span>
+<span class="fc" id="L94">            activityLogDao.log(</span>
+<span class="fc" id="L95">                    household.getId(),</span>
+<span class="fc" id="L96">                    actor.getId(),</span>
+<span class="fc" id="L97">                    displayName(actor) + &quot; changed water usage from &quot;</span>
+<span class="fc" id="L98">                            + oldEntry.getLitres() + &quot; L to &quot;</span>
+                            + litres + &quot; L&quot;
+            );
+        } else {
+<span class="fc" id="L102">            activityLogDao.log(</span>
+<span class="fc" id="L103">                    household.getId(),</span>
+<span class="fc" id="L104">                    actor.getId(),</span>
+<span class="fc" id="L105">                    displayName(actor) + &quot; updated water usage for &quot;</span>
+<span class="fc" id="L106">                            + updatedEntry.getPeriod()</span>
+            );
+        }
+
+<span class="fc" id="L110">        scoreService.recalculate(household.getId());</span>
+
+<span class="fc" id="L112">        return updatedEntry;</span>
+    }
+
+    /**
+     * @param household the household to look up
+     * @return all of the household's water readings
+     */
+    public List&lt;WaterEntry&gt; findEntriesForHousehold(Household household) {
+<span class="fc" id="L120">        return waterEntryDao.findByHousehold(household.getId());</span>
+    }
+
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
+    private String displayName(User user) {
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

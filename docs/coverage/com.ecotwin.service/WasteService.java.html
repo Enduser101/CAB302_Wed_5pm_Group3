@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WasteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">WasteService.java</span></div><h1>WasteService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.WasteEntryDao;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.User;
+import com.ecotwin.model.WasteEntry;
+
+import java.time.YearMonth;
+import java.util.List;
+
+/**
+ * Monthly household waste readings, split into general waste, recycling and compost, in
+ * kilograms (US-17, US-19, US-14).
+ *
+ * &lt;p&gt;Every change is written to the household's activity history and triggers a score
+ * recalculation. Edits record all three previous and new amounts.
+ */
+public class WasteService {
+
+    private final WasteEntryDao wasteEntryDao;
+    private final ActivityLogDao activityLogDao;
+    private final ScoreService scoreService;
+
+    /**
+     * @param wasteEntryDao  where waste readings are stored
+     * @param activityLogDao where history messages are written
+     * @param scoreService   told to recalculate after every change
+     */
+<span class="fc" id="L30">    public WasteService(WasteEntryDao wasteEntryDao, ActivityLogDao activityLogDao, ScoreService scoreService) {</span>
+<span class="fc" id="L31">        this.wasteEntryDao = wasteEntryDao;</span>
+<span class="fc" id="L32">        this.activityLogDao = activityLogDao;</span>
+<span class="fc" id="L33">        this.scoreService = scoreService;</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * US-17: record the household's waste and recycling for the current period.
+     *
+     * @param actor      the user recording the reading
+     * @param household  the household it belongs to
+     * @param generalKg  general (landfill) waste this month, in kg
+     * @param recycledKg recycling this month, in kg
+     * @param compostKg  compost this month, in kg
+     * @return the saved entry, dated to the current month ({@code YYYY-MM})
+     * @throws IllegalArgumentException if any amount is negative
+     */
+    public WasteEntry recordEntry(User actor, Household household, double generalKg, double recycledKg, double compostKg) {
+<span class="fc bfc" id="L48" title="All 6 branches covered.">        if (generalKg &lt; 0 || recycledKg &lt; 0 || compostKg &lt; 0) {</span>
+<span class="fc" id="L49">            throw new IllegalArgumentException(&quot;Waste amounts cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L52">        String period = YearMonth.now().toString();</span>
+<span class="fc" id="L53">        WasteEntry entry = wasteEntryDao.create(household.getId(), period, generalKg, recycledKg, compostKg, actor.getId());</span>
+<span class="fc" id="L54">        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; recorded waste for &quot; + period);</span>
+<span class="fc" id="L55">        scoreService.recalculate(household.getId());</span>
+<span class="fc" id="L56">        return entry;</span>
+    }
+
+    /**
+     * US-19: update an existing waste entry.
+     *
+     * &lt;p&gt;US-14: the history message lists all three old and new amounts, e.g. &quot;changed waste
+     * from general 27.0kg, recycled 12.0kg, compost 4.0kg to general 24.0kg, ...&quot;.
+     *
+     * @param actor      the user making the edit
+     * @param household  the household the entry belongs to
+     * @param entryId    the entry to change
+     * @param generalKg  the corrected general waste, in kg
+     * @param recycledKg the corrected recycling, in kg
+     * @param compostKg  the corrected compost, in kg
+     * @return the updated entry
+     * @throws IllegalArgumentException if any amount is negative
+     */
+    public WasteEntry updateEntry(User actor, Household household, long entryId,
+                                  double generalKg, double recycledKg, double compostKg) {
+
+<span class="pc bpc" id="L77" title="2 of 6 branches missed.">        if (generalKg &lt; 0 || recycledKg &lt; 0 || compostKg &lt; 0) {</span>
+<span class="fc" id="L78">            throw new IllegalArgumentException(&quot;Waste amounts cannot be negative&quot;);</span>
+        }
+
+<span class="fc" id="L81">        WasteEntry oldEntry = null;</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        for (WasteEntry entry : wasteEntryDao.findByHousehold(household.getId())) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if (entry.getId() == entryId) {</span>
+<span class="fc" id="L85">                oldEntry = entry;</span>
+<span class="fc" id="L86">                break;</span>
+            }
+<span class="nc" id="L88">        }</span>
+
+<span class="fc" id="L90">        WasteEntry updatedEntry = wasteEntryDao.update(</span>
+                entryId,
+                generalKg,
+                recycledKg,
+                compostKg,
+<span class="fc" id="L95">                actor.getId()</span>
+        );
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (oldEntry != null) {</span>
+<span class="fc" id="L99">            activityLogDao.log(</span>
+<span class="fc" id="L100">                    household.getId(),</span>
+<span class="fc" id="L101">                    actor.getId(),</span>
+<span class="fc" id="L102">                    displayName(actor) + &quot; changed waste from general &quot;</span>
+<span class="fc" id="L103">                            + oldEntry.getGeneralKg() + &quot;kg, recycled &quot;</span>
+<span class="fc" id="L104">                            + oldEntry.getRecycledKg() + &quot;kg, compost &quot;</span>
+<span class="fc" id="L105">                            + oldEntry.getCompostKg() + &quot;kg to general &quot;</span>
+                            + generalKg + &quot;kg, recycled &quot;
+                            + recycledKg + &quot;kg, compost &quot;
+                            + compostKg + &quot;kg&quot;
+            );
+        } else {
+<span class="fc" id="L111">            activityLogDao.log(</span>
+<span class="fc" id="L112">                    household.getId(),</span>
+<span class="fc" id="L113">                    actor.getId(),</span>
+<span class="fc" id="L114">                    displayName(actor) + &quot; updated waste for &quot;</span>
+<span class="fc" id="L115">                            + updatedEntry.getPeriod()</span>
+            );
+        }
+
+<span class="fc" id="L119">        scoreService.recalculate(household.getId());</span>
+
+<span class="fc" id="L121">        return updatedEntry;</span>
+    }
+
+    /**
+     * @param household the household to look up
+     * @return all of the household's waste readings
+     */
+    public List&lt;WasteEntry&gt; findEntriesForHousehold(Household household) {
+<span class="fc" id="L129">        return wasteEntryDao.findByHousehold(household.getId());</span>
+    }
+
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
+    private String displayName(User user) {
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
