@@ -6,6 +6,7 @@ import com.ecotwin.model.EnergyEntry;
 import com.ecotwin.model.Household;
 import com.ecotwin.model.User;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,16 +61,169 @@ class EnergyServiceTest {
         verify(scoreService, times(1)).recalculate(household.getId());
     }
 
+
+
     @Test
-    void negativeElectricityUsageIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> service.recordEntry(user, household, -1.0, null, null));
+    void canEditEnergyEntry() {
+        EnergyEntry updatedEntry = new EnergyEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                100.0,
+                20.0,
+                "Updated usage",
+                user.getId(),
+                "now"
+        );
+
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(updatedEntry);
+
+        EnergyEntry result = service.updateEntry(
+                user,
+                household,
+                1,
+                100.0,
+                20.0,
+                "Updated usage"
+        );
+
+        assertEquals(100.0, result.getElectricityKwh());
+    }
+
+    @Test
+    void editingEnergyEntryRecalculatesScore() {
+        EnergyEntry updatedEntry = new EnergyEntry(
+                1, household.getId(), "2026-09",
+                100.0, 20.0, "Updated usage", user.getId(), "now"
+        );
+
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(updatedEntry);
+
+        service.updateEntry(
+                user, household, 1,
+                100.0, 20.0, "Updated usage"
+        );
+
+        verify(scoreService).recalculate(household.getId());
+    }
+
+    @Test
+    void invalidEnergyValuesAreRejectedWhenRecording() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.recordEntry(user, household, -1.0, 10.0, null)
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.recordEntry(user, household, 100.0, -5.0, null)
+        );
+
         verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
     }
 
     @Test
-    void negativeSolarGenerationIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> service.recordEntry(user, household, 100.0, -5.0, null));
+    void invalidEnergyValuesAreRejectedWhenEditing() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        -50.0,
+                        20.0,
+                        "Updated usage"
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        100.0,
+                        -20.0,
+                        "Updated usage"
+                )
+        );
+
         verifyNoInteractions(energyEntryDao, activityLogDao, scoreService);
+    }
+
+    @Test
+    void editingEnergyEntryLogsPreviousValue() {
+        EnergyEntry oldEntry = new EnergyEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                120.0,
+                15.0,
+                "Old usage",
+                user.getId(),
+                "before"
+        );
+
+        EnergyEntry updatedEntry = new EnergyEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                100.0,
+                20.0,
+                "Updated usage",
+                user.getId(),
+                "now"
+        );
+
+        when(energyEntryDao.findByHousehold(household.getId()))
+                .thenReturn(List.of(oldEntry));
+
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(updatedEntry);
+
+        service.updateEntry(
+                user,
+                household,
+                1,
+                100.0,
+                20.0,
+                "Updated usage"
+        );
+
+        verify(activityLogDao).log(
+                household.getId(),
+                user.getId(),
+                "Resident changed energy usage from 120.0 kWh to 100.0 kWh"
+                        + " and solar generation from 15.0 kWh to 20.0 kWh"
+        );
+    }
+
+    @Test
+    void editingOnlySolarLogsTheSolarChange() {
+        EnergyEntry oldEntry = new EnergyEntry(1, household.getId(), "2026-09", 120.0, 15.0, null, user.getId(), "before");
+        when(energyEntryDao.findByHousehold(household.getId())).thenReturn(List.of(oldEntry));
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(new EnergyEntry(1, household.getId(), "2026-09", 120.0, 40.0, null, user.getId(), "now"));
+
+        service.updateEntry(user, household, 1, 120.0, 40.0, null);
+
+        verify(activityLogDao).log(household.getId(), user.getId(),
+                "Resident changed solar generation from 15.0 kWh to 40.0 kWh");
+    }
+
+    @Test
+    void removingSolarLogsItAsNone() {
+        EnergyEntry oldEntry = new EnergyEntry(1, household.getId(), "2026-09", 120.0, 15.0, null, user.getId(), "before");
+        when(energyEntryDao.findByHousehold(household.getId())).thenReturn(List.of(oldEntry));
+        when(energyEntryDao.update(anyLong(), anyDouble(), any(), any(), anyLong()))
+                .thenReturn(new EnergyEntry(1, household.getId(), "2026-09", 120.0, null, null, user.getId(), "now"));
+
+        service.updateEntry(user, household, 1, 120.0, null, null);
+
+        verify(activityLogDao).log(household.getId(), user.getId(),
+                "Resident changed solar generation from 15.0 kWh to none");
     }
 
     private static long eqLong(long value) {

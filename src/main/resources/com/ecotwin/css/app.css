@@ -210,3 +210,142 @@
 .tab-pane .tab-content-area {
     -fx-background-color: #0A130E;
 }
+.history-row {
+    -fx-alignment: center-left ;
+    -fx-padding: 14px 16px;
+    -fx-background-color: #101C15;
+    -fx-background-radius: 8px;
+    -fx-border-color: #26362C;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.edit-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #34D399;
+    -fx-border-color: #1D7A46;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 9px 16px;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.edit-button:hover {
+    -fx-background-color: #163523;
+    -fx-border-color: #34d399;
+}
+
+.domain-card {
+    -fx-background-color: #101C15;
+    -fx-border-color: #26362C;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14;
+}
+.domain-card-weakest {
+    -fx-border-color: #EAB308;
+}
+.domain-name {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+}
+.domain-score {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.domain-grade {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+}
+.domain-card-weakest .domain-name,
+.domain-card-weakest .domain-score,
+.domain-card-weakest .domain-grade {
+    -fx-text-fill: #EAB308;
+}
+
+.chart {
+    -fx-padding: 0;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines,
+.chart-alternative-row-fill,
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line {
+    -fx-stroke: transparent;
+    -fx-fill: transparent;
+}
+
+.axis {
+    -fx-tick-labels-visible: false;
+    -fx-tick-mark-visible: false;
+    -fx-minor-tick-visible: false;
+    -fx-border-color: transparent;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #22C55E;
+    -fx-stroke-width: 2;
+}
+
+
+.filter-tabs {
+    -fx-border-color: transparent transparent #26362C transparent;
+    -fx-padding: 0 0 4 0;
+}
+.filter-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.filter-tab-active {
+    -fx-text-fill: #22C55E;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent #22C55E transparent;
+}
+.rec-card-weakest {
+    -fx-border-color: #3B82F6;
+}
+.rec-domain {
+    -fx-text-fill: #22C55E;
+    -fx-font-size: 11px;
+}
+.rec-title {
+    -fx-text-fill: #F2F5F3;
+    -fx-font-size: 13px;
+}
+.rec-detail {
+    -fx-text-fill: #8FA398;
+    -fx-font-size: 11px;
+}
+.rec-points {
+    -fx-text-fill: #22C55E;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* Password visibility toggle */
+.password-toggle {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #71877A;
+    -fx-font-size: 20px;
+    -fx-font-family: "Segoe UI Symbol";
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.password-toggle:hover {
+    -fx-text-fill: #4F7560;
+}

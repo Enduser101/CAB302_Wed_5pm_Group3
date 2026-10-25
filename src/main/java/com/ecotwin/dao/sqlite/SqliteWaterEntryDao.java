@@ -64,17 +64,55 @@ public class SqliteWaterEntryDao implements WaterEntryDao {
         }
     }
 
+    @Override
+    public WaterEntry update(long entryId, double litres, String notes,
+                             long updatedByUserId) {
+        String updatedAt = Instant.now().toString();
+
+        String sql = "UPDATE water_entries SET litres = ?, notes = ?, "
+                + "updated_by_user_id = ?, updated_at = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDouble(1, litres);
+            statement.setString(2, notes);
+            statement.setLong(3, updatedByUserId);
+            statement.setString(4, updatedAt);
+            statement.setLong(5, entryId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update water entry " + entryId, e);
+        }
+
+        String findSql = "SELECT * FROM water_entries WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(findSql)) {
+            statement.setLong(1, entryId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not find water entry " + entryId, e);
+        }
+
+        throw new IllegalArgumentException("Water entry not found");
+    }
+
     private WaterEntry map(ResultSet rs) throws SQLException {
         long updatedBy = rs.getLong("updated_by_user_id");
         Long updatedByValue = rs.wasNull() ? null : updatedBy;
+
         return new WaterEntry(
-            rs.getLong("id"),
-            rs.getLong("household_id"),
-            rs.getString("period"),
-            rs.getDouble("litres"),
-            rs.getString("notes"),
-            updatedByValue,
-            rs.getString("updated_at")
+                rs.getLong("id"),
+                rs.getLong("household_id"),
+                rs.getString("period"),
+                rs.getDouble("litres"),
+                rs.getString("notes"),
+                updatedByValue,
+                rs.getString("updated_at")
         );
     }
 }

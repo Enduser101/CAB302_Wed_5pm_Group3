@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteWasteEntryDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteWasteEntryDao.java</span></div><h1>SqliteWasteEntryDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.WasteEntryDao;
+import com.ecotwin.model.WasteEntry;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SqliteWasteEntryDao implements WasteEntryDao {
+
+    private final Connection connection;
+
+<span class="fc" id="L20">    public SqliteWasteEntryDao(Connection connection) {</span>
+<span class="fc" id="L21">        this.connection = connection;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public WasteEntry create(long householdId, String period, double generalKg, double recycledKg, double compostKg,
+                              Long updatedByUserId) {
+<span class="fc" id="L27">        String updatedAt = Instant.now().toString();</span>
+<span class="fc" id="L28">        String sql = &quot;INSERT INTO waste_entries &quot;</span>
+            + &quot;(household_id, period, general_kg, recycled_kg, compost_kg, updated_by_user_id, updated_at) &quot;
+            + &quot;VALUES (?, ?, ?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L31">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L32">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L33">            statement.setString(2, period);</span>
+<span class="fc" id="L34">            statement.setDouble(3, generalKg);</span>
+<span class="fc" id="L35">            statement.setDouble(4, recycledKg);</span>
+<span class="fc" id="L36">            statement.setDouble(5, compostKg);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (updatedByUserId == null) {</span>
+<span class="nc" id="L38">                statement.setNull(6, Types.INTEGER);</span>
+            } else {
+<span class="fc" id="L40">                statement.setLong(6, updatedByUserId);</span>
+            }
+<span class="fc" id="L42">            statement.setString(7, updatedAt);</span>
+<span class="fc" id="L43">            statement.executeUpdate();</span>
+<span class="fc" id="L44">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L45">                keys.next();</span>
+<span class="fc" id="L46">                return new WasteEntry(keys.getLong(1), householdId, period, generalKg, recycledKg, compostKg,</span>
+                    updatedByUserId, updatedAt);
+            }
+<span class="nc" id="L49">        } catch (SQLException e) {</span>
+<span class="nc" id="L50">            throw new IllegalStateException(&quot;Could not record waste entry for household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public List&lt;WasteEntry&gt; findByHousehold(long householdId) {
+<span class="fc" id="L56">        String sql = &quot;SELECT * FROM waste_entries WHERE household_id = ? ORDER BY id DESC&quot;;</span>
+<span class="fc" id="L57">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L58">            statement.setLong(1, householdId);</span>
+<span class="fc" id="L59">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="fc" id="L60">                List&lt;WasteEntry&gt; entries = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L62">                    entries.add(map(rs));</span>
+                }
+<span class="fc" id="L64">                return entries;</span>
+            }
+<span class="nc" id="L66">        } catch (SQLException e) {</span>
+<span class="nc" id="L67">            throw new IllegalStateException(&quot;Could not look up waste entries for household &quot; + householdId, e);</span>
+        }
+    }
+    @Override
+    public WasteEntry update(long entryId, double generalKg, double recycledKg,
+                             double compostKg, long updatedByUserId) {
+
+<span class="fc" id="L74">        String updatedAt = Instant.now().toString();</span>
+
+<span class="fc" id="L76">        String sql = &quot;UPDATE waste_entries SET general_kg = ?, recycled_kg = ?, &quot;</span>
+                + &quot;compost_kg = ?, updated_by_user_id = ?, updated_at = ? &quot;
+                + &quot;WHERE id = ?&quot;;
+
+<span class="fc" id="L80">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L81">            statement.setDouble(1, generalKg);</span>
+<span class="fc" id="L82">            statement.setDouble(2, recycledKg);</span>
+<span class="fc" id="L83">            statement.setDouble(3, compostKg);</span>
+<span class="fc" id="L84">            statement.setLong(4, updatedByUserId);</span>
+<span class="fc" id="L85">            statement.setString(5, updatedAt);</span>
+<span class="fc" id="L86">            statement.setLong(6, entryId);</span>
+
+<span class="fc" id="L88">            statement.executeUpdate();</span>
+<span class="nc" id="L89">        } catch (SQLException e) {</span>
+<span class="nc" id="L90">            throw new IllegalStateException(</span>
+                    &quot;Could not update waste entry &quot; + entryId, e
+            );
+<span class="fc" id="L93">        }</span>
+
+<span class="fc" id="L95">        String findSql = &quot;SELECT * FROM waste_entries WHERE id = ?&quot;;</span>
+
+<span class="fc" id="L97">        try (PreparedStatement statement = connection.prepareStatement(findSql)) {</span>
+<span class="fc" id="L98">            statement.setLong(1, entryId);</span>
+
+<span class="fc" id="L100">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                if (rs.next()) {</span>
+<span class="fc" id="L102">                    return map(rs);</span>
+                }
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L106">            throw new IllegalStateException(</span>
+                    &quot;Could not find waste entry &quot; + entryId, e
+            );
+<span class="nc" id="L109">        }</span>
+
+<span class="nc" id="L111">        throw new IllegalArgumentException(&quot;Waste entry not found&quot;);</span>
+    }
+
+    private WasteEntry map(ResultSet rs) throws SQLException {
+<span class="fc" id="L115">        long updatedBy = rs.getLong(&quot;updated_by_user_id&quot;);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        Long updatedByValue = rs.wasNull() ? null : updatedBy;</span>
+<span class="fc" id="L117">        return new WasteEntry(</span>
+<span class="fc" id="L118">            rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L119">            rs.getLong(&quot;household_id&quot;),</span>
+<span class="fc" id="L120">            rs.getString(&quot;period&quot;),</span>
+<span class="fc" id="L121">            rs.getDouble(&quot;general_kg&quot;),</span>
+<span class="fc" id="L122">            rs.getDouble(&quot;recycled_kg&quot;),</span>
+<span class="fc" id="L123">            rs.getDouble(&quot;compost_kg&quot;),</span>
+            updatedByValue,
+<span class="fc" id="L125">            rs.getString(&quot;updated_at&quot;)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

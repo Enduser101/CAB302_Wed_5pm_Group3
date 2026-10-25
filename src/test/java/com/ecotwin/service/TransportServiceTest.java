@@ -7,6 +7,7 @@ import com.ecotwin.model.Household;
 import com.ecotwin.model.TransportEntry;
 import com.ecotwin.model.User;
 import com.ecotwin.model.Vehicle;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +83,271 @@ class TransportServiceTest {
         verify(activityLogDao, times(1)).log(eqLong(household.getId()), eqLong(user.getId()), anyString());
         verify(scoreService, times(1)).recalculate(household.getId());
     }
+    @Test
+    void canEditTransportEntry() {
+        TransportEntry updated = new TransportEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                6.0,
+                1.0,
+                user.getId(),
+                "later"
+        );
 
+        when(transportEntryDao.update(
+                anyLong(),
+                anyDouble(),
+                anyDouble(),
+                anyLong()
+        )).thenReturn(updated);
+
+        TransportEntry result = service.updateEntry(
+                user,
+                household,
+                1,
+                6.0,
+                1.0
+        );
+
+        assertEquals(6.0, result.getPublicTransportTripsPerWeek());
+        assertEquals(1.0, result.getFlightsPerYear());
+    }
+
+    @Test
+    void editingTransportEntryRecalculatesScore() {
+        when(transportEntryDao.update(
+                anyLong(),
+                anyDouble(),
+                anyDouble(),
+                anyLong()
+        )).thenReturn(new TransportEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                6.0,
+                1.0,
+                user.getId(),
+                "later"
+        ));
+
+        service.updateEntry(
+                user,
+                household,
+                1,
+                6.0,
+                1.0
+        );
+
+        verify(scoreService, times(1))
+                .recalculate(household.getId());
+    }
+
+    @Test
+    void negativeTransportEditIsRejected() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        -1.0,
+                        2.0
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateEntry(
+                        user,
+                        household,
+                        1,
+                        4.0,
+                        -1.0
+                )
+        );
+
+        verifyNoInteractions(
+                transportEntryDao,
+                activityLogDao,
+                scoreService
+        );
+    }
+
+    @Test
+    void editingTransportEntryLogsPreviousValue() {
+        TransportEntry oldEntry = new TransportEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                4.0,
+                2.0,
+                user.getId(),
+                "now"
+        );
+
+        TransportEntry updatedEntry = new TransportEntry(
+                1,
+                household.getId(),
+                "2026-09",
+                6.0,
+                1.0,
+                user.getId(),
+                "later"
+        );
+
+        when(transportEntryDao.findByHousehold(household.getId()))
+                .thenReturn(List.of(oldEntry));
+
+        when(transportEntryDao.update(
+                anyLong(),
+                anyDouble(),
+                anyDouble(),
+                anyLong()
+        )).thenReturn(updatedEntry);
+
+        service.updateEntry(
+                user,
+                household,
+                1,
+                6.0,
+                1.0
+        );
+
+        verify(activityLogDao).log(
+                household.getId(),
+                user.getId(),
+                "Resident changed transport from 4.0 PT trips/week and 2.0 flights/year to "
+                        + "6.0 PT trips/week and 1.0 flights/year"
+        );
+    }
+
+    @Test
+    void canEditVehicle() {
+        Vehicle updated = new Vehicle(
+                1,
+                household.getId(),
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        when(vehicleDao.update(
+                anyLong(),
+                anyString(),
+                anyString(),
+                anyDouble()
+        )).thenReturn(updated);
+
+        Vehicle result = service.updateVehicle(
+                user,
+                household,
+                1,
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        assertEquals("Family Car", result.getLabel());
+        assertEquals("Hybrid", result.getFuelType());
+        assertEquals(100.0, result.getKmPerWeek());
+    }
+
+    @Test
+    void editingVehicleRecalculatesScore() {
+        Vehicle updated = new Vehicle(
+                1,
+                household.getId(),
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        when(vehicleDao.update(
+                anyLong(),
+                anyString(),
+                anyString(),
+                anyDouble()
+        )).thenReturn(updated);
+
+        service.updateVehicle(
+                user,
+                household,
+                1,
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        verify(scoreService, times(1))
+                .recalculate(household.getId());
+    }
+
+    @Test
+    void editingVehicleWithNegativeKmIsRejected() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateVehicle(
+                        user,
+                        household,
+                        1,
+                        "Family Car",
+                        "Petrol",
+                        -10.0
+                )
+        );
+
+        verifyNoInteractions(
+                vehicleDao,
+                activityLogDao,
+                scoreService
+        );
+    }
+
+    @Test
+    void editingVehicleLogsPreviousValue() {
+        Vehicle oldVehicle = new Vehicle(
+                1,
+                household.getId(),
+                "Vehicle 1",
+                "Petrol",
+                150.0
+        );
+
+        Vehicle updatedVehicle = new Vehicle(
+                1,
+                household.getId(),
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        when(vehicleDao.findByHousehold(household.getId()))
+                .thenReturn(List.of(oldVehicle));
+
+        when(vehicleDao.update(
+                anyLong(),
+                anyString(),
+                anyString(),
+                anyDouble()
+        )).thenReturn(updatedVehicle);
+
+        service.updateVehicle(
+                user,
+                household,
+                1,
+                "Family Car",
+                "Hybrid",
+                100.0
+        );
+
+        verify(activityLogDao).log(
+                household.getId(),
+                user.getId(),
+                "Resident changed vehicle Vehicle 1 (Petrol, 150.0 km/week) to "
+                        + "Family Car (Hybrid, 100.0 km/week)"
+        );
+    }
     @Test
     void addingAVehicleWithABlankLabelIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> service.addVehicle(user, household, "  ", "petrol", 150.0));

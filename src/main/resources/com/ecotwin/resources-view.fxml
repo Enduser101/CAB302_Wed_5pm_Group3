@@ -25,6 +25,12 @@
             <Label text="Record your household's energy, water, waste and transport information."
                    styleClass="muted-text" wrapText="true" />
 
+            <VBox fx:id="scoreChangeCard" styleClass="card" spacing="6" maxWidth="520" visible="false" managed="false">
+                <Label text="Score after your update" styleClass="field-label" />
+                <Label fx:id="overallChangeLabel" wrapText="true" />
+                <Label fx:id="domainChangeLabel" wrapText="true" />
+            </VBox>
+
             <VBox fx:id="noHouseholdSection" spacing="12">
                 <Label text="Join or create a household first to start tracking resources." styleClass="muted-text" wrapText="true" />
             </VBox>
@@ -111,7 +117,11 @@
 
                 <!-- US-18: record transport information -->
                 <Tab text="Transport">
-                    <VBox spacing="16">
+                        <ScrollPane fitToWidth="true"
+                                    hbarPolicy="NEVER"
+                                    vbarPolicy = "AS_NEEDED"
+                                    styleClass="content-scroll">
+                            <VBox spacing="16">
                         <padding><Insets top="20" right="4" bottom="4" left="4" /></padding>
 
                         <HBox spacing="24">
@@ -154,6 +164,7 @@
                         <Label text="History" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F2F5F3;" />
                         <VBox fx:id="transportEntriesList" spacing="6" />
                     </VBox>
+                </ScrollPane>
                 </Tab>
 
             </TabPane>

@@ -34,7 +34,30 @@
 
             <VBox spacing="4">
                 <Label text="Password" styleClass="field-label" />
-                <PasswordField fx:id="passwordField" maxWidth="Infinity" />
+
+                <StackPane>
+                    <PasswordField fx:id="passwordField"
+                                   styleClass="password-input"
+                                   maxWidth="Infinity" />
+
+                    <TextField fx:id="visiblePasswordField"
+                               styleClass="password-input"
+                               maxWidth="Infinity"
+                               visible="false"
+                               managed="false" />
+
+                    <Button fx:id="togglePasswordButton"
+                            text="◎"
+                            styleClass="password-toggle"
+                            minWidth="42"
+                            prefWidth="42"
+                            maxWidth="42"
+                            minHeight="35"
+                            prefHeight="35"
+                            maxHeight="35"
+                            onAction="#handleTogglePassword"
+                            StackPane.alignment="CENTER_RIGHT" />
+                </StackPane>
             </VBox>
 
             <Label fx:id="messageLabel" styleClass="error-text" wrapText="true" />

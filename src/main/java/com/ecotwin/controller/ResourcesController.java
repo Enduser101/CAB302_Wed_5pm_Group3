@@ -3,6 +3,9 @@ package com.ecotwin.controller;
 import com.ecotwin.AppContext;
 import com.ecotwin.model.EnergyEntry;
 import com.ecotwin.model.Household;
+import com.ecotwin.model.Recommendation.Domain;
+import com.ecotwin.model.ScenarioComparison;
+import com.ecotwin.model.ScoreChange;
 import com.ecotwin.model.TransportEntry;
 import com.ecotwin.model.User;
 import com.ecotwin.model.WasteEntry;
@@ -13,11 +16,19 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 
 import java.util.List;
+import java.util.Optional;
 
 /** US-15..18: record energy, water, waste and transport information for the current household. */
 public class ResourcesController {
+    private Long editingEnergyEntryId;
+    private Long editingWaterEntryId;
+    private Long editingWasteEntryId;
+    private Long editingTransportEntryId;
+    private Long editingVehicleId;
 
     private final Navigator nav;
     private final AppContext ctx;
@@ -53,6 +64,12 @@ public class ResourcesController {
     @FXML private Label transportErrorLabel;
     @FXML private VBox transportEntriesList;
 
+    @FXML private VBox scoreChangeCard;
+    @FXML private Label overallChangeLabel;
+    @FXML private Label domainChangeLabel;
+
+
+
     public ResourcesController(Navigator nav, AppContext ctx) {
         this.nav = nav;
         this.ctx = ctx;
@@ -66,10 +83,11 @@ public class ResourcesController {
 
     private void refresh() {
         boolean hasHousehold = ctx.session.hasActiveHousehold();
-        noHouseholdSection.setVisible(!hasHousehold);
-        noHouseholdSection.setManaged(!hasHousehold);
-        resourcesTabPane.setVisible(hasHousehold);
-        resourcesTabPane.setManaged(hasHousehold);
+        boolean showTabs = hasHousehold || ctx.session.isGuest(); //let guests type and look but they can't save.
+        noHouseholdSection.setVisible(!showTabs);
+        noHouseholdSection.setManaged(!showTabs);
+        resourcesTabPane.setVisible(showTabs);
+        resourcesTabPane.setManaged(showTabs);
 
         if (!hasHousehold) {
             return;
@@ -83,10 +101,12 @@ public class ResourcesController {
         refreshTransportList(household);
     }
 
+
     // US-15: record energy information
 
     @FXML
     private void handleSaveEnergy() {
+        if (blockedFromSaving(energyErrorLabel)) return;
         try {
             double electricityKwh = Double.parseDouble(electricityKwhField.getText().trim());
             Double solarGenerationKwh = solarGenerationKwhField.getText().isBlank()
@@ -94,7 +114,20 @@ public class ResourcesController {
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.energyService.recordEntry(user, household, electricityKwh, solarGenerationKwh, energyNotesField.getText());
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.ENERGY, () -> {
+                if (editingEnergyEntryId == null) {
+                    ctx.energyService.recordEntry(
+                            user, household, electricityKwh,
+                            solarGenerationKwh, energyNotesField.getText()
+                    );
+                } else {
+                    ctx.energyService.updateEntry(
+                            user, household, editingEnergyEntryId,
+                            electricityKwh, solarGenerationKwh, energyNotesField.getText()
+                    );
+                    editingEnergyEntryId = null;
+                }
+            }));
             hideError(energyErrorLabel);
             electricityKwhField.clear();
             solarGenerationKwhField.clear();
@@ -115,99 +148,278 @@ public class ResourcesController {
             return;
         }
         for (EnergyEntry entry : entries) {
-            String solar = entry.getSolarGenerationKwh() != null ? ", " + entry.getSolarGenerationKwh() + " kWh solar" : "";
-            energyEntriesList.getChildren().add(
-                mutedLabel(entry.getPeriod() + " — " + entry.getElectricityKwh() + " kWh" + solar));
+            String solar = entry.getSolarGenerationKwh() != null
+                    ? ", " + entry.getSolarGenerationKwh() + " kWh solar"
+                    : "";
+
+            Label entryLabel = mutedLabel(
+                    entry.getPeriod() + " — " + entry.getElectricityKwh() + " kWh" + solar
+            );
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event-> {
+                editingEnergyEntryId = entry.getId();
+
+                electricityKwhField.setText(String.valueOf(entry.getElectricityKwh()));
+
+                if (entry.getSolarGenerationKwh() != null) {
+                    solarGenerationKwhField.setText(
+                            String.valueOf(entry.getSolarGenerationKwh())
+                    );
+                } else {
+                    solarGenerationKwhField.clear();
+                }
+
+                energyNotesField.setText(
+                        entry.getNotes() != null ? entry.getNotes() : ""
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+            row.getChildren().addAll(entryLabel, editButton);
+
+            entryLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(entryLabel, javafx.scene.layout.Priority.ALWAYS);
+
+            energyEntriesList.getChildren().add(row);
         }
     }
-
     // US-16: record water information
 
     @FXML
     private void handleSaveWater() {
+        if (blockedFromSaving(waterErrorLabel)) return;
         try {
             double litres = Double.parseDouble(litresField.getText().trim());
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.waterService.recordEntry(user, household, litres, waterNotesField.getText());
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WATER, () -> {
+                if (editingWaterEntryId == null) {
+                    ctx.waterService.recordEntry(
+                            user, household, litres, waterNotesField.getText()
+                    );
+                } else {
+                    ctx.waterService.updateEntry(
+                            user, household, editingWaterEntryId,
+                            litres, waterNotesField.getText()
+                    );
+                    editingWaterEntryId = null;
+                }
+            }));
+
             hideError(waterErrorLabel);
             litresField.clear();
             waterNotesField.clear();
             refreshWaterList(household);
+
         } catch (NumberFormatException e) {
             showError(waterErrorLabel, "Enter a valid number");
         } catch (IllegalArgumentException e) {
             showError(waterErrorLabel, e.getMessage());
         }
     }
-
     private void refreshWaterList(Household household) {
         List<WaterEntry> entries = ctx.waterService.findEntriesForHousehold(household);
         waterEntriesList.getChildren().clear();
+
         if (entries.isEmpty()) {
-            waterEntriesList.getChildren().add(mutedLabel("No water readings yet"));
+            waterEntriesList.getChildren().add(
+                    mutedLabel("No water readings yet")
+            );
             return;
         }
+
         for (WaterEntry entry : entries) {
-            waterEntriesList.getChildren().add(mutedLabel(entry.getPeriod() + " — " + entry.getLitres() + " L"));
+
+            Label entryLabel = mutedLabel(
+                    entry.getPeriod() + " — " + entry.getLitres() + " L"
+            );
+
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event -> {
+                editingWaterEntryId = entry.getId();
+
+                litresField.setText(
+                        String.valueOf(entry.getLitres())
+                );
+
+                waterNotesField.setText(
+                        entry.getNotes() != null ? entry.getNotes() : ""
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+
+            entryLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+            row.getChildren().addAll(entryLabel, editButton);
+            waterEntriesList.getChildren().add(row);
         }
     }
+
 
     // US-17: record waste information
 
     @FXML
     private void handleSaveWaste() {
+        if (blockedFromSaving(wasteErrorLabel)) return;
         try {
             double generalKg = Double.parseDouble(generalKgField.getText().trim());
             double recycledKg = Double.parseDouble(recycledKgField.getText().trim());
             double compostKg = Double.parseDouble(compostKgField.getText().trim());
+
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.wasteService.recordEntry(user, household, generalKg, recycledKg, compostKg);
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.WASTE, () -> {
+                if (editingWasteEntryId == null) {
+                    ctx.wasteService.recordEntry(
+                            user,
+                            household,
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
+                } else {
+                    ctx.wasteService.updateEntry(
+                            user,
+                            household,
+                            editingWasteEntryId,
+                            generalKg,
+                            recycledKg,
+                            compostKg
+                    );
+
+                    editingWasteEntryId = null;
+                }
+            }));
+
             hideError(wasteErrorLabel);
+
             generalKgField.clear();
             recycledKgField.clear();
             compostKgField.clear();
+
             refreshWasteList(household);
+
         } catch (NumberFormatException e) {
             showError(wasteErrorLabel, "Enter valid numbers");
         } catch (IllegalArgumentException e) {
             showError(wasteErrorLabel, e.getMessage());
         }
     }
-
     private void refreshWasteList(Household household) {
-        List<WasteEntry> entries = ctx.wasteService.findEntriesForHousehold(household);
+        List<WasteEntry> entries =
+                ctx.wasteService.findEntriesForHousehold(household);
+
         wasteEntriesList.getChildren().clear();
+
         if (entries.isEmpty()) {
-            wasteEntriesList.getChildren().add(mutedLabel("No waste readings yet"));
+            wasteEntriesList.getChildren().add(
+                    mutedLabel("No waste readings yet")
+            );
             return;
         }
+
         for (WasteEntry entry : entries) {
-            wasteEntriesList.getChildren().add(mutedLabel(entry.getPeriod() + " — general " + entry.getGeneralKg()
-                + "kg, recycled " + entry.getRecycledKg() + "kg, compost " + entry.getCompostKg() + "kg"));
+
+            Label entryLabel = mutedLabel(
+                    entry.getPeriod()
+                            + " — General: " + entry.getGeneralKg() + " kg"
+                            + " | Recycled: " + entry.getRecycledKg() + " kg"
+                            + " | Compost: " + entry.getCompostKg() + " kg"
+            );
+
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event -> {
+                editingWasteEntryId = entry.getId();
+
+                generalKgField.setText(
+                        String.valueOf(entry.getGeneralKg())
+                );
+
+                recycledKgField.setText(
+                        String.valueOf(entry.getRecycledKg())
+                );
+
+                compostKgField.setText(
+                        String.valueOf(entry.getCompostKg())
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+
+            entryLabel.setMaxWidth(Double.MAX_VALUE);
+
+            HBox.setHgrow(
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+            row.getChildren().addAll(entryLabel, editButton);
+
+            wasteEntriesList.getChildren().add(row);
         }
     }
+
+
 
     // US-18: record transport information
 
     @FXML
     private void handleAddVehicle() {
+        if (blockedFromSaving(vehicleErrorLabel)) return;
         try {
             String label = vehicleLabelField.getText();
             String fuelType = vehicleFuelTypeCombo.getValue();
-            double kmPerWeek = Double.parseDouble(vehicleKmPerWeekField.getText().trim());
+            double kmPerWeek =
+                    Double.parseDouble(vehicleKmPerWeekField.getText().trim());
+
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.transportService.addVehicle(user, household, label, fuelType, kmPerWeek);
+            if (editingVehicleId == null) {
+                ctx.transportService.addVehicle(
+                        user,
+                        household,
+                        label,
+                        fuelType,
+                        kmPerWeek
+                );
+            } else {
+                ctx.transportService.updateVehicle(
+                        user,
+                        household,
+                        editingVehicleId,
+                        label,
+                        fuelType,
+                        kmPerWeek
+                );
+
+                editingVehicleId = null;
+            }
+
             hideError(vehicleErrorLabel);
+
             vehicleLabelField.clear();
             vehicleFuelTypeCombo.setValue(null);
             vehicleKmPerWeekField.clear();
+
             refreshVehiclesList(household);
+
         } catch (NumberFormatException e) {
             showError(vehicleErrorLabel, "Enter a valid number");
         } catch (IllegalArgumentException e) {
@@ -217,28 +429,98 @@ public class ResourcesController {
 
     private void refreshVehiclesList(Household household) {
         vehiclesList.getChildren().clear();
-        var vehicles = ctx.transportService.findVehiclesForHousehold(household);
+
+        var vehicles =
+                ctx.transportService.findVehiclesForHousehold(household);
+
         if (vehicles.isEmpty()) {
-            vehiclesList.getChildren().add(mutedLabel("No vehicles added yet"));
+            vehiclesList.getChildren().add(
+                    mutedLabel("No vehicles added yet")
+            );
             return;
         }
-        vehicles.forEach(vehicle -> vehiclesList.getChildren().add(
-            mutedLabel(vehicle.getLabel() + " (" + vehicle.getFuelType() + ") — " + vehicle.getKmPerWeek() + " km/week")));
-    }
 
+        for (var vehicle : vehicles) {
+
+            Label vehicleLabel = mutedLabel(
+                    vehicle.getLabel()
+                            + " (" + vehicle.getFuelType() + ") — "
+                            + vehicle.getKmPerWeek()
+                            + " km/week"
+            );
+
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event -> {
+                editingVehicleId = vehicle.getId();
+
+                vehicleLabelField.setText(
+                        vehicle.getLabel()
+                );
+
+                vehicleFuelTypeCombo.setValue(
+                        vehicle.getFuelType()
+                );
+
+                vehicleKmPerWeekField.setText(
+                        String.valueOf(vehicle.getKmPerWeek())
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+
+            vehicleLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(
+                    vehicleLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+            row.getChildren().addAll(vehicleLabel, editButton);
+            vehiclesList.getChildren().add(row);
+        }
+    }
     @FXML
     private void handleSaveTransport() {
+        if (blockedFromSaving(transportErrorLabel)) return;
         try {
-            double publicTransportTripsPerWeek = Double.parseDouble(publicTransportTripsField.getText().trim());
-            double flightsPerYear = Double.parseDouble(flightsPerYearField.getText().trim());
+            double publicTransportTripsPerWeek =
+                    Double.parseDouble(publicTransportTripsField.getText().trim());
+
+            double flightsPerYear =
+                    Double.parseDouble(flightsPerYearField.getText().trim());
+
             User user = ctx.session.getCurrentUser();
             Household household = ctx.session.getCurrentHousehold();
 
-            ctx.transportService.recordEntry(user, household, publicTransportTripsPerWeek, flightsPerYear);
+            showScoreChange(ctx.householdScoreService.trackChange(household, Domain.TRANSPORT, () -> {
+                if (editingTransportEntryId == null) {
+                    ctx.transportService.recordEntry(
+                            user,
+                            household,
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
+                } else {
+                    ctx.transportService.updateEntry(
+                            user,
+                            household,
+                            editingTransportEntryId,
+                            publicTransportTripsPerWeek,
+                            flightsPerYear
+                    );
+
+                    editingTransportEntryId = null;
+                }
+            }));
+
             hideError(transportErrorLabel);
             publicTransportTripsField.clear();
             flightsPerYearField.clear();
+
             refreshTransportList(household);
+
         } catch (NumberFormatException e) {
             showError(transportErrorLabel, "Enter valid numbers");
         } catch (IllegalArgumentException e) {
@@ -247,16 +529,113 @@ public class ResourcesController {
     }
 
     private void refreshTransportList(Household household) {
-        List<TransportEntry> entries = ctx.transportService.findEntriesForHousehold(household);
+        List<TransportEntry> entries =
+                ctx.transportService.findEntriesForHousehold(household);
+
         transportEntriesList.getChildren().clear();
+
         if (entries.isEmpty()) {
-            transportEntriesList.getChildren().add(mutedLabel("No transport information recorded yet"));
+            transportEntriesList.getChildren().add(
+                    mutedLabel("No transport information recorded yet")
+            );
             return;
         }
+
         for (TransportEntry entry : entries) {
-            transportEntriesList.getChildren().add(mutedLabel(entry.getPeriod() + " — "
-                + entry.getPublicTransportTripsPerWeek() + " PT trips/week, " + entry.getFlightsPerYear() + " flights/year"));
+
+            Label entryLabel = mutedLabel(
+                    entry.getPeriod()
+                            + " — "
+                            + entry.getPublicTransportTripsPerWeek()
+                            + " PT trips/week, "
+                            + entry.getFlightsPerYear()
+                            + " flights/year"
+            );
+
+            Button editButton = new Button("✎\u00A0\u00A0Edit");
+            editButton.getStyleClass().add("edit-button");
+
+            editButton.setOnAction(event -> {
+                editingTransportEntryId = entry.getId();
+
+                publicTransportTripsField.setText(
+                        String.valueOf(entry.getPublicTransportTripsPerWeek())
+                );
+
+                flightsPerYearField.setText(
+                        String.valueOf(entry.getFlightsPerYear())
+                );
+            });
+
+            HBox row = new HBox(10);
+            row.getStyleClass().add("history-row");
+
+            entryLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(
+                    entryLabel,
+                    javafx.scene.layout.Priority.ALWAYS
+            );
+
+            row.getChildren().addAll(entryLabel, editButton);
+            transportEntriesList.getChildren().add(row);
         }
+    }
+    // US-23: show how the update changed the score
+
+    private void showScoreChange(Optional<ScoreChange> change) {
+        scoreChangeCard.setVisible(change.isPresent());
+        scoreChangeCard.setManaged(change.isPresent());
+        if (change.isEmpty()) {
+            return;
+        }
+
+        ScoreChange scores = change.get();
+        boolean showDomain = !scores.isFirstScore();
+        domainChangeLabel.setVisible(showDomain);
+        domainChangeLabel.setManaged(showDomain);
+
+        if (scores.isFirstScore()) {
+            overallChangeLabel.setText("Your household's first overall score is "
+                    + formatScore(scores.overall().getScenarioScore()));
+            setDirectionStyle(overallChangeLabel, scores.overall());
+            return;
+        }
+
+        showChangeLine(overallChangeLabel, "Overall score", scores.overall());
+        showChangeLine(domainChangeLabel, domainName(scores.domain()) + " score", scores.domainChange());
+    }
+
+    private void showChangeLine(Label label, String title, ScenarioComparison comparison) {
+        label.setText(title + ": " + formatScore(comparison.getCurrentScore())
+                + " → " + formatScore(comparison.getScenarioScore())
+                + "  (" + describeDifference(comparison) + ")");
+        setDirectionStyle(label, comparison);
+    }
+
+    private void setDirectionStyle(Label label, ScenarioComparison comparison) {
+        label.getStyleClass().removeAll("success-text", "error-text", "muted-text");
+        label.getStyleClass().add(switch (comparison.getDirection()) {
+            case IMPROVED -> "success-text";
+            case WORSENED -> "error-text";
+            case UNCHANGED -> "muted-text";
+        });
+    }
+
+    private String describeDifference(ScenarioComparison comparison) {
+        return switch (comparison.getDirection()) {
+            case IMPROVED -> comparison.signedPoints() + ", better";
+            case WORSENED -> comparison.signedPoints() + ", worse";
+            case UNCHANGED -> "no change";
+        };
+    }
+
+    private String domainName(Domain domain) {
+        String name = domain.name().toLowerCase();
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    }
+
+    private String formatScore(double score) {
+        return String.format("%.1f", score);
     }
 
     private Label mutedLabel(String text) {
@@ -269,6 +648,13 @@ public class ResourcesController {
         label.setText(message);
         label.setVisible(true);
         label.setManaged(true);
+    }
+
+    /** US-03 / #85: guests and users without a household see a message instead of saving. */
+    private boolean blockedFromSaving(Label errorLabel) {
+        if (ctx.session.canRecordEntries()) return false;
+        showError(errorLabel, "Sign in and join a household to save readings");
+        return true;
     }
 
     private void hideError(Label label) {

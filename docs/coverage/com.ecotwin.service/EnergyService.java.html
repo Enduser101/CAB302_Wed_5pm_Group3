@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnergyService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">EnergyService.java</span></div><h1>EnergyService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.EnergyEntryDao;
+import com.ecotwin.model.EnergyEntry;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.User;
+
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Monthly household energy readings: electricity used and, optionally, solar generated
+ * (US-15, US-19, US-14).
+ *
+ * &lt;p&gt;Every change is written to the household's activity history and triggers a score
+ * recalculation. Edits record the old and new values of only the fields that changed.
+ */
+public class EnergyService {
+
+    private final EnergyEntryDao energyEntryDao;
+    private final ActivityLogDao activityLogDao;
+    private final ScoreService scoreService;
+
+    /**
+     * @param energyEntryDao where energy readings are stored
+     * @param activityLogDao where history messages are written
+     * @param scoreService   told to recalculate after every change
+     */
+<span class="fc" id="L32">    public EnergyService(EnergyEntryDao energyEntryDao, ActivityLogDao activityLogDao, ScoreService scoreService) {</span>
+<span class="fc" id="L33">        this.energyEntryDao = energyEntryDao;</span>
+<span class="fc" id="L34">        this.activityLogDao = activityLogDao;</span>
+<span class="fc" id="L35">        this.scoreService = scoreService;</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * US-15: record the household's energy usage for the current period.
+     *
+     * @param actor              the user recording the reading
+     * @param household          the household it belongs to
+     * @param electricityKwh     electricity used this month, in kWh
+     * @param solarGenerationKwh solar generated this month in kWh, or {@code null} if the
+     *                           household has no solar
+     * @param notes              optional free-text notes
+     * @return the saved entry, dated to the current month ({@code YYYY-MM})
+     * @throws IllegalArgumentException if either value is negative
+     */
+    public EnergyEntry recordEntry(User actor, Household household, double electricityKwh, Double solarGenerationKwh,
+                                    String notes) {
+<span class="fc" id="L52">        validateEnergyValues(electricityKwh, solarGenerationKwh);</span>
+
+<span class="fc" id="L54">        String period = YearMonth.now().toString();</span>
+<span class="fc" id="L55">        EnergyEntry entry = energyEntryDao.create(household.getId(), period, electricityKwh, solarGenerationKwh,</span>
+<span class="fc" id="L56">            notes, actor.getId());</span>
+<span class="fc" id="L57">        activityLogDao.log(household.getId(), actor.getId(), displayName(actor) + &quot; recorded energy usage for &quot; + period);</span>
+<span class="fc" id="L58">        scoreService.recalculate(household.getId());</span>
+<span class="fc" id="L59">        return entry;</span>
+    }
+
+    /**
+     * US-19: update an existing energy entry.
+     *
+     * &lt;p&gt;US-14: the history message names each value that changed with its old and new
+     * value, e.g. &quot;changed energy usage from 410.0 kWh to 395.0 kWh and solar generation
+     * from none to 60.0 kWh&quot;. If nothing changed, it just says the entry was updated.
+     *
+     * @param actor              the user making the edit
+     * @param household          the household the entry belongs to
+     * @param entryId            the entry to change
+     * @param electricityKwh     the corrected electricity use, in kWh
+     * @param solarGenerationKwh the corrected solar generation in kWh, or {@code null} for none
+     * @param notes              optional free-text notes
+     * @return the updated entry
+     * @throws IllegalArgumentException if either value is negative
+     */
+    public EnergyEntry updateEntry(User actor, Household household, long entryId,
+                                   double electricityKwh, Double solarGenerationKwh, String notes) {
+<span class="fc" id="L80">        validateEnergyValues(electricityKwh, solarGenerationKwh);</span>
+<span class="fc" id="L81">        EnergyEntry oldEntry = null;</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        for (EnergyEntry entry : energyEntryDao.findByHousehold(household.getId())) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if (entry.getId() == entryId) {</span>
+<span class="fc" id="L85">                oldEntry = entry;</span>
+<span class="fc" id="L86">                break;</span>
+            }
+<span class="nc" id="L88">        }</span>
+
+<span class="fc" id="L90">        EnergyEntry updatedEntry = energyEntryDao.update(</span>
+                entryId,
+                electricityKwh,
+                solarGenerationKwh,
+                notes,
+<span class="fc" id="L95">                actor.getId()</span>
+        );
+
+<span class="fc" id="L98">        List&lt;String&gt; changes = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L99" title="All 4 branches covered.">        if (oldEntry != null &amp;&amp; oldEntry.getElectricityKwh() != electricityKwh) {</span>
+<span class="fc" id="L100">            changes.add(&quot;energy usage from &quot; + oldEntry.getElectricityKwh() + &quot; kWh to &quot; + electricityKwh + &quot; kWh&quot;);</span>
+        }
+<span class="fc bfc" id="L102" title="All 4 branches covered.">        if (oldEntry != null &amp;&amp; !Objects.equals(oldEntry.getSolarGenerationKwh(), solarGenerationKwh)) {</span>
+<span class="fc" id="L103">            changes.add(&quot;solar generation from &quot; + solarText(oldEntry.getSolarGenerationKwh())</span>
+<span class="fc" id="L104">                    + &quot; to &quot; + solarText(solarGenerationKwh));</span>
+        }
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (!changes.isEmpty()) {</span>
+<span class="fc" id="L108">            activityLogDao.log(</span>
+<span class="fc" id="L109">                    household.getId(),</span>
+<span class="fc" id="L110">                    actor.getId(),</span>
+<span class="fc" id="L111">                    displayName(actor) + &quot; changed &quot; + String.join(&quot; and &quot;, changes)</span>
+            );
+        } else {
+<span class="fc" id="L114">            activityLogDao.log(</span>
+<span class="fc" id="L115">                    household.getId(),</span>
+<span class="fc" id="L116">                    actor.getId(),</span>
+<span class="fc" id="L117">                    displayName(actor) + &quot; updated energy usage for &quot;</span>
+<span class="fc" id="L118">                            + updatedEntry.getPeriod()</span>
+            );
+        }
+
+<span class="fc" id="L122">        scoreService.recalculate(household.getId());</span>
+
+<span class="fc" id="L124">        return updatedEntry;</span>
+    }
+
+    /**
+     * @param household the household to look up
+     * @return all of the household's energy readings
+     */
+    public List&lt;EnergyEntry&gt; findEntriesForHousehold(Household household) {
+<span class="fc" id="L132">        return energyEntryDao.findByHousehold(household.getId());</span>
+    }
+
+    /**
+     * Rejects negative readings. Zero is allowed: it is a real reading, not a missing one.
+     *
+     * @param electricityKwh     electricity used, in kWh
+     * @param solarGenerationKwh solar generated in kWh, or {@code null} for none
+     * @throws IllegalArgumentException if either value is negative
+     */
+    private void validateEnergyValues(double electricityKwh, Double solarGenerationKwh) {
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (electricityKwh &lt; 0) {</span>
+<span class="fc" id="L144">            throw new IllegalArgumentException(&quot;Electricity usage cannot be negative&quot;);</span>
+        }
+
+<span class="fc bfc" id="L147" title="All 4 branches covered.">        if (solarGenerationKwh != null &amp;&amp; solarGenerationKwh &lt; 0) {</span>
+<span class="fc" id="L148">            throw new IllegalArgumentException(&quot;Solar generation cannot be negative&quot;);</span>
+        }
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * @param kwh a solar reading, or {@code null}
+     * @return the reading as shown in the history, e.g. &quot;60.0 kWh&quot;, or &quot;none&quot; when there is no solar
+     */
+    private String solarText(Double kwh) {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        return kwh == null ? &quot;none&quot; : kwh + &quot; kWh&quot;;</span>
+    }
+
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
+    private String displayName(User user) {
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppContext.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin</a> &gt; <span class="el_source">AppContext.java</span></div><h1>AppContext.java</h1><pre class="source lang-java linenums">package com.ecotwin;
+
+import com.ecotwin.dao.sqlite.SqliteActivityLogDao;
+import com.ecotwin.dao.sqlite.SqliteEnergyEntryDao;
+import com.ecotwin.dao.sqlite.SqliteHouseholdDao;
+import com.ecotwin.dao.sqlite.SqliteHouseholdMembershipDao;
+import com.ecotwin.dao.sqlite.SqliteScenarioDao;
+import com.ecotwin.dao.sqlite.SqliteTransportEntryDao;
+import com.ecotwin.dao.sqlite.SqliteUserDao;
+import com.ecotwin.dao.sqlite.SqliteVehicleDao;
+import com.ecotwin.dao.sqlite.SqliteWasteEntryDao;
+import com.ecotwin.dao.sqlite.SqliteWaterEntryDao;
+import com.ecotwin.service.AuthService;
+import com.ecotwin.service.EnergyService;
+import com.ecotwin.service.HouseholdScoreService;
+import com.ecotwin.service.HouseholdService;
+import com.ecotwin.service.IndicativeScoreCalculator;
+import com.ecotwin.service.PlaceholderScoreService;
+import com.ecotwin.service.ScenarioService;
+import com.ecotwin.service.ScoreService;
+import com.ecotwin.service.TransportService;
+import com.ecotwin.service.WasteService;
+import com.ecotwin.service.WaterService;
+import com.ecotwin.util.SessionContext;
+import com.ecotwin.service.ScoreExplanationService;
+
+import java.sql.Connection;
+
+/**
+ * Manual dependency-injection container: wires DAOs into services once, at startup.
+ *
+ * &lt;p&gt;This is the only place that knows which DAO implementations are used. Services only
+ * depend on DAO interfaces, so they can be unit tested with mocks, and controllers get their
+ * services from here instead of creating them. Swapping SQLite for another database would
+ * only change this class.
+ *
+ * &lt;p&gt;The fields are public and final: they are set once in the constructor and never change.
+ */
+public class AppContext {
+
+    /** Registration, login and password changes. */
+    public final AuthService authService;
+    /** Creating, joining, leaving and managing households, plus their activity history. */
+    public final HouseholdService householdService;
+    /** Recording and editing monthly energy readings. */
+    public final EnergyService energyService;
+    /** Recording and editing monthly water readings. */
+    public final WaterService waterService;
+    /** Recording and editing monthly waste readings. */
+    public final WasteService wasteService;
+    /** Household vehicles and monthly transport readings. */
+    public final TransportService transportService;
+    /** &quot;What if&quot; scenarios and their saved results. */
+    public final ScenarioService scenarioService;
+    /** A household's current scores, score history and score changes. */
+    public final HouseholdScoreService householdScoreService;
+    /** Plain-language explanations of what each score means. */
+    public final ScoreExplanationService scoreExplanationService;
+    /** The signed-in user (or guest) and their active household. */
+<span class="fc" id="L60">    public final SessionContext session = SessionContext.getInstance();</span>
+
+    /**
+     * Builds every DAO on the given connection, then every service on those DAOs.
+     *
+     * @param connection the open database connection; the app passes
+     *                   {@link com.ecotwin.util.DatabaseConnection}'s, and tests pass a temporary database
+     */
+<span class="fc" id="L68">    public AppContext(Connection connection) {</span>
+<span class="fc" id="L69">        SqliteUserDao userDao = new SqliteUserDao(connection);</span>
+<span class="fc" id="L70">        SqliteHouseholdDao householdDao = new SqliteHouseholdDao(connection);</span>
+<span class="fc" id="L71">        SqliteHouseholdMembershipDao membershipDao = new SqliteHouseholdMembershipDao(connection);</span>
+<span class="fc" id="L72">        SqliteActivityLogDao activityLogDao = new SqliteActivityLogDao(connection);</span>
+<span class="fc" id="L73">        SqliteEnergyEntryDao energyEntryDao = new SqliteEnergyEntryDao(connection);</span>
+<span class="fc" id="L74">        SqliteWaterEntryDao waterEntryDao = new SqliteWaterEntryDao(connection);</span>
+<span class="fc" id="L75">        SqliteWasteEntryDao wasteEntryDao = new SqliteWasteEntryDao(connection);</span>
+<span class="fc" id="L76">        SqliteVehicleDao vehicleDao = new SqliteVehicleDao(connection);</span>
+<span class="fc" id="L77">        SqliteTransportEntryDao transportEntryDao = new SqliteTransportEntryDao(connection);</span>
+<span class="fc" id="L78">        SqliteScenarioDao scenarioDao = new SqliteScenarioDao(connection);</span>
+<span class="fc" id="L79">        ScoreService scoreService = new PlaceholderScoreService();</span>
+
+<span class="fc" id="L81">        this.authService = new AuthService(userDao);</span>
+<span class="fc" id="L82">        this.householdService = new HouseholdService(householdDao, membershipDao, activityLogDao, userDao);</span>
+<span class="fc" id="L83">        this.energyService = new EnergyService(energyEntryDao, activityLogDao, scoreService);</span>
+<span class="fc" id="L84">        this.waterService = new WaterService(waterEntryDao, activityLogDao, scoreService);</span>
+<span class="fc" id="L85">        this.wasteService = new WasteService(wasteEntryDao, activityLogDao, scoreService);</span>
+<span class="fc" id="L86">        this.transportService = new TransportService(vehicleDao, transportEntryDao, activityLogDao, scoreService);</span>
+<span class="fc" id="L87">        IndicativeScoreCalculator scoreCalculator = new IndicativeScoreCalculator();</span>
+<span class="fc" id="L88">        this.scenarioService = new ScenarioService(scenarioDao, scoreCalculator);</span>
+<span class="fc" id="L89">        this.householdScoreService = new HouseholdScoreService(</span>
+                energyService, waterService, wasteService, transportService, scoreCalculator);
+<span class="fc" id="L91">        this.scoreExplanationService = new ScoreExplanationService();</span>
+<span class="fc" id="L92">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

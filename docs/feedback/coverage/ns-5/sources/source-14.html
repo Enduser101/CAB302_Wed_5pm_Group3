@@ -1,0 +1,92 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RecommendationRule</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.ecotwin.service</a>
+</div>
+
+<h1>Coverage Summary for Class: RecommendationRule (com.ecotwin.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RecommendationRule</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.ecotwin.service;
+&nbsp;
+&nbsp;import com.ecotwin.model.Recommendation.Domain;
+&nbsp;import com.ecotwin.model.SustainabilityScenario;
+&nbsp;
+&nbsp;/**
+&nbsp; * US-24: one way a household could improve. A rule applies only when the household&#39;s
+&nbsp; * values call for it, models the change on a copy, and words itself from those values.
+&nbsp; */
+&nbsp;public interface RecommendationRule {
+&nbsp;
+&nbsp;    Domain domain();
+&nbsp;
+&nbsp;    /** @return true when this change makes sense for these values */
+&nbsp;    boolean applies(SustainabilityScenario values, int people);
+&nbsp;
+&nbsp;    /** Change the copy to what the household would look like after taking the advice. */
+&nbsp;    void apply(SustainabilityScenario copy, int people);
+&nbsp;
+&nbsp;    String title();
+&nbsp;
+&nbsp;    /** Wording that quotes the household&#39;s own numbers. */
+&nbsp;    String detail(SustainabilityScenario values, int people);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-10-22 21:22</div>
+</div>
+</body>
+</html>

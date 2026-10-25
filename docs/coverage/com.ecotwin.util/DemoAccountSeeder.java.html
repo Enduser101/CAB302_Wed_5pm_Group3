@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DemoAccountSeeder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.util</a> &gt; <span class="el_source">DemoAccountSeeder.java</span></div><h1>DemoAccountSeeder.java</h1><pre class="source lang-java linenums">package com.ecotwin.util;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.EnergyEntryDao;
+import com.ecotwin.dao.TransportEntryDao;
+import com.ecotwin.dao.WasteEntryDao;
+import com.ecotwin.dao.WaterEntryDao;
+import com.ecotwin.dao.sqlite.SqliteActivityLogDao;
+import com.ecotwin.dao.sqlite.SqliteEnergyEntryDao;
+import com.ecotwin.dao.sqlite.SqliteTransportEntryDao;
+import com.ecotwin.dao.sqlite.SqliteUserDao;
+import com.ecotwin.dao.sqlite.SqliteWasteEntryDao;
+import com.ecotwin.dao.sqlite.SqliteWaterEntryDao;
+import com.ecotwin.model.EnergyEntry;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.TransportEntry;
+import com.ecotwin.model.User;
+import com.ecotwin.model.Vehicle;
+import com.ecotwin.model.WasteEntry;
+import com.ecotwin.model.WaterEntry;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+/**
+ * #115: creates the &quot;Cab 302&quot; demo account on first launch, so the dashboard, score chart and
+ * activity history have something to show.
+ *
+ * Six months of readings (May - Oct 2026) that rise and fall, then a month of edits
+ * (18 Sep - 17 Oct 2026). Periods are fixed so the demo looks the same whenever it is run.
+ * Readings are created through the DAOs (the services always record the current month);
+ * edits go through the services so the history wording is exactly what the app writes.
+ * Each change is then backdated to when it &quot;happened&quot;.
+ */
+public class DemoAccountSeeder {
+
+    public static final String USERNAME = &quot;Cab 302&quot;;
+    public static final String PASSWORD = &quot;Testuser1&quot;;
+
+<span class="fc" id="L44">    private static final ZoneId BRISBANE = ZoneId.of(&quot;Australia/Brisbane&quot;);</span>
+
+    private final Connection connection;
+    private final AppContext ctx;
+    private final EnergyEntryDao energyDao;
+    private final WaterEntryDao waterDao;
+    private final WasteEntryDao wasteDao;
+    private final TransportEntryDao transportDao;
+    private final ActivityLogDao activityLogDao;
+
+    private User user;
+    private Household household;
+
+<span class="fc" id="L57">    public DemoAccountSeeder(Connection connection, AppContext ctx) {</span>
+<span class="fc" id="L58">        this.connection = connection;</span>
+<span class="fc" id="L59">        this.ctx = ctx;</span>
+<span class="fc" id="L60">        this.energyDao = new SqliteEnergyEntryDao(connection);</span>
+<span class="fc" id="L61">        this.waterDao = new SqliteWaterEntryDao(connection);</span>
+<span class="fc" id="L62">        this.wasteDao = new SqliteWasteEntryDao(connection);</span>
+<span class="fc" id="L63">        this.transportDao = new SqliteTransportEntryDao(connection);</span>
+<span class="fc" id="L64">        this.activityLogDao = new SqliteActivityLogDao(connection);</span>
+<span class="fc" id="L65">    }</span>
+
+    /** @return true if the demo account was created, false if it already existed */
+    public boolean seedIfMissing() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (new SqliteUserDao(connection).findByUsername(USERNAME).isPresent()) {</span>
+<span class="fc" id="L70">            return false;</span>
+        }
+
+        // One transaction: about 80 writes become one disk write, and a failure leaves no half-made account.
+        try {
+<span class="fc" id="L75">            connection.setAutoCommit(false);</span>
+            try {
+<span class="fc" id="L77">                seed();</span>
+<span class="fc" id="L78">                connection.commit();</span>
+<span class="nc" id="L79">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L80">                connection.rollback();</span>
+<span class="nc" id="L81">                throw e;</span>
+            } finally {
+<span class="fc" id="L83">                connection.setAutoCommit(true);</span>
+            }
+<span class="nc" id="L85">        } catch (SQLException e) {</span>
+<span class="nc" id="L86">            throw new IllegalStateException(&quot;Could not create the demo account&quot;, e);</span>
+<span class="fc" id="L87">        }</span>
+<span class="fc" id="L88">        return true;</span>
+    }
+
+    private void seed() {
+<span class="fc" id="L92">        user = ctx.authService.register(USERNAME, &quot;cab302@example.com&quot;, PASSWORD);</span>
+<span class="fc" id="L93">        household = ctx.householdService.createHousehold(user, &quot;CAB302 Demo House&quot;, 2, &quot;House&quot;, &quot;QLD&quot;);</span>
+<span class="fc" id="L94">        String created = at(5, 1, 10, 0);</span>
+<span class="fc" id="L95">        backdate(&quot;UPDATE users SET created_at = ? WHERE id = ?&quot;, created, user.getId());</span>
+<span class="fc" id="L96">        backdate(&quot;UPDATE households SET created_at = ? WHERE id = ?&quot;, created, household.getId());</span>
+<span class="fc" id="L97">        backdate(&quot;UPDATE household_memberships SET joined_at = ? WHERE household_id = ?&quot;, created, household.getId());</span>
+<span class="fc" id="L98">        backdateLatestHistory(created);</span>
+
+<span class="fc" id="L100">        recordPastMonths();</span>
+<span class="fc" id="L101">        recordSeptember();</span>
+<span class="fc" id="L102">        recordOctober();</span>
+<span class="fc" id="L103">    }</span>
+
+    /** May - Aug: heating pushes energy up over winter, a June holiday adds flights, August is dry. */
+    private void recordPastMonths() {
+<span class="fc" id="L107">        recordMonth(&quot;2026-05&quot;, 460, 10500, 32, 8, 2, 5, 2, at(6, 2, 19, 30));</span>
+<span class="fc" id="L108">        recordMonth(&quot;2026-06&quot;, 520, 9000, 28, 10, 3, 3, 4, at(7, 1, 19, 30));</span>
+<span class="fc" id="L109">        recordMonth(&quot;2026-07&quot;, 560, 8500, 35, 7, 2, 4, 3, at(8, 3, 19, 30));</span>
+<span class="fc" id="L110">        recordMonth(&quot;2026-08&quot;, 470, 11000, 26, 12, 4, 6, 2, at(9, 2, 19, 30));</span>
+<span class="fc" id="L111">    }</span>
+
+    private void recordMonth(String period, double kwh, double litres, double general, double recycled,
+                             double compost, double tripsPerWeek, double flightsPerYear, String when) {
+<span class="fc" id="L115">        energy(period, kwh, null, when);</span>
+<span class="fc" id="L116">        water(period, litres, when);</span>
+<span class="fc" id="L117">        waste(period, general, recycled, compost, when);</span>
+<span class="fc" id="L118">        transport(period, tripsPerWeek, flightsPerYear, when);</span>
+<span class="fc" id="L119">    }</span>
+
+    /** Recorded mid-month, then corrected once the bills arrived. */
+    private void recordSeptember() {
+<span class="fc" id="L123">        EnergyEntry energy = energy(&quot;2026-09&quot;, 450, null, at(9, 18, 9, 12));</span>
+<span class="fc" id="L124">        WaterEntry water = water(&quot;2026-09&quot;, 12800, at(9, 18, 9, 15));</span>
+<span class="fc" id="L125">        waste(&quot;2026-09&quot;, 30, 10, 3, at(9, 21, 18, 40));</span>
+<span class="fc" id="L126">        transport(&quot;2026-09&quot;, 4, 3, at(9, 21, 18, 44));</span>
+
+<span class="fc" id="L128">        ctx.waterService.updateEntry(user, household, water.getId(), 12000, &quot;Corrected from water bill&quot;);</span>
+<span class="fc" id="L129">        backdateEntry(&quot;water_entries&quot;, water.getId(), at(9, 25, 20, 5));</span>
+<span class="fc" id="L130">        ctx.energyService.updateEntry(user, household, energy.getId(), 420, null, &quot;Corrected from power bill&quot;);</span>
+<span class="fc" id="L131">        backdateEntry(&quot;energy_entries&quot;, energy.getId(), at(9, 29, 19, 50));</span>
+<span class="fc" id="L132">    }</span>
+
+    /** Solar goes in, showers get shorter and the car is used less. */
+    private void recordOctober() {
+<span class="fc" id="L136">        EnergyEntry energy = energy(&quot;2026-10&quot;, 410, null, at(10, 2, 8, 30));</span>
+<span class="fc" id="L137">        Vehicle car = ctx.transportService.addVehicle(user, household, &quot;Family car&quot;, &quot;Petrol&quot;, 180);</span>
+<span class="fc" id="L138">        backdateLatestHistory(at(10, 3, 12, 10));</span>
+<span class="fc" id="L139">        WaterEntry water = water(&quot;2026-10&quot;, 10400, at(10, 5, 19, 0));</span>
+
+<span class="fc" id="L141">        ctx.energyService.updateEntry(user, household, energy.getId(), 395, 60.0, &quot;Solar panels installed&quot;);</span>
+<span class="fc" id="L142">        backdateEntry(&quot;energy_entries&quot;, energy.getId(), at(10, 8, 17, 45));</span>
+
+<span class="fc" id="L144">        WasteEntry waste = waste(&quot;2026-10&quot;, 27, 12, 4, at(10, 9, 20, 15));</span>
+
+<span class="fc" id="L146">        ctx.transportService.updateVehicle(user, household, car.getId(), &quot;Family car&quot;, &quot;Petrol&quot;, 150);</span>
+<span class="fc" id="L147">        backdateLatestHistory(at(10, 11, 10, 20));</span>
+
+<span class="fc" id="L149">        TransportEntry transport = transport(&quot;2026-10&quot;, 6, 2, at(10, 12, 18, 5));</span>
+
+<span class="fc" id="L151">        ctx.waterService.updateEntry(user, household, water.getId(), 9500, &quot;Shorter showers&quot;);</span>
+<span class="fc" id="L152">        backdateEntry(&quot;water_entries&quot;, water.getId(), at(10, 14, 21, 0));</span>
+<span class="fc" id="L153">        ctx.wasteService.updateEntry(user, household, waste.getId(), 24, 14, 6);</span>
+<span class="fc" id="L154">        backdateEntry(&quot;waste_entries&quot;, waste.getId(), at(10, 15, 19, 30));</span>
+<span class="fc" id="L155">        ctx.transportService.updateEntry(user, household, transport.getId(), 8, 2);</span>
+<span class="fc" id="L156">        backdateEntry(&quot;transport_entries&quot;, transport.getId(), at(10, 16, 8, 0));</span>
+<span class="fc" id="L157">        ctx.energyService.updateEntry(user, household, energy.getId(), 380, 60.0, &quot;Solar panels installed&quot;);</span>
+<span class="fc" id="L158">        backdateEntry(&quot;energy_entries&quot;, energy.getId(), at(10, 17, 9, 0));</span>
+<span class="fc" id="L159">    }</span>
+
+    private EnergyEntry energy(String period, double kwh, Double solarKwh, String when) {
+<span class="fc" id="L162">        EnergyEntry entry = energyDao.create(household.getId(), period, kwh, solarKwh, null, user.getId());</span>
+<span class="fc" id="L163">        log(&quot;recorded energy usage for &quot; + period);</span>
+<span class="fc" id="L164">        backdateEntry(&quot;energy_entries&quot;, entry.getId(), when);</span>
+<span class="fc" id="L165">        return entry;</span>
+    }
+
+    private WaterEntry water(String period, double litres, String when) {
+<span class="fc" id="L169">        WaterEntry entry = waterDao.create(household.getId(), period, litres, null, user.getId());</span>
+<span class="fc" id="L170">        log(&quot;recorded water usage for &quot; + period);</span>
+<span class="fc" id="L171">        backdateEntry(&quot;water_entries&quot;, entry.getId(), when);</span>
+<span class="fc" id="L172">        return entry;</span>
+    }
+
+    private WasteEntry waste(String period, double general, double recycled, double compost, String when) {
+<span class="fc" id="L176">        WasteEntry entry = wasteDao.create(household.getId(), period, general, recycled, compost, user.getId());</span>
+<span class="fc" id="L177">        log(&quot;recorded waste for &quot; + period);</span>
+<span class="fc" id="L178">        backdateEntry(&quot;waste_entries&quot;, entry.getId(), when);</span>
+<span class="fc" id="L179">        return entry;</span>
+    }
+
+    private TransportEntry transport(String period, double tripsPerWeek, double flightsPerYear, String when) {
+<span class="fc" id="L183">        TransportEntry entry = transportDao.upsertForPeriod(</span>
+<span class="fc" id="L184">                household.getId(), period, tripsPerWeek, flightsPerYear, user.getId());</span>
+<span class="fc" id="L185">        log(&quot;updated transport information for &quot; + period);</span>
+<span class="fc" id="L186">        backdateEntry(&quot;transport_entries&quot;, entry.getId(), when);</span>
+<span class="fc" id="L187">        return entry;</span>
+    }
+
+    /** Same wording the services use when recording a new reading. */
+    private void log(String action) {
+<span class="fc" id="L192">        activityLogDao.log(household.getId(), user.getId(), USERNAME + &quot; &quot; + action);</span>
+<span class="fc" id="L193">    }</span>
+
+    /** Backdates a reading and the history entry its change just wrote. */
+    private void backdateEntry(String table, long entryId, String when) {
+<span class="fc" id="L197">        backdate(&quot;UPDATE &quot; + table + &quot; SET updated_at = ? WHERE id = ?&quot;, when, entryId);</span>
+<span class="fc" id="L198">        backdateLatestHistory(when);</span>
+<span class="fc" id="L199">    }</span>
+
+    private void backdateLatestHistory(String when) {
+<span class="fc" id="L202">        backdate(&quot;UPDATE activity_log SET created_at = ? WHERE id = &quot;</span>
+<span class="fc" id="L203">                + &quot;(SELECT MAX(id) FROM activity_log WHERE household_id = ?)&quot;, when, household.getId());</span>
+<span class="fc" id="L204">    }</span>
+
+    // The DAOs always stamp &quot;now&quot;, so backdating is the one place the seeder writes SQL itself.
+    private void backdate(String sql, String when, long id) {
+<span class="fc" id="L208">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L209">            statement.setString(1, when);</span>
+<span class="fc" id="L210">            statement.setLong(2, id);</span>
+<span class="fc" id="L211">            statement.executeUpdate();</span>
+<span class="nc" id="L212">        } catch (SQLException e) {</span>
+<span class="nc" id="L213">            throw new IllegalStateException(&quot;Could not backdate demo data&quot;, e);</span>
+<span class="fc" id="L214">        }</span>
+<span class="fc" id="L215">    }</span>
+
+    /** A 2026 Brisbane date and time, stored as UTC like the DAOs do. */
+    private static String at(int month, int day, int hour, int minute) {
+<span class="fc" id="L219">        return LocalDateTime.of(2026, month, day, hour, minute).atZone(BRISBANE).toInstant().toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

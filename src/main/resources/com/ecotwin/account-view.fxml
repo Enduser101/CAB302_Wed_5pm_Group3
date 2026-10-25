@@ -7,6 +7,8 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
@@ -18,6 +20,16 @@
     <Label text="Account" styleClass="page-title" />
     <Label fx:id="usernameLabel" styleClass="muted-text" />
 
+    <!-- US-03 / #85: guests acct details page -->
+    <VBox fx:id="guestSection" spacing="10" maxWidth="740" visible="false" managed="false">
+        <Label text="You're browsing as a guest" styleClass="section-title" />
+        <Label text="Sign in or create an account to join a household and save your readings."
+               styleClass="muted-text" wrapText="true" />
+        <Button text="Sign in" styleClass="btn-primary" onAction="#guestHandleSignIn" />
+        <Button text="Create account" styleClass="btn-primary" onAction="#guestHandleCreateAccount" />
+    </VBox>
+
+    <VBox fx:id="memberSection" spacing="20">
     <VBox spacing="10" maxWidth="740">
         <Label text="Account details" styleClass="section-title" />
 
@@ -44,23 +56,83 @@
         </GridPane>
     </VBox>
 
+
     <VBox spacing="10" maxWidth="740">
         <Label text="Change password" styleClass="section-title" />
 
         <VBox spacing="4">
             <Label text="Current password" styleClass="field-label" />
-            <PasswordField fx:id="currentPasswordField" />
+
+            <StackPane>
+                <PasswordField fx:id="currentPasswordField"
+                               styleClass="password-input"
+                               maxWidth="Infinity" />
+
+                <TextField fx:id="visibleCurrentPasswordField"
+                           styleClass="password-input"
+                           maxWidth="Infinity"
+                           visible="false"
+                           managed="false" />
+
+                <Button fx:id="toggleCurrentPasswordButton"
+                        text="◎"
+                        styleClass="password-toggle"
+                        minWidth="42" prefWidth="42" maxWidth="42"
+                        minHeight="35" prefHeight="35" maxHeight="35"
+                        onAction="#handleToggleCurrentPassword"
+                        StackPane.alignment="CENTER_RIGHT" />
+            </StackPane>
         </VBox>
 
         <VBox spacing="4">
             <Label text="New password" styleClass="field-label" />
-            <PasswordField fx:id="newPasswordField" />
+
+            <StackPane>
+                <PasswordField fx:id="newPasswordField"
+                               styleClass="password-input"
+                               maxWidth="Infinity" />
+
+                <TextField fx:id="visibleNewPasswordField"
+                           styleClass="password-input"
+                           maxWidth="Infinity"
+                           visible="false"
+                           managed="false" />
+
+                <Button fx:id="toggleNewPasswordButton"
+                        text="◎"
+                        styleClass="password-toggle"
+                        minWidth="42" prefWidth="42" maxWidth="42"
+                        minHeight="35" prefHeight="35" maxHeight="35"
+                        onAction="#handleToggleNewPassword"
+                        StackPane.alignment="CENTER_RIGHT" />
+            </StackPane>
+
             <Label text="Must be at least 8 characters" styleClass="muted-text" />
         </VBox>
 
         <VBox spacing="4">
             <Label text="Confirm new password" styleClass="field-label" />
-            <PasswordField fx:id="confirmPasswordField" />
+
+            <StackPane>
+                <PasswordField fx:id="confirmPasswordField"
+                               styleClass="password-input"
+                               maxWidth="Infinity" />
+
+                <TextField fx:id="visibleConfirmPasswordField"
+                           styleClass="password-input"
+                           maxWidth="Infinity"
+                           visible="false"
+                           managed="false" />
+
+                <Button fx:id="toggleConfirmPasswordButton"
+                        text="◎"
+                        styleClass="password-toggle"
+                        minWidth="42" prefWidth="42" maxWidth="42"
+                        minHeight="35" prefHeight="35" maxHeight="35"
+                        onAction="#handleToggleConfirmPassword"
+                        StackPane.alignment="CENTER_RIGHT" />
+            </StackPane>
+
             <Label fx:id="passwordMessageLabel" styleClass="error-text"
                    visible="false" managed="false" />
         </VBox>
@@ -70,5 +142,5 @@
     </VBox>
 
     <Button fx:id="signOutButton" text="Sign out" styleClass="btn-danger" onAction="#handleSignOut" />
-
+    </VBox>
 </VBox>

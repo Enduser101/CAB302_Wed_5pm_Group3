@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.controller</a> &gt; <span class="el_source">DashboardController.java</span></div><h1>DashboardController.java</h1><pre class="source lang-java linenums">package com.ecotwin.controller;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.model.ScoreBreakdown;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import com.ecotwin.model.ScorePoint;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import java.util.List;
+
+/**
+ * US-20/21: the household's overall score with its four domain scores beside it.
+ * Each domain card shows its number and a grade, and the weakest card says &quot;Weakest&quot;,
+ * so the meaning never relies on colour alone.
+ */
+public class DashboardController {
+
+    private final AppContext ctx;
+
+    @FXML private Label noDataLabel;
+    @FXML private VBox scoresSection;
+    @FXML private Label totalScoreLabel;
+    @FXML private Label totalGradeLabel;
+    @FXML private Label scoreExplanationLabel; // left empty for US-22 (score meaning)
+    @FXML private HBox domainCards;
+    @FXML private Label historySummaryLabel;
+
+<span class="nc" id="L39">    public DashboardController(Navigator nav, AppContext ctx) {</span>
+<span class="nc" id="L40">        this.ctx = ctx;</span>
+<span class="nc" id="L41">    }</span>
+
+    @FXML
+    private void initialize() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (!ctx.session.hasActiveHousehold()) {</span>
+<span class="nc" id="L46">            showNoData(&quot;Join or create a household to see its sustainability scores.&quot;);</span>
+<span class="nc" id="L47">            return;</span>
+        }
+
+<span class="nc" id="L50">        Optional&lt;ScoreBreakdown&gt; scores =</span>
+<span class="nc" id="L51">                ctx.householdScoreService.currentScores(ctx.session.getCurrentHousehold());</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (scores.isEmpty()) {</span>
+<span class="nc" id="L54">            showNoData(&quot;Record energy, water, waste and transport information to see your scores.&quot;);</span>
+<span class="nc" id="L55">            return;</span>
+        }
+
+<span class="nc" id="L58">        showScores(scores.get());</span>
+<span class="nc" id="L59">    }</span>
+
+    private void showNoData(String message) {
+<span class="nc" id="L62">        noDataLabel.setText(message);</span>
+<span class="nc" id="L63">        scoresSection.setVisible(false);</span>
+<span class="nc" id="L64">        scoresSection.setManaged(false);</span>
+<span class="nc" id="L65">    }</span>
+
+    private void showScores(ScoreBreakdown scores) {
+<span class="nc" id="L68">        noDataLabel.setVisible(false);</span>
+<span class="nc" id="L69">        noDataLabel.setManaged(false);</span>
+
+<span class="nc" id="L71">        long total = whole(scores.total());</span>
+<span class="nc" id="L72">        totalScoreLabel.setText(total + &quot; / 100&quot;);</span>
+<span class="nc" id="L73">        totalGradeLabel.setText(letter(total) + &quot; - &quot; + word(total));</span>
+<span class="nc" id="L74">        scoreExplanationLabel.setText(ctx.scoreExplanationService.getExplanation());</span>
+
+<span class="nc" id="L76">        Map&lt;String, Double&gt; domains = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L77">        domains.put(&quot;Energy&quot;, scores.energy());</span>
+<span class="nc" id="L78">        domains.put(&quot;Water&quot;, scores.water());</span>
+<span class="nc" id="L79">        domains.put(&quot;Waste&quot;, scores.waste());</span>
+<span class="nc" id="L80">        domains.put(&quot;Transport&quot;, scores.transport());</span>
+
+<span class="nc" id="L82">        long weakest = domains.values().stream().mapToLong(DashboardController::whole).min().orElseThrow();</span>
+
+<span class="nc" id="L84">        domainCards.getChildren().clear();</span>
+<span class="nc" id="L85">        domains.forEach((name, score) -&gt;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                domainCards.getChildren().add(domainCard(name, whole(score), whole(score) == weakest)));</span>
+<span class="nc" id="L87">        showHistory();</span>
+<span class="nc" id="L88">    }</span>
+
+    private VBox domainCard(String name, long score, boolean weakest) {
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        String grade = letter(score) + &quot; - &quot; + (weakest ? &quot;Weakest&quot; : word(score));</span>
+
+<span class="nc" id="L93">        Label nameLabel = new Label(name);</span>
+<span class="nc" id="L94">        nameLabel.getStyleClass().add(&quot;domain-name&quot;);</span>
+<span class="nc" id="L95">        Label scoreLabel = new Label(String.valueOf(score));</span>
+<span class="nc" id="L96">        scoreLabel.getStyleClass().add(&quot;domain-score&quot;);</span>
+<span class="nc" id="L97">        Label gradeLabel = new Label(grade);</span>
+<span class="nc" id="L98">        gradeLabel.getStyleClass().add(&quot;domain-grade&quot;);</span>
+
+<span class="nc" id="L100">        VBox card = new VBox(6, nameLabel, scoreLabel, gradeLabel);</span>
+<span class="nc" id="L101">        card.getStyleClass().add(&quot;domain-card&quot;);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (weakest) {</span>
+<span class="nc" id="L103">            card.getStyleClass().add(&quot;domain-card-weakest&quot;);</span>
+        }
+<span class="nc" id="L105">        card.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L106">        card.setAccessibleText(name + &quot; score &quot; + score + &quot; out of 100, &quot; + grade);</span>
+<span class="nc" id="L107">        HBox.setHgrow(card, Priority.ALWAYS);</span>
+<span class="nc" id="L108">        return card;</span>
+    }
+    @FXML
+    private void openRecommendations() {
+<span class="nc" id="L112">        clickNav(&quot;#recommendationsNav&quot;);</span>
+<span class="nc" id="L113">    }</span>
+
+    @FXML
+    private void openScenarios() {
+<span class="nc" id="L117">        clickNav(&quot;#scenariosNav&quot;);</span>
+<span class="nc" id="L118">    }</span>
+
+    @FXML
+    private void openResources() {
+<span class="nc" id="L122">        clickNav(&quot;#resourcesNav&quot;);</span>
+<span class="nc" id="L123">    }</span>
+
+    @FXML private LineChart&lt;String, Number&gt; historyChart;
+
+    @FXML private Label historyEmptyLabel;
+
+    /** Presses the matching sidebar button, so the app shell stays in charge of switching pages. */
+    private void clickNav(String navId) {
+<span class="nc" id="L131">        Node node = domainCards.getScene().lookup(navId);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (node instanceof Button navButton) {</span>
+<span class="nc" id="L133">            navButton.fire();</span>
+        }
+<span class="nc" id="L135">    }</span>
+    /** Grade bands from the high-fidelity design: A 80+, B 70-79, C 60-69, D below 60. */
+    private static String letter(long score) {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (score &gt;= 80) {</span>
+<span class="nc" id="L139">            return &quot;A&quot;;</span>
+        }
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (score &gt;= 70) {</span>
+<span class="nc" id="L142">            return &quot;B&quot;;</span>
+        }
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (score &gt;= 60) {</span>
+<span class="nc" id="L145">            return &quot;C&quot;;</span>
+        }
+<span class="nc" id="L147">        return &quot;D&quot;;</span>
+    }
+
+    private static String word(long score) {
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        if (score &gt;= 80) {</span>
+<span class="nc" id="L152">            return &quot;Strong&quot;;</span>
+        }
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (score &gt;= 70) {</span>
+<span class="nc" id="L155">            return &quot;Good&quot;;</span>
+        }
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (score &gt;= 60) {</span>
+<span class="nc" id="L158">            return &quot;Fair&quot;;</span>
+        }
+<span class="nc" id="L160">        return &quot;Needs work&quot;;</span>
+    }
+
+    /** US-23: the household's overall score for each period with a full set of readings. */
+    private void showHistory() {
+
+<span class="nc" id="L166">        List&lt;ScorePoint&gt; history = ctx.householdScoreService.scoreHistory(ctx.session.getCurrentHousehold());</span>
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (history.size() &lt; 2) {</span>
+<span class="nc" id="L169">            historyEmptyLabel.setText(&quot;Record another month of readings to see your score over time.&quot;);</span>
+<span class="nc" id="L170">            historyChart.setVisible(false);</span>
+<span class="nc" id="L171">            historyChart.setManaged(false);</span>
+<span class="nc" id="L172">            return;</span>
+        }
+
+<span class="nc" id="L175">        historyEmptyLabel.setVisible(false);</span>
+<span class="nc" id="L176">        historyEmptyLabel.setManaged(false);</span>
+
+<span class="nc" id="L178">        XYChart.Series&lt;String, Number&gt; series = new XYChart.Series&lt;&gt;();</span>
+<span class="nc" id="L179">        history.forEach(point -&gt; series.getData().add(</span>
+<span class="nc" id="L180">                new XYChart.Data&lt;&gt;(point.period(), whole(point.scores().total()))));</span>
+<span class="nc" id="L181">        historyChart.getData().setAll(series);</span>
+
+<span class="nc" id="L183">        double first = history.get(0).scores().total();</span>
+<span class="nc" id="L184">        double last = history.get(history.size() - 1).scores().total();</span>
+<span class="nc" id="L185">        long change = Math.round(last - first);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        historySummaryLabel.setText(change &gt;= 0</span>
+<span class="nc" id="L187">                ? &quot;Up &quot; + change + &quot; points since &quot; + history.get(0).period()</span>
+<span class="nc" id="L188">                : &quot;Down &quot; + Math.abs(change) + &quot; points since &quot; + history.get(0).period());</span>
+<span class="nc" id="L189">    }</span>
+
+    private static long whole(double score) {
+<span class="nc" id="L192">        return Math.round(score);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

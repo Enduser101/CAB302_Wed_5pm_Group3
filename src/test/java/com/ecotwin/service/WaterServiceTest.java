@@ -7,6 +7,8 @@ import com.ecotwin.model.User;
 import com.ecotwin.model.WaterEntry;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,6 +65,35 @@ class WaterServiceTest {
     @Test
     void negativeWaterUsageIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> service.recordEntry(user, household, -1.0, null));
+        verifyNoInteractions(waterEntryDao, activityLogDao, scoreService);
+    }
+
+    @Test
+    void editingWaterEntryLogsPreviousValue() {
+        WaterEntry oldEntry = new WaterEntry(1, household.getId(), "2026-09", 350.0, null, user.getId(), "before");
+        WaterEntry updatedEntry = new WaterEntry(1, household.getId(), "2026-09", 280.0, null, user.getId(), "now");
+        when(waterEntryDao.findByHousehold(household.getId())).thenReturn(List.of(oldEntry));
+        when(waterEntryDao.update(anyLong(), anyDouble(), any(), anyLong())).thenReturn(updatedEntry);
+
+        service.updateEntry(user, household, 1, 280.0, null);
+
+        verify(activityLogDao).log(household.getId(), user.getId(),
+                "Resident changed water usage from 350.0 L to 280.0 L");
+    }
+
+    @Test
+    void editingWaterEntryRecalculatesScore() {
+        when(waterEntryDao.update(anyLong(), anyDouble(), any(), anyLong()))
+            .thenReturn(new WaterEntry(1, household.getId(), "2026-09", 280.0, null, user.getId(), "now"));
+
+        service.updateEntry(user, household, 1, 280.0, null);
+
+        verify(scoreService, times(1)).recalculate(household.getId());
+    }
+
+    @Test
+    void negativeWaterEditIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> service.updateEntry(user, household, 1, -1.0, null));
         verifyNoInteractions(waterEntryDao, activityLogDao, scoreService);
     }
 

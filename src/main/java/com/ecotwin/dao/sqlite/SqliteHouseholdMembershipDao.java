@@ -114,4 +114,44 @@ public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
             throw new IllegalStateException("Could not look up household members", e);
         }
     }
+
+    // US-35: transfer administrator rights to another active member
+    @Override
+    public void transferAdmin(long householdId, long currentAdminUserId, long newAdminUserId) {
+        String sql = """
+            UPDATE household_memberships
+            SET role = CASE
+                WHEN user_id = ? THEN 'MEMBER'
+                WHEN user_id = ? THEN 'ADMIN'
+            END
+            WHERE household_id = ?
+              AND left_at IS NULL
+              AND user_id IN (?, ?)
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, currentAdminUserId);
+            statement.setLong(2, newAdminUserId);
+            statement.setLong(3, householdId);
+            statement.setLong(4, currentAdminUserId);
+            statement.setLong(5, newAdminUserId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not transfer administrator rights", e);
+        }
+    }
+
+    // US-36: delete household memberships
+    @Override
+    public void deleteByHousehold(long householdId) {
+        String sql = "DELETE FROM household_memberships WHERE household_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, householdId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not delete household memberships", e);
+        }
+    }
 }

@@ -71,6 +71,54 @@ public class SqliteTransportEntryDao implements TransportEntryDao {
             throw new IllegalStateException("Could not look up transport entries for household " + householdId, e);
         }
     }
+    @Override
+    public TransportEntry update(long entryId,
+                                 double publicTransportTripsPerWeek,
+                                 double flightsPerYear,
+                                 long updatedByUserId) {
+
+        String updatedAt = Instant.now().toString();
+
+        String sql = "UPDATE transport_entries SET "
+                + "public_transport_trips_per_week = ?, "
+                + "flights_per_year = ?, "
+                + "updated_by_user_id = ?, "
+                + "updated_at = ? "
+                + "WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDouble(1, publicTransportTripsPerWeek);
+            statement.setDouble(2, flightsPerYear);
+            statement.setLong(3, updatedByUserId);
+            statement.setString(4, updatedAt);
+            statement.setLong(5, entryId);
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not update transport entry " + entryId, e
+            );
+        }
+
+        String findSql = "SELECT * FROM transport_entries WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(findSql)) {
+            statement.setLong(1, entryId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Could not find transport entry " + entryId, e
+            );
+        }
+
+        throw new IllegalArgumentException("Transport entry not found");
+    }
+
 
     private TransportEntry map(ResultSet rs) throws SQLException {
         long updatedBy = rs.getLong("updated_by_user_id");

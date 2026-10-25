@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScenariosController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.controller</a> &gt; <span class="el_source">ScenariosController.java</span></div><h1>ScenariosController.java</h1><pre class="source lang-java linenums">package com.ecotwin.controller;
+
+import com.ecotwin.AppContext;
+import com.ecotwin.model.EnergyEntry;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.SavedScenario;
+import com.ecotwin.model.ScenarioComparison;
+import com.ecotwin.model.SustainabilityScenario;
+import com.ecotwin.model.TransportEntry;
+import com.ecotwin.model.WasteEntry;
+import com.ecotwin.model.WaterEntry;
+import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+
+import java.util.Comparator;
+import java.util.List;
+
+/**
+ * US-27: Create a temporary sustainability scenario.
+ *
+ * Scenario values are copied from current household data and can be changed
+ * without changing the household's real resource records.
+ *
+ * US-28: the scenario's score is shown beside the current score.
+ * US-29/30/31: scenarios can be saved, reopened and deleted.
+ */
+public class ScenariosController {
+
+    private final AppContext ctx;
+
+    private SustainabilityScenario currentValues;
+    private SustainabilityScenario scenario;
+
+    @FXML private VBox noHouseholdSection;
+    @FXML private VBox scenarioSection;
+
+    @FXML private TextField energyKwhField;
+    @FXML private TextField solarGenerationKwhField;
+    @FXML private TextField waterLitresField;
+    @FXML private TextField generalWasteKgField;
+    @FXML private TextField recycledWasteKgField;
+    @FXML private TextField compostKgField;
+    @FXML private TextField publicTransportTripsField;
+    @FXML private TextField flightsPerYearField;
+
+    @FXML private Label currentScoreLabel;
+    @FXML private Label scenarioScoreLabel;
+    @FXML private Label scoreDifferenceLabel;
+
+    @FXML private TextField scenarioNameField;
+    @FXML private VBox savedScenariosList;
+
+    @FXML private Label errorLabel;
+    @FXML private Label statusLabel;
+
+<span class="nc" id="L65">    public ScenariosController(Navigator nav, AppContext ctx) {</span>
+<span class="nc" id="L66">        this.ctx = ctx;</span>
+<span class="nc" id="L67">    }</span>
+
+    @FXML
+    private void initialize() {
+<span class="nc" id="L71">        loadCurrentHouseholdData();</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (scenario != null) {</span>
+<span class="nc" id="L74">            refreshSavedScenarios();</span>
+        }
+<span class="nc" id="L76">    }</span>
+
+    private void loadCurrentHouseholdData() {
+<span class="nc" id="L79">        boolean hasHousehold = ctx.session.hasActiveHousehold();</span>
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        noHouseholdSection.setVisible(!hasHousehold);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        noHouseholdSection.setManaged(!hasHousehold);</span>
+<span class="nc" id="L83">        scenarioSection.setVisible(hasHousehold);</span>
+<span class="nc" id="L84">        scenarioSection.setManaged(hasHousehold);</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (!hasHousehold) {</span>
+<span class="nc" id="L87">            return;</span>
+        }
+
+<span class="nc" id="L90">        Household household = ctx.session.getCurrentHousehold();</span>
+
+<span class="nc" id="L92">        List&lt;EnergyEntry&gt; energyEntries =</span>
+<span class="nc" id="L93">                ctx.energyService.findEntriesForHousehold(household);</span>
+<span class="nc" id="L94">        List&lt;WaterEntry&gt; waterEntries =</span>
+<span class="nc" id="L95">                ctx.waterService.findEntriesForHousehold(household);</span>
+<span class="nc" id="L96">        List&lt;WasteEntry&gt; wasteEntries =</span>
+<span class="nc" id="L97">                ctx.wasteService.findEntriesForHousehold(household);</span>
+<span class="nc" id="L98">        List&lt;TransportEntry&gt; transportEntries =</span>
+<span class="nc" id="L99">                ctx.transportService.findEntriesForHousehold(household);</span>
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (energyEntries.isEmpty()</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                || waterEntries.isEmpty()</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                || wasteEntries.isEmpty()</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                || transportEntries.isEmpty()) {</span>
+
+<span class="nc" id="L106">            scenarioSection.setVisible(false);</span>
+<span class="nc" id="L107">            scenarioSection.setManaged(false);</span>
+
+<span class="nc" id="L109">            showError(</span>
+                    &quot;Record energy, water, waste and transport information &quot;
+                            + &quot;before creating a scenario.&quot;
+            );
+<span class="nc" id="L113">            return;</span>
+        }
+
+<span class="nc" id="L116">        EnergyEntry energy = latestEnergy(energyEntries);</span>
+<span class="nc" id="L117">        WaterEntry water = latestWater(waterEntries);</span>
+<span class="nc" id="L118">        WasteEntry waste = latestWaste(wasteEntries);</span>
+<span class="nc" id="L119">        TransportEntry transport = latestTransport(transportEntries);</span>
+
+<span class="nc" id="L121">        currentValues = ctx.scenarioService.createScenario(</span>
+                energy,
+                water,
+                waste,
+                transport
+        );
+<span class="nc" id="L127">        scenario = currentValues.copy();</span>
+
+<span class="nc" id="L129">        populateFields();</span>
+<span class="nc" id="L130">        showComparison(compareToCurrent());</span>
+<span class="nc" id="L131">    }</span>
+
+    private EnergyEntry latestEnergy(List&lt;EnergyEntry&gt; entries) {
+<span class="nc" id="L134">        return entries.stream()</span>
+<span class="nc" id="L135">                .max(Comparator</span>
+<span class="nc" id="L136">                        .comparing(EnergyEntry::getPeriod)</span>
+<span class="nc" id="L137">                        .thenComparingLong(EnergyEntry::getId))</span>
+<span class="nc" id="L138">                .orElseThrow();</span>
+    }
+
+    private WaterEntry latestWater(List&lt;WaterEntry&gt; entries) {
+<span class="nc" id="L142">        return entries.stream()</span>
+<span class="nc" id="L143">                .max(Comparator</span>
+<span class="nc" id="L144">                        .comparing(WaterEntry::getPeriod)</span>
+<span class="nc" id="L145">                        .thenComparingLong(WaterEntry::getId))</span>
+<span class="nc" id="L146">                .orElseThrow();</span>
+    }
+
+    private WasteEntry latestWaste(List&lt;WasteEntry&gt; entries) {
+<span class="nc" id="L150">        return entries.stream()</span>
+<span class="nc" id="L151">                .max(Comparator</span>
+<span class="nc" id="L152">                        .comparing(WasteEntry::getPeriod)</span>
+<span class="nc" id="L153">                        .thenComparingLong(WasteEntry::getId))</span>
+<span class="nc" id="L154">                .orElseThrow();</span>
+    }
+
+    private TransportEntry latestTransport(List&lt;TransportEntry&gt; entries) {
+<span class="nc" id="L158">        return entries.stream()</span>
+<span class="nc" id="L159">                .max(Comparator</span>
+<span class="nc" id="L160">                        .comparing(TransportEntry::getPeriod)</span>
+<span class="nc" id="L161">                        .thenComparingLong(TransportEntry::getId))</span>
+<span class="nc" id="L162">                .orElseThrow();</span>
+    }
+
+    private void populateFields() {
+<span class="nc" id="L166">        energyKwhField.setText(String.valueOf(scenario.getEnergyKwh()));</span>
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (scenario.getSolarGenerationKwh() == null) {</span>
+<span class="nc" id="L169">            solarGenerationKwhField.clear();</span>
+        } else {
+<span class="nc" id="L171">            solarGenerationKwhField.setText(</span>
+<span class="nc" id="L172">                    String.valueOf(scenario.getSolarGenerationKwh())</span>
+            );
+        }
+
+<span class="nc" id="L176">        waterLitresField.setText(String.valueOf(scenario.getWaterLitres()));</span>
+<span class="nc" id="L177">        generalWasteKgField.setText(String.valueOf(scenario.getGeneralWasteKg()));</span>
+<span class="nc" id="L178">        recycledWasteKgField.setText(String.valueOf(scenario.getRecycledWasteKg()));</span>
+<span class="nc" id="L179">        compostKgField.setText(String.valueOf(scenario.getCompostKg()));</span>
+
+<span class="nc" id="L181">        publicTransportTripsField.setText(</span>
+<span class="nc" id="L182">                String.valueOf(scenario.getPublicTransportTripsPerWeek())</span>
+        );
+
+<span class="nc" id="L185">        flightsPerYearField.setText(</span>
+<span class="nc" id="L186">                String.valueOf(scenario.getFlightsPerYear())</span>
+        );
+<span class="nc" id="L188">    }</span>
+
+    @FXML
+    private void handleApplyScenarioChanges() {
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (!applyFieldsToScenario()) {</span>
+<span class="nc" id="L193">            return;</span>
+        }
+
+<span class="nc" id="L196">        showComparison(compareToCurrent());</span>
+<span class="nc" id="L197">        showStatus(&quot;Scenario updated. Your real household data has not been changed.&quot;);</span>
+<span class="nc" id="L198">    }</span>
+
+    /** Copies the form into the in-memory scenario. Returns false (with an error shown) if it is invalid. */
+    private boolean applyFieldsToScenario() {
+        try {
+<span class="nc" id="L203">            double energyKwh =</span>
+<span class="nc" id="L204">                    Double.parseDouble(energyKwhField.getText().trim());</span>
+
+            Double solarGenerationKwh =
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                    solarGenerationKwhField.getText().isBlank()</span>
+<span class="nc" id="L208">                            ? null</span>
+<span class="nc" id="L209">                            : Double.parseDouble(</span>
+<span class="nc" id="L210">                                    solarGenerationKwhField.getText().trim()</span>
+                            );
+
+<span class="nc" id="L213">            double waterLitres =</span>
+<span class="nc" id="L214">                    Double.parseDouble(waterLitresField.getText().trim());</span>
+
+<span class="nc" id="L216">            double generalWasteKg =</span>
+<span class="nc" id="L217">                    Double.parseDouble(generalWasteKgField.getText().trim());</span>
+
+<span class="nc" id="L219">            double recycledWasteKg =</span>
+<span class="nc" id="L220">                    Double.parseDouble(recycledWasteKgField.getText().trim());</span>
+
+<span class="nc" id="L222">            double compostKg =</span>
+<span class="nc" id="L223">                    Double.parseDouble(compostKgField.getText().trim());</span>
+
+<span class="nc" id="L225">            double publicTransportTrips =</span>
+<span class="nc" id="L226">                    Double.parseDouble(</span>
+<span class="nc" id="L227">                            publicTransportTripsField.getText().trim()</span>
+                    );
+
+<span class="nc" id="L230">            double flightsPerYear =</span>
+<span class="nc" id="L231">                    Double.parseDouble(flightsPerYearField.getText().trim());</span>
+
+<span class="nc bnc" id="L233" title="All 4 branches missed.">            if (energyKwh &lt; 0</span>
+<span class="nc bnc" id="L234" title="All 14 branches missed.">                    || (solarGenerationKwh != null &amp;&amp; solarGenerationKwh &lt; 0)</span>
+                    || waterLitres &lt; 0
+                    || generalWasteKg &lt; 0
+                    || recycledWasteKg &lt; 0
+                    || compostKg &lt; 0
+                    || publicTransportTrips &lt; 0
+                    || flightsPerYear &lt; 0) {
+
+<span class="nc" id="L242">                showError(&quot;Scenario values cannot be negative.&quot;);</span>
+<span class="nc" id="L243">                return false;</span>
+            }
+
+<span class="nc" id="L246">            scenario.setEnergyKwh(energyKwh);</span>
+<span class="nc" id="L247">            scenario.setSolarGenerationKwh(solarGenerationKwh);</span>
+<span class="nc" id="L248">            scenario.setWaterLitres(waterLitres);</span>
+<span class="nc" id="L249">            scenario.setGeneralWasteKg(generalWasteKg);</span>
+<span class="nc" id="L250">            scenario.setRecycledWasteKg(recycledWasteKg);</span>
+<span class="nc" id="L251">            scenario.setCompostKg(compostKg);</span>
+<span class="nc" id="L252">            scenario.setPublicTransportTripsPerWeek(publicTransportTrips);</span>
+<span class="nc" id="L253">            scenario.setFlightsPerYear(flightsPerYear);</span>
+
+<span class="nc" id="L255">            hideError();</span>
+<span class="nc" id="L256">            return true;</span>
+
+<span class="nc" id="L258">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L259">            showError(&quot;Enter valid numbers for all scenario values.&quot;);</span>
+<span class="nc" id="L260">            return false;</span>
+        }
+    }
+
+    @FXML
+    private void handleResetScenario() {
+<span class="nc" id="L266">        hideError();</span>
+
+<span class="nc" id="L268">        statusLabel.setVisible(false);</span>
+<span class="nc" id="L269">        statusLabel.setManaged(false);</span>
+
+<span class="nc" id="L271">        loadCurrentHouseholdData();</span>
+<span class="nc" id="L272">    }</span>
+
+    // US-28: compare scenario score to current score
+    private ScenarioComparison compareToCurrent() {
+<span class="nc" id="L276">        return ctx.scenarioService.compareToCurrent(</span>
+                currentValues,
+                scenario,
+<span class="nc" id="L279">                ctx.session.getCurrentHousehold()</span>
+        );
+    }
+
+    private void showComparison(ScenarioComparison comparison) {
+<span class="nc" id="L284">        currentScoreLabel.setText(formatScore(comparison.getCurrentScore()));</span>
+<span class="nc" id="L285">        scenarioScoreLabel.setText(formatScore(comparison.getScenarioScore()));</span>
+<span class="nc" id="L286">        scoreDifferenceLabel.setText(describeDifference(comparison));</span>
+
+<span class="nc" id="L288">        scoreDifferenceLabel.getStyleClass().removeAll(&quot;success-text&quot;, &quot;error-text&quot;, &quot;muted-text&quot;);</span>
+<span class="nc bnc" id="L289" title="All 3 branches missed.">        scoreDifferenceLabel.getStyleClass().add(switch (comparison.getDirection()) {</span>
+<span class="nc" id="L290">            case IMPROVED -&gt; &quot;success-text&quot;;</span>
+<span class="nc" id="L291">            case WORSENED -&gt; &quot;error-text&quot;;</span>
+<span class="nc" id="L292">            case UNCHANGED -&gt; &quot;muted-text&quot;;</span>
+        });
+<span class="nc" id="L294">    }</span>
+
+    private String describeDifference(ScenarioComparison comparison) {
+<span class="nc bnc" id="L297" title="All 3 branches missed.">        return switch (comparison.getDirection()) {</span>
+<span class="nc" id="L298">            case IMPROVED -&gt; comparison.signedPoints() + &quot; - better than your current score&quot;;</span>
+<span class="nc" id="L299">            case WORSENED -&gt; comparison.signedPoints() + &quot; - worse than your current score&quot;;</span>
+<span class="nc" id="L300">            case UNCHANGED -&gt; &quot;No change from your current score&quot;;</span>
+        };
+    }
+
+    private String formatScore(double score) {
+<span class="nc" id="L305">        return String.format(&quot;%.1f&quot;, score);</span>
+    }
+
+    // US-29: save a scenario
+    @FXML
+    private void handleSaveScenario() {
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        if (!ctx.session.canSaveScenario()) {</span>
+<span class="nc" id="L312">            showError(&quot;Sign in to save a scenario.&quot;);</span>
+<span class="nc" id="L313">            return;</span>
+        }
+
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (!applyFieldsToScenario()) {</span>
+<span class="nc" id="L317">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L321">            SavedScenario saved = ctx.scenarioService.saveScenario(</span>
+<span class="nc" id="L322">                    ctx.session.getCurrentUser(),</span>
+<span class="nc" id="L323">                    ctx.session.getCurrentHousehold(),</span>
+<span class="nc" id="L324">                    scenarioNameField.getText(),</span>
+                    currentValues,
+                    scenario
+            );
+
+<span class="nc" id="L329">            scenarioNameField.clear();</span>
+<span class="nc" id="L330">            showComparison(compareToCurrent());</span>
+<span class="nc" id="L331">            showStatus(&quot;Saved \&quot;&quot; + saved.getName() + &quot;\&quot; for your household.&quot;);</span>
+<span class="nc" id="L332">            refreshSavedScenarios();</span>
+
+<span class="nc" id="L334">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L335">            showError(&quot;Enter a name for the scenario before saving.&quot;);</span>
+<span class="nc" id="L336">        }</span>
+<span class="nc" id="L337">    }</span>
+
+    // US-30: view saved scenarios
+    private void refreshSavedScenarios() {
+<span class="nc" id="L341">        savedScenariosList.getChildren().clear();</span>
+
+<span class="nc" id="L343">        List&lt;SavedScenario&gt; savedScenarios =</span>
+<span class="nc" id="L344">                ctx.scenarioService.findSavedScenarios(ctx.session.getCurrentHousehold());</span>
+
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        if (savedScenarios.isEmpty()) {</span>
+<span class="nc" id="L347">            Label emptyLabel = new Label(&quot;No scenarios have been saved for this household yet.&quot;);</span>
+<span class="nc" id="L348">            emptyLabel.getStyleClass().add(&quot;muted-text&quot;);</span>
+<span class="nc" id="L349">            savedScenariosList.getChildren().add(emptyLabel);</span>
+<span class="nc" id="L350">            return;</span>
+        }
+
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        for (SavedScenario saved : savedScenarios) {</span>
+<span class="nc" id="L354">            savedScenariosList.getChildren().add(savedScenarioRow(saved));</span>
+<span class="nc" id="L355">        }</span>
+<span class="nc" id="L356">    }</span>
+
+    private HBox savedScenarioRow(SavedScenario saved) {
+<span class="nc" id="L359">        ScenarioComparison comparison =</span>
+<span class="nc" id="L360">                new ScenarioComparison(saved.getBaselineScore(), saved.getProjectedScore());</span>
+
+<span class="nc" id="L362">        Label nameLabel = new Label(saved.getName());</span>
+<span class="nc" id="L363">        nameLabel.getStyleClass().add(&quot;value-text&quot;);</span>
+
+<span class="nc" id="L365">        Label scoresLabel = new Label(</span>
+<span class="nc" id="L366">                &quot;Score &quot; + formatScore(comparison.getScenarioScore())</span>
+<span class="nc" id="L367">                        + &quot; (current was &quot; + formatScore(comparison.getCurrentScore()) + &quot;)&quot;</span>
+        );
+<span class="nc" id="L369">        scoresLabel.getStyleClass().add(&quot;muted-text&quot;);</span>
+
+<span class="nc" id="L371">        Region spacer = new Region();</span>
+<span class="nc" id="L372">        HBox.setHgrow(spacer, Priority.ALWAYS);</span>
+
+<span class="nc" id="L374">        Button openButton = new Button(&quot;Open&quot;);</span>
+<span class="nc" id="L375">        openButton.getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="nc" id="L376">        openButton.setOnAction(event -&gt; handleOpenSavedScenario(saved));</span>
+
+<span class="nc" id="L378">        Button deleteButton = new Button(&quot;Delete&quot;);</span>
+<span class="nc" id="L379">        deleteButton.getStyleClass().add(&quot;btn-danger&quot;);</span>
+<span class="nc" id="L380">        deleteButton.setOnAction(event -&gt; handleDeleteSavedScenario(saved));</span>
+
+<span class="nc" id="L382">        HBox row = new HBox(16, nameLabel, scoresLabel, spacer, openButton, deleteButton);</span>
+<span class="nc" id="L383">        row.setAlignment(Pos.CENTER_LEFT);</span>
+<span class="nc" id="L384">        row.getStyleClass().add(&quot;history-row&quot;);</span>
+<span class="nc" id="L385">        return row;</span>
+    }
+
+    private void handleOpenSavedScenario(SavedScenario saved) {
+<span class="nc" id="L389">        scenario = saved.getValues().copy();</span>
+
+<span class="nc" id="L391">        hideError();</span>
+<span class="nc" id="L392">        populateFields();</span>
+<span class="nc" id="L393">        showComparison(new ScenarioComparison(saved.getBaselineScore(), saved.getProjectedScore()));</span>
+<span class="nc" id="L394">        showStatus(</span>
+<span class="nc" id="L395">                &quot;Viewing saved scenario \&quot;&quot; + saved.getName() + &quot;\&quot; with the scores it had when it was saved. &quot;</span>
+                        + &quot;Apply Scenario Changes compares it with your current data.&quot;
+        );
+<span class="nc" id="L398">    }</span>
+
+    // US-31: delete a saved scenario
+    private void handleDeleteSavedScenario(SavedScenario saved) {
+<span class="nc" id="L402">        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);</span>
+
+<span class="nc" id="L404">        confirmation.setTitle(&quot;Delete Scenario&quot;);</span>
+<span class="nc" id="L405">        confirmation.setHeaderText(&quot;Delete the scenario \&quot;&quot; + saved.getName() + &quot;\&quot;?&quot;);</span>
+<span class="nc" id="L406">        confirmation.setContentText(</span>
+                &quot;It will be removed for every member of your household. &quot;
+                        + &quot;Your household data will not be changed.&quot;
+        );
+
+<span class="nc" id="L411">        confirmation.showAndWait().ifPresent(response -&gt; {</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">            if (response == ButtonType.OK) {</span>
+<span class="nc" id="L413">                ctx.scenarioService.deleteScenario(</span>
+<span class="nc" id="L414">                        ctx.session.getCurrentHousehold(),</span>
+<span class="nc" id="L415">                        saved.getId()</span>
+                );
+
+<span class="nc" id="L418">                showStatus(&quot;Deleted \&quot;&quot; + saved.getName() + &quot;\&quot;.&quot;);</span>
+<span class="nc" id="L419">                refreshSavedScenarios();</span>
+            }
+<span class="nc" id="L421">        });</span>
+<span class="nc" id="L422">    }</span>
+
+    private void showStatus(String message) {
+<span class="nc" id="L425">        statusLabel.setText(message);</span>
+<span class="nc" id="L426">        statusLabel.setVisible(true);</span>
+<span class="nc" id="L427">        statusLabel.setManaged(true);</span>
+<span class="nc" id="L428">    }</span>
+
+    private void showError(String message) {
+<span class="nc" id="L431">        errorLabel.setText(message);</span>
+<span class="nc" id="L432">        errorLabel.setVisible(true);</span>
+<span class="nc" id="L433">        errorLabel.setManaged(true);</span>
+<span class="nc" id="L434">    }</span>
+
+    private void hideError() {
+<span class="nc" id="L437">        errorLabel.setVisible(false);</span>
+<span class="nc" id="L438">        errorLabel.setManaged(false);</span>
+<span class="nc" id="L439">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

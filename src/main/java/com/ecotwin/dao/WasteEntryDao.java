@@ -9,4 +9,9 @@ public interface WasteEntryDao {
     WasteEntry create(long householdId, String period, double generalKg, double recycledKg, double compostKg,
                        Long updatedByUserId);
     List<WasteEntry> findByHousehold(long householdId);
+    WasteEntry update(long entryId,
+                      double generalWasteKg,
+                      double recyclingKg,
+                      double organicWasteKg,
+                      long updatedByUserId);
 }

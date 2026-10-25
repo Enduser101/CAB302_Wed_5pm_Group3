@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HouseholdService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.service</a> &gt; <span class="el_source">HouseholdService.java</span></div><h1>HouseholdService.java</h1><pre class="source lang-java linenums">package com.ecotwin.service;
+
+import com.ecotwin.dao.ActivityLogDao;
+import com.ecotwin.dao.HouseholdDao;
+import com.ecotwin.dao.HouseholdMembershipDao;
+import com.ecotwin.dao.UserDao;
+import com.ecotwin.model.Household;
+import com.ecotwin.model.HouseholdMembership;
+import com.ecotwin.model.User;
+import com.ecotwin.model.ActivityLogEntry;
+
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Households and their members: creating and joining (US-08, US-09), leaving and viewing
+ * members (US-10, US-11), activity history (US-12, US-13) and administration (US-32 to US-36).
+ *
+ * &lt;p&gt;Each household has exactly one administrator. Membership changes are written to the
+ * household's activity history. Admin-only actions throw {@link IllegalArgumentException}
+ * when an ordinary member tries them, and the UI shows that message.
+ */
+public class HouseholdService {
+
+    private static final String JOIN_CODE_ALPHABET = &quot;ABCDEFGHJKLMNPQRSTUVWXYZ23456789&quot;; // no 0/O/1/I
+    private static final int JOIN_CODE_LENGTH = 6;
+<span class="fc" id="L29">    private static final SecureRandom RANDOM = new SecureRandom();</span>
+
+    private final HouseholdDao householdDao;
+    private final HouseholdMembershipDao membershipDao;
+    private final ActivityLogDao activityLogDao;
+    private final UserDao userDao;
+
+    /**
+     * @param householdDao   where households are stored
+     * @param membershipDao  who belongs to which household, and their role
+     * @param activityLogDao where history messages are written
+     * @param userDao        used to look up members' accounts
+     */
+    public HouseholdService(HouseholdDao householdDao, HouseholdMembershipDao membershipDao,
+<span class="fc" id="L43">                            ActivityLogDao activityLogDao, UserDao userDao) {</span>
+<span class="fc" id="L44">        this.householdDao = householdDao;</span>
+<span class="fc" id="L45">        this.membershipDao = membershipDao;</span>
+<span class="fc" id="L46">        this.activityLogDao = activityLogDao;</span>
+<span class="fc" id="L47">        this.userDao = userDao;</span>
+<span class="fc" id="L48">    }</span>
+
+    /**
+     * US-08: creator becomes admin, household persists after restart.
+     *
+     * @param creator      the signed-in user creating the household; they become its admin
+     * @param name         the household's name
+     * @param occupants    how many people live there (at least 1); scores are per person
+     * @param dwellingType e.g. &quot;House&quot; or &quot;Apartment&quot;
+     * @param state        the Australian state, e.g. &quot;QLD&quot;
+     * @return the new household, with a unique 6-character join code
+     * @throws IllegalArgumentException if the name is blank or occupants is less than 1
+     */
+    public Household createHousehold(User creator, String name, int occupants, String dwellingType, String state) {
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        if (name == null || name.isBlank()) {</span>
+<span class="fc" id="L63">            throw new IllegalArgumentException(&quot;Household name is required&quot;);</span>
+        }
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (occupants &lt; 1) {</span>
+<span class="fc" id="L66">            throw new IllegalArgumentException(&quot;Number of occupants must be at least 1&quot;);</span>
+        }
+<span class="fc" id="L68">        String joinCode = generateUniqueJoinCode();</span>
+<span class="fc" id="L69">        Household household = householdDao.create(name, occupants, dwellingType, state, joinCode);</span>
+<span class="fc" id="L70">        membershipDao.addMember(creator.getId(), household.getId(), HouseholdMembership.Role.ADMIN);</span>
+<span class="fc" id="L71">        activityLogDao.log(household.getId(), creator.getId(), displayName(creator) + &quot; created the household&quot;);</span>
+<span class="fc" id="L72">        return household;</span>
+    }
+
+    /**
+     * US-09: join by code; invalid code raises an error the UI turns into &quot;No household found with that code&quot;.
+     * The code is trimmed and upper-cased first, so &quot; 95fcve&quot; works.
+     *
+     * @param user     the signed-in user joining
+     * @param joinCode the code shared by the household's admin
+     * @return the household joined, with the user added as an ordinary member
+     * @throws IllegalArgumentException if the code is blank or matches no household
+     */
+    public Household joinHousehold(User user, String joinCode) {
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">        if (joinCode == null || joinCode.isBlank()) {</span>
+<span class="fc" id="L86">            throw new IllegalArgumentException(&quot;Enter a join code&quot;);</span>
+        }
+<span class="fc" id="L88">        Household household = householdDao.findByJoinCode(joinCode.trim().toUpperCase())</span>
+<span class="fc" id="L89">            .orElseThrow(() -&gt; new IllegalArgumentException(&quot;No household found with that code&quot;));</span>
+<span class="fc" id="L90">        membershipDao.addMember(user.getId(), household.getId(), HouseholdMembership.Role.MEMBER);</span>
+<span class="fc" id="L91">        activityLogDao.log(household.getId(), user.getId(), displayName(user) + &quot; joined the household&quot;);</span>
+<span class="fc" id="L92">        return household;</span>
+    }
+
+    /**
+     * @param user the user to look up
+     * @return the household the user currently belongs to, or empty if they have none
+     */
+    public Optional&lt;Household&gt; findActiveHouseholdForUser(User user) {
+<span class="fc" id="L100">        return membershipDao.findAnyActiveByUser(user.getId())</span>
+<span class="fc" id="L101">            .flatMap(membership -&gt; householdDao.findById(membership.getHouseholdId()));</span>
+    }
+
+    /**
+     * @param user      the user to look up
+     * @param household the household to check
+     * @return the user's current membership (including their role), or empty if they are
+     *         not an active member
+     */
+    public Optional&lt;HouseholdMembership&gt; findActiveMembership(User user, Household household) {
+<span class="fc" id="L111">        return membershipDao.findActiveByUserAndHousehold(user.getId(), household.getId());</span>
+    }
+
+    /**
+     * Makes a random 6-character code, retrying until no other household uses it. Letters
+     * and digits that look alike (0/O, 1/I) are left out so codes are easy to read out.
+     *
+     * @return a join code no household currently has
+     */
+    private String generateUniqueJoinCode() {
+        String code;
+        do {
+<span class="fc" id="L123">            StringBuilder sb = new StringBuilder(JOIN_CODE_LENGTH);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            for (int i = 0; i &lt; JOIN_CODE_LENGTH; i++) {</span>
+<span class="fc" id="L125">                sb.append(JOIN_CODE_ALPHABET.charAt(RANDOM.nextInt(JOIN_CODE_ALPHABET.length())));</span>
+            }
+<span class="fc" id="L127">            code = sb.toString();</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        } while (householdDao.findByJoinCode(code).isPresent());</span>
+<span class="fc" id="L129">        return code;</span>
+    }
+
+    /**
+     * @param user the user to name
+     * @return their display name, or their username if they have not set one
+     */
+    private String displayName(User user) {
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        return user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();</span>
+    }
+
+    // US-10: leave a household
+    // US-13: departures are recorded in the household activity history
+    public void leaveHousehold(User user, Household household) {
+<span class="fc" id="L143">        HouseholdMembership membership = findActiveMembership(user, household).orElseThrow();</span>
+<span class="fc" id="L144">        membershipDao.leaveHousehold(membership.getId());</span>
+<span class="fc" id="L145">        activityLogDao.log(household.getId(), user.getId(), displayName(user) + &quot; left the household&quot;);</span>
+<span class="fc" id="L146">    }</span>
+
+    // US-11: view current household members
+    public List&lt;User&gt; findActiveMembers(Household household) {
+<span class="fc" id="L150">        List&lt;User&gt; users = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (HouseholdMembership membership : membershipDao.findActiveByHousehold(household.getId())) {</span>
+<span class="fc" id="L153">            userDao.findById(membership.getUserId()).ifPresent(users::add);</span>
+<span class="fc" id="L154">        }</span>
+
+<span class="fc" id="L156">        return users;</span>
+    }
+
+    // US-32: administrator removes a member from the household
+    public void removeMember(User admin, Household household, User member) {
+<span class="fc" id="L161">        HouseholdMembership adminMembership =</span>
+<span class="fc" id="L162">                findActiveMembership(admin, household).orElseThrow();</span>
+
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L165">            throw new IllegalArgumentException(&quot;Only the household administrator can remove members&quot;);</span>
+        }
+
+<span class="fc" id="L168">        HouseholdMembership memberMembership =</span>
+<span class="fc" id="L169">                findActiveMembership(member, household).orElseThrow();</span>
+
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (memberMembership.getRole() == HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L172">            throw new IllegalArgumentException(&quot;The household administrator cannot be removed&quot;);</span>
+        }
+
+<span class="fc" id="L175">        membershipDao.leaveHousehold(memberMembership.getId());</span>
+
+<span class="fc" id="L177">        activityLogDao.log(</span>
+<span class="fc" id="L178">                household.getId(),</span>
+<span class="fc" id="L179">                admin.getId(),</span>
+<span class="fc" id="L180">                member.getDisplayName() + &quot; was removed from the household&quot;</span>
+        );
+<span class="fc" id="L182">    }</span>
+    public List&lt;ActivityLogEntry&gt; getHistory(Household household) {
+<span class="fc" id="L184">        return activityLogDao.findByHousehold(household.getId());</span>
+    }
+
+    // US-33: administrator renames the household
+    public void renameHousehold(User admin, Household household, String newName) {
+<span class="fc" id="L189">        HouseholdMembership adminMembership =</span>
+<span class="fc" id="L190">                findActiveMembership(admin, household).orElseThrow();</span>
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L193">            throw new IllegalArgumentException(&quot;Only the household administrator can rename the household&quot;);</span>
+        }
+
+<span class="pc bpc" id="L196" title="1 of 4 branches missed.">        if (newName == null || newName.isBlank()) {</span>
+<span class="fc" id="L197">            throw new IllegalArgumentException(&quot;Household name is required&quot;);</span>
+        }
+
+<span class="fc" id="L200">        String oldName = household.getName();</span>
+<span class="fc" id="L201">        String trimmedName = newName.trim();</span>
+
+<span class="fc" id="L203">        householdDao.renameHousehold(household.getId(), trimmedName);</span>
+
+<span class="fc" id="L205">        activityLogDao.log(</span>
+<span class="fc" id="L206">                household.getId(),</span>
+<span class="fc" id="L207">                admin.getId(),</span>
+                &quot;Household renamed from &quot; + oldName + &quot; to &quot; + trimmedName
+        );
+<span class="fc" id="L210">    }</span>
+
+    // US-33: change the household join code
+    public void changeJoinCode(User admin, Household household) {
+<span class="fc" id="L214">        HouseholdMembership adminMembership =</span>
+<span class="fc" id="L215">                findActiveMembership(admin, household).orElseThrow();</span>
+
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L218">            throw new IllegalArgumentException(&quot;Only the household administrator can change the join code&quot;);</span>
+        }
+
+<span class="fc" id="L221">        String newJoinCode = generateUniqueJoinCode();</span>
+
+<span class="fc" id="L223">        householdDao.updateJoinCode(household.getId(), newJoinCode);</span>
+
+<span class="fc" id="L225">        activityLogDao.log(</span>
+<span class="fc" id="L226">                household.getId(),</span>
+<span class="fc" id="L227">                admin.getId(),</span>
+<span class="fc" id="L228">                &quot;Household join code changed from &quot; + household.getJoinCode()</span>
+                        + &quot; to &quot; + newJoinCode
+        );
+<span class="fc" id="L231">    }</span>
+
+    // US-35: transfer administrator rights to another active member
+    public void transferAdmin(User admin, Household household, User newAdmin) {
+<span class="fc" id="L235">        HouseholdMembership adminMembership =</span>
+<span class="fc" id="L236">                findActiveMembership(admin, household).orElseThrow();</span>
+
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L239">            throw new IllegalArgumentException(&quot;Only the household administrator can transfer administrator rights&quot;);</span>
+        }
+
+<span class="fc" id="L242">        HouseholdMembership newAdminMembership =</span>
+<span class="fc" id="L243">                findActiveMembership(newAdmin, household).orElseThrow();</span>
+
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        if (newAdminMembership.getRole() != HouseholdMembership.Role.MEMBER) {</span>
+<span class="nc" id="L246">            throw new IllegalArgumentException(&quot;Administrator rights can only be transferred to an active member&quot;);</span>
+        }
+
+<span class="fc" id="L249">        membershipDao.transferAdmin(</span>
+<span class="fc" id="L250">                household.getId(),</span>
+<span class="fc" id="L251">                admin.getId(),</span>
+<span class="fc" id="L252">                newAdmin.getId()</span>
+        );
+
+<span class="fc" id="L255">        activityLogDao.log(</span>
+<span class="fc" id="L256">                household.getId(),</span>
+<span class="fc" id="L257">                admin.getId(),</span>
+<span class="fc" id="L258">                admin.getDisplayName() + &quot; transferred administrator rights to &quot;</span>
+<span class="fc" id="L259">                        + newAdmin.getDisplayName()</span>
+        );
+<span class="fc" id="L261">    }</span>
+
+    // US-36: delete a household
+    public void deleteHousehold(User admin, Household household) {
+<span class="fc" id="L265">        HouseholdMembership adminMembership =</span>
+<span class="fc" id="L266">                findActiveMembership(admin, household).orElseThrow(</span>
+<span class="nc" id="L267">                        () -&gt; new IllegalArgumentException(</span>
+                                &quot;You are not an active member of this household&quot;));
+
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if (adminMembership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L271">            throw new IllegalArgumentException(</span>
+                    &quot;Only the household administrator can delete the household&quot;);
+        }
+
+        // Delete history and memberships before deleting the household.
+<span class="fc" id="L276">        activityLogDao.deleteByHousehold(household.getId());</span>
+<span class="fc" id="L277">        membershipDao.deleteByHousehold(household.getId());</span>
+<span class="fc" id="L278">        householdDao.deleteHousehold(household.getId());</span>
+<span class="fc" id="L279">    }</span>
+
+    // US-34: check that the user is the household administrator
+    private void requireAdmin(User user, Household household) {
+<span class="fc" id="L283">        HouseholdMembership membership = findActiveMembership(user, household)</span>
+<span class="pc" id="L284">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
+                        &quot;You are not an active member of this household&quot;));
+
+<span class="fc bfc" id="L287" title="All 2 branches covered.">        if (membership.getRole() != HouseholdMembership.Role.ADMIN) {</span>
+<span class="fc" id="L288">            throw new IllegalArgumentException(</span>
+                    &quot;Only the household administrator can edit activity history&quot;);
+        }
+<span class="fc" id="L291">    }</span>
+
+    // US-34: edit an activity history entry and record the correction
+    public void editHistoryEntry(User admin, Household household,
+                                 long entryId, String newMessage) {
+<span class="fc" id="L296">        requireAdmin(admin, household);</span>
+
+<span class="pc bpc" id="L298" title="2 of 4 branches missed.">        if (newMessage == null || newMessage.trim().isEmpty()) {</span>
+<span class="nc" id="L299">            throw new IllegalArgumentException(&quot;The activity message cannot be empty&quot;);</span>
+        }
+
+<span class="fc" id="L302">        ActivityLogEntry entry = getHistory(household).stream()</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">                .filter(item -&gt; item.getId() == entryId)</span>
+<span class="fc" id="L304">                .findFirst()</span>
+<span class="pc" id="L305">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
+                        &quot;Activity history entry not found&quot;));
+
+<span class="fc" id="L308">        String oldMessage = entry.getMessage();</span>
+<span class="fc" id="L309">        String updatedMessage = newMessage.trim();</span>
+
+<span class="fc" id="L311">        activityLogDao.updateMessage(entryId, household.getId(), updatedMessage);</span>
+
+        // US-34: record the original and updated messages
+<span class="fc" id="L314">        activityLogDao.log(</span>
+<span class="fc" id="L315">                household.getId(),</span>
+<span class="fc" id="L316">                admin.getId(),</span>
+<span class="fc" id="L317">                displayName(admin) + &quot; edited activity entry #&quot; + entryId</span>
+                        + &quot;. Original: \&quot;&quot; + oldMessage
+                        + &quot;\&quot;. Updated: \&quot;&quot; + updatedMessage + &quot;\&quot;&quot;);
+<span class="fc" id="L320">    }</span>
+
+    // US-34: delete an activity history entry and record what was removed
+    public void deleteHistoryEntry(User admin, Household household, long entryId) {
+<span class="fc" id="L324">        requireAdmin(admin, household);</span>
+
+<span class="fc" id="L326">        ActivityLogEntry entry = getHistory(household).stream()</span>
+<span class="pc bpc" id="L327" title="1 of 2 branches missed.">                .filter(item -&gt; item.getId() == entryId)</span>
+<span class="fc" id="L328">                .findFirst()</span>
+<span class="pc" id="L329">                .orElseThrow(() -&gt; new IllegalArgumentException(</span>
+                        &quot;Activity history entry not found&quot;));
+
+<span class="fc" id="L332">        activityLogDao.deleteEntry(entryId, household.getId());</span>
+
+        // US-34: preserve a record of the deleted entry
+<span class="fc" id="L335">        activityLogDao.log(</span>
+<span class="fc" id="L336">                household.getId(),</span>
+<span class="fc" id="L337">                admin.getId(),</span>
+<span class="fc" id="L338">                displayName(admin) + &quot; deleted activity entry #&quot; + entryId</span>
+<span class="fc" id="L339">                        + &quot;. Original message: \&quot;&quot; + entry.getMessage() + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L340">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

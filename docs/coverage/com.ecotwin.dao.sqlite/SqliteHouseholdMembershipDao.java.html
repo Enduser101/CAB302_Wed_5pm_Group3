@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqliteHouseholdMembershipDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EcoTwin</a> &gt; <a href="index.source.html" class="el_package">com.ecotwin.dao.sqlite</a> &gt; <span class="el_source">SqliteHouseholdMembershipDao.java</span></div><h1>SqliteHouseholdMembershipDao.java</h1><pre class="source lang-java linenums">package com.ecotwin.dao.sqlite;
+
+import com.ecotwin.dao.HouseholdMembershipDao;
+import com.ecotwin.model.HouseholdMembership;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class SqliteHouseholdMembershipDao implements HouseholdMembershipDao {
+
+    private final Connection connection;
+
+<span class="fc" id="L20">    public SqliteHouseholdMembershipDao(Connection connection) {</span>
+<span class="fc" id="L21">        this.connection = connection;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public HouseholdMembership addMember(long userId, long householdId, HouseholdMembership.Role role) {
+<span class="fc" id="L26">        String joinedAt = Instant.now().toString();</span>
+<span class="fc" id="L27">        String sql = &quot;INSERT INTO household_memberships (user_id, household_id, role, joined_at, left_at) &quot;</span>
+            + &quot;VALUES (?, ?, ?, ?, NULL)&quot;;
+<span class="fc" id="L29">        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L30">            statement.setLong(1, userId);</span>
+<span class="fc" id="L31">            statement.setLong(2, householdId);</span>
+<span class="fc" id="L32">            statement.setString(3, role.name());</span>
+<span class="fc" id="L33">            statement.setString(4, joinedAt);</span>
+<span class="fc" id="L34">            statement.executeUpdate();</span>
+<span class="fc" id="L35">            try (ResultSet keys = statement.getGeneratedKeys()) {</span>
+<span class="fc" id="L36">                keys.next();</span>
+<span class="fc" id="L37">                return new HouseholdMembership(keys.getLong(1), userId, householdId, role, joinedAt, null);</span>
+            }
+<span class="nc" id="L39">        } catch (SQLException e) {</span>
+<span class="nc" id="L40">            throw new IllegalStateException(&quot;Could not add member to household &quot; + householdId, e);</span>
+        }
+    }
+
+    @Override
+    public Optional&lt;HouseholdMembership&gt; findActiveByUserAndHousehold(long userId, long householdId) {
+<span class="nc" id="L46">        String sql = &quot;SELECT * FROM household_memberships WHERE user_id = ? AND household_id = ? AND left_at IS NULL&quot;;</span>
+<span class="nc" id="L47">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L48">            statement.setLong(1, userId);</span>
+<span class="nc" id="L49">            statement.setLong(2, householdId);</span>
+<span class="nc" id="L50">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                return rs.next() ? Optional.of(map(rs)) : Optional.empty();</span>
+            }
+<span class="nc" id="L53">        } catch (SQLException e) {</span>
+<span class="nc" id="L54">            throw new IllegalStateException(&quot;Could not look up membership&quot;, e);</span>
+        }
+    }
+
+    @Override
+    public Optional&lt;HouseholdMembership&gt; findAnyActiveByUser(long userId) {
+<span class="fc" id="L60">        String sql = &quot;SELECT * FROM household_memberships WHERE user_id = ? AND left_at IS NULL ORDER BY joined_at LIMIT 1&quot;;</span>
+<span class="fc" id="L61">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L62">            statement.setLong(1, userId);</span>
+<span class="fc" id="L63">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                return rs.next() ? Optional.of(map(rs)) : Optional.empty();</span>
+            }
+<span class="nc" id="L66">        } catch (SQLException e) {</span>
+<span class="nc" id="L67">            throw new IllegalStateException(&quot;Could not look up active membership for user &quot; + userId, e);</span>
+        }
+    }
+
+    private HouseholdMembership map(ResultSet rs) throws SQLException {
+<span class="fc" id="L72">        return new HouseholdMembership(</span>
+<span class="fc" id="L73">            rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L74">            rs.getLong(&quot;user_id&quot;),</span>
+<span class="fc" id="L75">            rs.getLong(&quot;household_id&quot;),</span>
+<span class="fc" id="L76">            HouseholdMembership.Role.valueOf(rs.getString(&quot;role&quot;)),</span>
+<span class="fc" id="L77">            rs.getString(&quot;joined_at&quot;),</span>
+<span class="fc" id="L78">            rs.getString(&quot;left_at&quot;)</span>
+        );
+    }
+
+    // US-10: leave a household
+    @Override
+    public void leaveHousehold(long membershipId) {
+<span class="fc" id="L85">        String sql = &quot;UPDATE household_memberships SET left_at = ? WHERE id = ?&quot;;</span>
+<span class="fc" id="L86">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="fc" id="L87">            statement.setString(1, Instant.now().toString());</span>
+<span class="fc" id="L88">            statement.setLong(2, membershipId);</span>
+<span class="fc" id="L89">            statement.executeUpdate();</span>
+<span class="nc" id="L90">        } catch (SQLException e) {</span>
+<span class="nc" id="L91">            throw new IllegalStateException(&quot;Could not leave household&quot;, e);</span>
+<span class="fc" id="L92">        }</span>
+<span class="fc" id="L93">    }</span>
+
+    // US-11: view current household members
+    @Override
+    public List&lt;HouseholdMembership&gt; findActiveByHousehold(long householdId) {
+        // Show the admin first
+<span class="nc" id="L99">        String sql = &quot;SELECT * FROM household_memberships WHERE household_id = ? AND left_at IS NULL &quot;</span>
+                + &quot;ORDER BY CASE WHEN role = 'ADMIN' THEN 0 ELSE 1 END, joined_at&quot;;
+<span class="nc" id="L101">        List&lt;HouseholdMembership&gt; memberships = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L103">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L104">            statement.setLong(1, householdId);</span>
+
+<span class="nc" id="L106">            try (ResultSet rs = statement.executeQuery()) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                while (rs.next()) {</span>
+<span class="nc" id="L108">                    memberships.add(map(rs));</span>
+                }
+            }
+
+<span class="nc" id="L112">            return memberships;</span>
+<span class="nc" id="L113">        } catch (SQLException e) {</span>
+<span class="nc" id="L114">            throw new IllegalStateException(&quot;Could not look up household members&quot;, e);</span>
+        }
+    }
+
+    // US-35: transfer administrator rights to another active member
+    @Override
+    public void transferAdmin(long householdId, long currentAdminUserId, long newAdminUserId) {
+<span class="nc" id="L121">        String sql = &quot;&quot;&quot;</span>
+            UPDATE household_memberships
+            SET role = CASE
+                WHEN user_id = ? THEN 'MEMBER'
+                WHEN user_id = ? THEN 'ADMIN'
+            END
+            WHERE household_id = ?
+              AND left_at IS NULL
+              AND user_id IN (?, ?)
+            &quot;&quot;&quot;;
+
+<span class="nc" id="L132">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L133">            statement.setLong(1, currentAdminUserId);</span>
+<span class="nc" id="L134">            statement.setLong(2, newAdminUserId);</span>
+<span class="nc" id="L135">            statement.setLong(3, householdId);</span>
+<span class="nc" id="L136">            statement.setLong(4, currentAdminUserId);</span>
+<span class="nc" id="L137">            statement.setLong(5, newAdminUserId);</span>
+
+<span class="nc" id="L139">            statement.executeUpdate();</span>
+<span class="nc" id="L140">        } catch (SQLException e) {</span>
+<span class="nc" id="L141">            throw new IllegalStateException(&quot;Could not transfer administrator rights&quot;, e);</span>
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">    }</span>
+
+    // US-36: delete household memberships
+    @Override
+    public void deleteByHousehold(long householdId) {
+<span class="nc" id="L148">        String sql = &quot;DELETE FROM household_memberships WHERE household_id = ?&quot;;</span>
+
+<span class="nc" id="L150">        try (PreparedStatement statement = connection.prepareStatement(sql)) {</span>
+<span class="nc" id="L151">            statement.setLong(1, householdId);</span>
+<span class="nc" id="L152">            statement.executeUpdate();</span>
+<span class="nc" id="L153">        } catch (SQLException e) {</span>
+<span class="nc" id="L154">            throw new IllegalStateException(&quot;Could not delete household memberships&quot;, e);</span>
+<span class="nc" id="L155">        }</span>
+<span class="nc" id="L156">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
