@@ -1,0 +1,5 @@
+module:com.ecotwin
+com.ecotwin
+com.ecotwin.controller
+com.ecotwin.model
+com.ecotwin.service

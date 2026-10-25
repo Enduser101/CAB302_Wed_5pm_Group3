@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"com.ecotwin","l":"com.ecotwin"},{"m":"com.ecotwin","l":"com.ecotwin.controller"},{"m":"com.ecotwin","l":"com.ecotwin.model"},{"m":"com.ecotwin","l":"com.ecotwin.service"}];updateSearchResults();
