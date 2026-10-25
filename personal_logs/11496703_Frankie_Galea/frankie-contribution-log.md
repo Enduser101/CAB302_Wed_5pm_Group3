@@ -5,13 +5,15 @@ Student Number: 11496703
 
 ## Summary
 
-**Code** — delivered US-05, US-06 and US-07 (view account details, change password, sign out), US-13 (record household membership changes) and US-23 (score over time). Wrote 9 unit tests, two features test-first with separate red and green commits. Added `UserDao.updatePassword`, `HouseholdScoreService.scoreHistory` and the `ScorePoint` record, plus the UI for each.
+**Code** — delivered US-05 and US-06 (view account details, change password), US-13 (record household membership changes) and the score-over-time half of US-23. Wrote 9 unit tests, two features test-first with separate red and green commits. Added `UserDao.updatePassword`, `HouseholdScoreService.scoreHistory` and the `ScorePoint` record, plus the UI for each. Refactored the duplicated scenario construction in `HouseholdScoreService` with the test suite unchanged as proof of behaviour, and tidied the test setup in the tests I owned.
 
 **Requirements** — wrote the user stories, goals, definitions of done and acceptance criteria for Epic 3 (Household Membership, US-08 to US-11) and Epic 4 (Household Activity History, US-12 to US-14).
 
-**Design** — produced the high fidelity design set, around 15 screens across Dashboard, Resources, Recommendations, Scenarios, Household and Account.
+**Design** — produced most of the high fidelity design set, around 15 screens across Dashboard, Resources, Recommendations, Scenarios, Activity History, Create/Join Household and Account.
 
-**Submission video** — built the medium fidelity, high fidelity and design-to-build slides, wrote the script, recorded the high fidelity and design-to-build segment, and assembled the final video from the team's recorded segments.
+**Week 9 submission video** — built the medium fidelity, high fidelity and design-to-build slides, wrote the script, recorded the high fidelity and design-to-build segment, and assembled the final video from the team's recorded segments.
+
+**Final submission video** — prepared the demo environment, wrote the script, recorded the one-minute demo of the finished application, and assembled the final video from the team's recorded segments.
 
 ---
 
@@ -41,7 +43,7 @@ Student Number: 11496703
 
 * Wrote the user stories for creating, joining and leaving a household, and for viewing current household members.
 * Defined the epic goal, definition of done and acceptance criteria for each story.
-* Established the constraint that a household administrator cannot leave without first transferring administrator rights, since the household would otherwise be left with nobody able to manage members. This became an acceptance criterion on US-13 and a row in the permissions matrix.
+* Took the constraint Tinom raised at the 19/08 meeting — that a household administrator cannot leave without first transferring administrator rights — and wrote it into the acceptance criteria and the permissions matrix, since the household would otherwise be left with nobody able to manage members.
 
 ### Epic 4 — Household Activity History (US-12 to US-14)
 
@@ -76,7 +78,7 @@ Student Number: 11496703
 
 ### Dashboard — High Fidelity
 
-* Set up the shared Figma file structure and agreed a component set with the team (sidebar, cards, buttons, spacing scale) before any screen was drawn, so that five people designing separately would not produce five visual languages.
+* Agreed a component set with the team (sidebar, cards, buttons, spacing scale) in the shared Figma file before any screen was drawn, so that five people designing separately would not produce five visual languages.
 * Built the Dashboard screen at 1440×960 with a 280px sidebar, using Auto Layout so the four domain score cards distribute evenly rather than being positioned by hand.
 * Created reusable components for the domain card, navigation item and button so they could be reused across the remaining screens.
 * Designed the overall score card, the score-over-time panel, the four domain cards, the weakest-area callout and the action row.
@@ -147,6 +149,7 @@ Student Number: 11496703
 
 * Designed the Saved Scenarios list showing each scenario's name, domain, author, date, score delta and resulting score.
 * Showed both the delta and the absolute resulting score, since the delta allows ranking while the absolute score shows where the household would end up.
+* A team member had also produced a version of this screen; raised it rather than quietly replacing theirs.
 
 ---
 
@@ -168,7 +171,7 @@ Student Number: 11496703
 
 ## 15/09/2026
 
-### US-05, US-06, US-07 — Account Details, Change Password, Sign Out
+### US-05 and US-06 — Account Details and Change Password
 
 * Reviewed the existing `AuthService` and found registration and login already implemented, so scoped the work to the change-password path and the account details view.
 * Added `updatePassword` to the `UserDao` interface and implemented it in `SqliteUserDao`, matching the existing error-handling style in that class.
@@ -218,9 +221,19 @@ Student Number: 11496703
 
 ---
 
-## [21/09 – 06/10/2026 — to be completed]
+## 30/09/2026
 
-*Sprint template, rubric review, bug #85, 30/09 tutorial attendance, 04/10 team meeting — fill in from your own records.*
+### Tutorial
+
+* Attended the tutorial. No other group members were present; Michael had attended earlier and left for the same reason.
+
+---
+
+## 04/10/2026
+
+### Team Meeting
+
+* Attended the team meeting.
 
 ---
 
@@ -269,6 +282,7 @@ Student Number: 11496703
 
 ### US-23 — Score Over Time
 
+* Took the score-over-time half of US-23; the before-and-after score change was built separately by another team member.
 * Reviewed the existing scoring architecture and established that score history could be derived from the readings already stored, since every entry carries a `YYYY-MM` period.
 * Chose to compute history from stored readings rather than add a score-history table, so there is no schema migration and no cached score that could drift from the data it came from.
 * Wrote three failing tests first in `HouseholdScoreServiceTest`: one period per complete set of readings in oldest-first order, periods missing a domain reading being left out, and a household with no readings returning no history.
@@ -299,3 +313,70 @@ Student Number: 11496703
 ### Team Meeting
 
 * Attended the team meeting.
+
+---
+
+## 19–20/10/2026
+
+### Assignment 3 — Key Lessons and Professional Insights
+
+* Prepared the closing section of the final presentation.
+* Drafted the topic titles first and shared them with the team, so the five sections could be checked against each other before anyone wrote a script.
+* Read the other four members' talking points and rewrote mine where they overlapped, since the team's process, architecture and quality sections already covered ground my first draft repeated.
+* Built the slide for the section.
+* Cut the script to roughly 160 words to match the length of the other sections and the time available.
+* Prepared for the Q&A, including likely questions on my own section and on the parts of the project presented by others.
+
+---
+
+## 21/10/2026
+
+### Group Rehearsal
+
+* Rehearsed the full presentation with the team, running the handovers between speakers and checking the overall timing.
+
+### Assignment 3 — Presentation and Oral Assessment
+
+* Presented the Key Lessons and Professional Insights section and closed the presentation.
+
+---
+
+## 23/10/2026
+
+### Refactor — Scenario Construction in HouseholdScoreService
+
+* Identified duplication introduced by my own US-23 work: `currentValues` and `scenarioFor` both constructed a `SustainabilityScenario` from the same eight values in the same order, so any change to the scenario's shape would have had to be made twice.
+* Extracted the construction into a single private `scenarioFrom` method and pointed both call sites at it.
+* Made no changes to any test, so the existing suite stands as the proof that behaviour is unchanged. The full suite passed at 169 tests before and after.
+* Committed the production refactor on its own, separate from the test changes below, so the refactor step is legible in the commit history rather than mixed in with other work.
+
+### Test Refactor — HouseholdScoreServiceTest
+
+* Moved the repeated Mockito stubbing in my three `scoreHistory` tests into named helpers (`givenEnergy`, `givenWater`, `givenWaste`, `givenTransport`, `givenNoReadings`), so each test states only the condition it is testing.
+* Added factory methods for each entry type, removing the positional `null` padding that made the entry constructors hard to read at a glance.
+* Scoped the change to the three tests I wrote. The `@BeforeEach` and the `currentValues` tests above them were written by another team member and were left untouched, with a note in the pull request offering to apply the same helpers if the author wants them.
+* Confirmed the suite still passed at 169 tests.
+
+### Git Workflow
+
+* Pushed to `refactor/scenario-construction` as two commits — production refactor, then test refactor — and opened PR #133 into `dev`, which was reviewed and merged.
+
+---
+
+## 24/10/2026
+
+### Final Submission Video — Demo Segment
+
+* Prepared the demo environment using the seeded demo account rather than hand-entered data, giving six months of readings across all four domains and a backdated edit history, so the score-over-time chart and the activity history both had real content to show.
+* Investigated why no water recommendation appeared for the demo household. Traced it to the `CutWater` rule, which fires above 5,500 litres per person per month; the household's October reading of 9,500 litres across two occupants is 4,750 per person, below the benchmark.
+* Concluded the behaviour was correct and left the seeded data as it was, rather than inflating the water reading to force a recommendation into the demo.
+* Wrote and recorded the one-minute demo segment covering the dashboard, score over time, recommendations, scenarios and account details, with emphasis on what was built after the Week 9 submission.
+
+---
+
+## 25/10/2026
+
+### Final Submission Video — Assembly
+
+* Edited and assembled the full final submission video from the team's separately recorded segments, in the order set by the assessment's recommended sequence: overview, demo, Java code walkthrough, continuous integration, feedback-driven improvement.
+* Checked the section timings against the suggested allocations and that the transitions between speakers ran cleanly.
