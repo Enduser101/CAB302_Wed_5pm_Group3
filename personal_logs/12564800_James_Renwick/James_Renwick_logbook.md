@@ -10,7 +10,7 @@
 
 My main contributions to EcoTwin covered requirements, interface design, household functionality, testing and team presentations. I wrote the user stories for Epics 7 and 8, contributed to organising the GitHub task board, and volunteered to complete a substantial share of the UI design. I developed medium and high fidelity screens in Figma, including account, household and scenario interfaces, alongside work on Resources and Recommendations designs and refinements to the team's other screens.
 
-In implementation, I worked on US-10 (leave a household), US-11 (view household members), and the household administration stories US-32 (remove members), US-33 (rename household and change join code), US-35 (transfer administrator rights), US-36 (delete household), and US-34 (edit and delete activity-history entries). I wrote tests for these features, reviewed teammates' pull requests, and helped test the integrated application. I also prepared and recorded the version-control and Java architecture sections of our Assignment 2 presentation. TBC (assignment 2 week 13 & assignment 3)
+In implementation, I worked on US-10 (leave a household), US-11 (view household members), and the household administration stories US-32 (remove members), US-33 (rename household and change join code), US-35 (transfer administrator rights), US-36 (delete household), and US-34 (edit and delete activity-history entries). I wrote tests for these features, reviewed teammates' pull requests, and helped test the integrated application. I also prepared and recorded the version-control and Java architecture sections of our Assignment 2 presentation. For the week 13 upload of Assignment 2, I made slides and recorded the walkthrough for the Java code section. For assignment 3, I prepared and presented my section on the development approach and key decisions, where I also answered questions in the Q&A. For Assignment's 2 and 3, I primarily focused on my own sections, where I was also involved in planning, reviewing, and adjusting each team member's parts.
 
 ---
 
@@ -595,4 +595,11 @@ In implementation, I worked on US-10 (leave a household), US-11 (view household 
 * Recorded my section of the Assignment 2 video walkthrough.
 
 ### Logbook Entries (Individual, 0.5 hours)
-* Wrote logbook entries for week 13
+* Wrote logbook entries for week 13.
+
+## 25/10/2026
+
+### Final adjustments (Individual, 0.5 hours)
+* Reviewed the final video for Assigment 2 before uploading.
+* Reviewed the GitHub repository for any unchecked pull requests or unmerged branches.
+* Updated logbook entries
