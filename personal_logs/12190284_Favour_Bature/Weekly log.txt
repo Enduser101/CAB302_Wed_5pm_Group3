@@ -623,3 +623,22 @@ Student Number: 12190284
 * Switched back to `dev` and pulled the latest changes.
 * Confirmed my local `dev` matched `origin/dev` and the working tree was clean.
 * The final PR #118 merge commit was `7301c28`.
+
+## 21/10/2026
+
+### Final Group Presentation
+
+* Prepared my assigned section covering EcoTwin's project purpose, development progress and key decisions.
+* Participated in the final group presentation and discussion.
+* Discussed the application's user experience, including lessons learned about testing with existing household data rather than only new accounts.
+
+## 22–23/10/2026
+
+### Assessment 2 — Final Video Preparation
+
+* Reviewed the final assessment video requirements and my assigned introduction section.
+* Prepared five slides covering the EcoTwin overview, Week 9 prototype, user stories, Agile planning and feedback.
+* Reviewed the GitHub project board, user stories and team planning decisions to support my presentation.
+* Reflected on our Week 9 TDD feedback and the importance of demonstrating the Red–Green–Refactor process clearly.
+* Prepared and refined my presentation script, shortening it after a practice recording to meet the video timing requirements.
+
