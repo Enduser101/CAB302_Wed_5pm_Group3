@@ -187,3 +187,7 @@ Run ID,Started (Brisbane),Result,Trigger,Branch,Commit / PR title,URL
 40175761417,2026-10-25 18:13,success,pull_request,docs/favour-final-log,docs: update Favour individual log for final assessment,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175761417
 40175804123,2026-10-25 18:13,success,push,dev,Merge pull request #142 from Enduser101/docs/favour-final-log,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40175804123
 40178004255,2026-10-25 18:47,success,pull_request,chore/sync-main-history,Sync main's history into dev so dev can merge into main cleanly,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40178004255
+40179143366,2026-10-25 19:04,success,pull_request,docs/submission-evidence,"Submission evidence: board export, Actions history, Javadoc and coverage",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40179143366
+40179687010,2026-10-25 19:12,success,push,dev,Merge pull request #143 from Enduser101/chore/sync-main-history,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40179687010
+40179805430,2026-10-25 19:14,success,pull_request,docs/submission-evidence,"Submission evidence: board export, Actions history, Javadoc and coverage",https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40179805430
+40179861394,2026-10-25 19:15,success,push,dev,Merge pull request #144 from Enduser101/docs/submission-evidence,https://github.com/Enduser101/CAB302_Wed_5pm_Group3/actions/runs/40179861394
